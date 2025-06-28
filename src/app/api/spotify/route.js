@@ -1,3 +1,4 @@
+// app/api/spotify/route.js
 import { NextResponse } from "next/server"
 
 const basic = Buffer.from(
@@ -33,6 +34,25 @@ export async function GET() {
   if (res.status === 204) return NextResponse.json({ isPlaying: false })
 
   const song = await res.json()
+
+  let playlistOwner = null
+
+  if (song.context?.type === "playlist" && song.context.href) {
+    const playlistRes = await fetch(song.context.href, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (playlistRes.ok) {
+      const playlistData = await playlistRes.json()
+      playlistOwner = {
+        name: playlistData.owner.display_name,
+        image: playlistData.owner.images?.[0]?.url || null,
+      }
+    }
+  }
+
   const track = {
     isPlaying: song.is_playing,
     title: song.item.name,
@@ -42,7 +62,8 @@ export async function GET() {
     songUrl: song.item.external_urls.spotify,
     progress: song.progress_ms,
     duration: song.item.duration_ms,
-    playlistUrl: song.context?.external_urls?.spotify || null, // link da playlist (se existir)
+    playlistUrl: song.context?.external_urls?.spotify || null,
+    playlistOwner,
   }
 
   return NextResponse.json(track)
