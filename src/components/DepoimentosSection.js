@@ -37,7 +37,7 @@ export default function DepoimentosSection() {
         transition={{ duration: 0.8 }}
         className="relative z-10 max-w-5xl w-full"
       >
-        <h2 className="text-4xl font-bold text-purple-400 mb-12">O que nossos clientes dizem</h2>
+        <h2 className="text-4xl font-bold text-white mb-12">O que nossos clientes dizem</h2>
         <div className="grid md:grid-cols-3 gap-8">
           {depoimentos.map(({ nome, empresa, texto }, i) => (
             <motion.div
@@ -49,7 +49,7 @@ export default function DepoimentosSection() {
                 <p className="italic text-sm md:text-base">“{texto}”</p>
               </div>
               <div className="border-t border-gray-700 pt-4">
-                <h3 className="font-semibold text-purple-400 text-base md:text-lg">{nome}</h3>
+                <h3 className="font-semibold text-purple-600 text-base md:text-lg">{nome}</h3>
                 <p className="text-sm text-gray-300">{empresa}</p>
               </div>
             </motion.div>

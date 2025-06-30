@@ -23,7 +23,7 @@ export default function HeroSection() {
   className="relative h-120 flex items-center justify-center px-6 text-center bg-cover bg-center bg-fixed"
   style={{ backgroundImage: "url('/images/hero.jpg')" }}
 >
-  <div className="absolute inset-0 bg-opacity-60" />
+  <div className="absolute inset-0 bg-opacity-60 backdrop-brightness-90 backdrop-blur-[3px]" />
   <motion.div
     initial={{ opacity: 0, y: 40 }}
     animate={{ opacity: 1, y: 0 }}

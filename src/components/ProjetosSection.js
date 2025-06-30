@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 
 export default function ProjetosSection() {
   return (
-    <section className="py-20 px-6 bg-black text-white">
+    <section className="py-20 px-6 bg-white text-purple-600">
       <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-5xl w-full mx-auto">
         <h2 className="text-3xl font-bold text-primary text-center mb-10">Projetos Recentes</h2>
         <div className="grid md:grid-cols-3 gap-6">

@@ -13,7 +13,7 @@ export default function Home() {
       <div id="sobre">
         <SobreSection />
       </div>
-      <div id="servicos">
+      <div id="servicos" className="scroll-mt-60">
         <ServicosSection />
       </div>
       <div id="depoimentos">

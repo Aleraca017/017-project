@@ -15,7 +15,8 @@ export default function Layout({ children }) {
     <main className="bg-black text-white min-h-screen font-sans">
       <Header />
         <div className="pt-20">{children}</div>
-        <SpotifyNowPlaying />
+        {//<SpotifyNowPlaying />
+}
       <Footer />
       
     </main>
