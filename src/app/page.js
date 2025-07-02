@@ -1,16 +1,16 @@
 import Layout from "../components/Layout"
 import HeroSection from "../components/home/HeroSection"
-import SobreSection from "../components/SobreSection"
-import ServicosSection from "../components/ServicosSection"
-import ProjetosSection from "../components/ProjetosSection"
-import DepoimentosSection from "../components/DepoimentosSection"
+import SobreSection from "../components/home/SobreSection"
+import ServicosSection from "../components/home/ServicosSection"
+import ProjetosSection from "../components/home/ProjetosSection"
+import DepoimentosSection from "../components/home/DepoimentosSection"
 
 
 export default function Home() {
   return (
     <Layout>
       <HeroSection />
-      <div id="sobre">
+      <div id="sobre" className="scroll-mt-60">
         <SobreSection />
       </div>
       <div id="servicos" className="scroll-mt-60">
