@@ -17,14 +17,7 @@ export default function HeroSection() {
         setIndex(index + 1)
       }, 100)
       return () => clearTimeout(timeout)
-    } else {
-      const resetTimeout = setTimeout(() => {
-        setText("")
-        setIndex(0)
-      }, 4000)
-      return () => clearTimeout(resetTimeout)
-    }
-  }, [index])
+    } })
 
   return (
     <section

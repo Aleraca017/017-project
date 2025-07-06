@@ -4,89 +4,82 @@ import { FaGithub, FaLinkedin, FaEnvelope, FaWhatsapp } from "react-icons/fa"
 
 export default function Footer() {
   const mandaParaWpp = () => {
-    window.open("https://wa.me/5511999999999", "_blank") // substitua pelo seu número
+    window.open("https://wa.me/5511999999999", "_blank") // Substitua pelo seu número
   }
 
   return (
-    <footer className="bg-black text-white py-10 flex flex-col items-center justify-center">
-      <div className="w-full max-w-6xl px-4 flex flex-col items-center gap-10 text-sm">
-
+    <footer className="relative bg-gradient-to-b from-zinc-900 to-purple-900 text-white pt-16 pb-10 px-6">
+      <div className="max-w-6xl mx-auto grid gap-10 md:grid-cols-4 sm:grid-cols-2 text-sm">
+        
         {/* Logo e descrição */}
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-purple-500">017Tag</h3>
-          <p className="text-gray-400">Desenvolvimento e integração web</p>
+        <div className="col-span-full md:col-span-1 text-center md:text-left">
+          <h3 className="text-3xl font-bold text-purple-500 mb-3">017Tag</h3>
+          <p className="text-purple-200 text-sm leading-relaxed">
+            Desenvolvimento web com soluções modernas em integração, performance e experiência.
+          </p>
         </div>
 
-        {/* Grid com 4 colunas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 w-full text-left text-base">
-          {/* Contato */}
-          <div>
-            <h1 className="mb-4 font-semibold">Contato</h1>
-            <ul className="space-y-1">
-              <li>CNPJ: 11.111.111/0001-11</li>
-              <li>Mogi das Cruzes - SP</li>
-              <li>
-                <Link href="/contato/contato" className="text-white hover:underline">
-                  Contato
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Informações */}
-          <div>
-            <h1 className="mb-4 font-semibold">Informações</h1>
-            <ul className="space-y-1">
-              <li>
-                <Link href="/politicas/politica-de-privacidade" className="hover:underline">
-                  Política de Privacidade
-                </Link>
-              </li>
-              <li>
-                <Link href="/politicas/termos-de-uso" className="hover:underline">
-                  Termos de Uso
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Redes sociais */}
-          <div>
-            <h1 className="mb-4 font-semibold">Redes Sociais</h1>
-            <div className="flex gap-4 text-xl">
-              <Link href="https://github.com/seu-perfil" target="_blank" className="text-purple-400 hover:text-purple-300">
-                <FaGithub />
+        {/* Contato */}
+        <div>
+          <h4 className="text-purple-400 font-semibold mb-3">Contato</h4>
+          <ul className="space-y-2 text-gray-300 text-sm">
+            <li>CNPJ: 11.111.111/0001-11</li>
+            <li>Mogi das Cruzes - SP</li>
+            <li>
+              <Link href="/contato/contato" className="hover:underline text-white">
+                Fale conosco
               </Link>
-              <Link href="https://www.linkedin.com/in/seu-perfil" target="_blank" className="text-purple-400 hover:text-purple-300">
-                <FaLinkedin />
-              </Link>
-              <Link href="mailto:contato@017tag.com.br" className="text-purple-400 hover:text-purple-300">
-                <FaEnvelope />
-              </Link>
-            </div>
-          </div>
-
-          {/* Parceiros */}
-          <div>
-            <h1 className="mb-4 font-semibold">Empresas Parceiras</h1>
-            <p className="text-gray-400 text-sm">Em breve</p>
-          </div>
+            </li>
+          </ul>
         </div>
 
-        {/* Direitos autorais */}
-        <div className="pt-10 text-center text-gray-500 text-xs">
-          &copy; {new Date().getFullYear()} 017Tag. Todos os direitos reservados.
+        {/* Informações */}
+        <div>
+          <h4 className="text-purple-400 font-semibold mb-3">Informações</h4>
+          <ul className="space-y-2 text-gray-300 text-sm">
+            <li>
+              <Link href="/politicas/politica-de-privacidade" className="hover:underline">
+                Política de Privacidade
+              </Link>
+            </li>
+            <li>
+              <Link href="/politicas/termos-de-uso" className="hover:underline">
+                Termos de Uso
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Redes Sociais */}
+        <div>
+          <h4 className="text-purple-400 font-semibold mb-3">Redes Sociais</h4>
+          <div className="flex gap-4 text-2xl text-purple-400">
+            <Link href="https://github.com/seu-perfil" target="_blank" className="hover:text-white transition">
+              <FaGithub />
+            </Link>
+            <Link href="https://linkedin.com/in/seu-perfil" target="_blank" className="hover:text-white transition">
+              <FaLinkedin />
+            </Link>
+            <Link href="mailto:contato@017tag.com.br" className="hover:text-white transition">
+              <FaEnvelope />
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Botão WhatsApp fixo */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* Rodapé inferior */}
+      <div className="mt-12 text-center text-purple-300 text-xs">
+        &copy; {new Date().getFullYear()} 017Tag. Todos os direitos reservados.
+      </div>
+
+      {/* Botão WhatsApp flutuante */}
+      <div className="fixed bottom-5 right-5 z-50">
         <button
           onClick={mandaParaWpp}
           className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-green-600 transition"
         >
           <FaWhatsapp className="text-xl" />
-          <span className="text-sm font-semibold">WhatsApp</span>
+          <span className="text-sm font-semibold hidden sm:inline">WhatsApp</span>
         </button>
       </div>
     </footer>

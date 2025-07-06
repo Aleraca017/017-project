@@ -9,11 +9,11 @@ import DepoimentosSection from "../components/home/DepoimentosSection"
 export default function Home() {
   return (
     <Layout>
-      <HeroSection />
+      <HeroSection id="home"/>
       <div id="sobre" className="scroll-mt-60">
         <SobreSection />
       </div>
-      <div id="servicos" className="scroll-mt-60">
+      <div id="servicos" className="scroll-mt-0">
         <ServicosSection />
       </div>
       <div id="depoimentos">

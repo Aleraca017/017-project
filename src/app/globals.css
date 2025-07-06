@@ -41,3 +41,12 @@ html{
   animation: slide-marquee 20s ease-in-out infinite;
   will-change: transform;
 }
+
+/* globals.css */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,11 +1,16 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
+import { FaBars, FaTimes } from "react-icons/fa"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function Header() {
   const [showHeader, setShowHeader] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useRef(null)
 
+  // Esconde o header ao rolar para baixo
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
@@ -20,6 +25,25 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [lastScrollY])
+
+  // Fecha o menu ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isMenuOpen])
 
   return (
     <header
@@ -36,14 +60,45 @@ export default function Header() {
           />
         </Link>
 
+        {/* Menu desktop */}
         <nav className="hidden md:flex space-x-8 text-sm font-medium">
-          <Link href="/" className="hover:text-purple-400 transition">Início</Link>
+          <Link href="/#home" className="hover:text-purple-400 transition">Início</Link>
           <Link href="/#sobre" className="hover:text-purple-400 transition">Sobre</Link>
           <Link href="/#servicos" className="hover:text-purple-400 transition">Serviços</Link>
           <Link href="/#projetos" className="hover:text-purple-400 transition">Projetos</Link>
           <Link href="/contato/contato" className="hover:text-purple-400 transition">Contato</Link>
         </nav>
+
+        {/* Botão hamburguer - mobile */}
+        <button
+          className="md:hidden text-white text-2xl"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-label="Abrir menu"
+        >
+          {isMenuOpen ? <FaTimes /> : <FaBars />}
+        </button>
       </div>
+
+      {/* Menu mobile com animação e clique fora */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            key="mobileMenu"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            ref={menuRef}
+            className="md:hidden bg-black px-6 pb-6 pt-2 flex flex-col gap-4 text-sm font-medium border-t border-zinc-700"
+          >
+            <Link href="/" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Início</Link>
+            <Link href="/#sobre" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Sobre</Link>
+            <Link href="/#servicos" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Serviços</Link>
+            <Link href="/#projetos" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Projetos</Link>
+            <Link href="/contato/contato" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Contato</Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

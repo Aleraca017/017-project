@@ -8,7 +8,7 @@ export default function ServicosSection() {
   return (
     <section
       id="servicos"
-      className="py-24 px-6 bg-purple-600 text-white"
+      className="py-24 px-6 bg-gradient-to-b to-purple-500 from-purple-700 text-white"
       aria-label="Seção de serviços oferecidos"
     >
       <motion.div

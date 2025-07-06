@@ -26,7 +26,7 @@ const projetos = [
     imagem: "/projetos/wsa.jpg",
     tecnologias: ["WordPress", "Elementor"],
     link: "#",
-    projetoStatus: "Projeto Pronto",
+    projetoStatus: "Ver Projeto Pronto",
   },
 ]
 
@@ -38,25 +38,25 @@ function getStatusProps(status) {
         icon: <FaTimes className="text-xs" />,
         tooltip: "Este projeto é privado e por isso não é possível exibi-lo.",
       }
-    case "Projeto Pronto":
-      return {
-        color: "bg-purple-700 hover:bg-purple-800",
-        icon: <FaExternalLinkAlt className="text-xs" />,
-        tooltip: "Este projeto está pronto e acessível publicamente.",
-      }
-    default:
+    case "Projeto em Produção":
       return {
         color: "bg-yellow-500 hover:bg-yellow-600 text-black",
         icon: <FaGithub className="text-xs" />,
         tooltip:
           "Este projeto está em produção e é possível acompanhar atualizações como commits e pull-requests pelo GitHub.",
       }
+    default:
+      return {
+        color: "bg-purple-700 hover:bg-purple-800",
+        icon: <FaExternalLinkAlt className="text-xs" />,
+        tooltip: "Este projeto está pronto e acessível publicamente.",
+      }
   }
 }
 
 export default function ProjetosSection() {
   return (
-    <section className="py-24 px-6 bg-zinc-900 text-gray-100" id="projetos">
+    <section className="py-24 px-6 bg-gradient-to-b from-zinc-950 to-zinc-900 text-gray-100" id="projetos">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -88,9 +88,9 @@ export default function ProjetosSection() {
                 </div>
 
                 <div className="p-6 flex flex-col justify-between h-full">
-                  <div>
+                  <div className="flex flex-col justify-evenly h-full">
                     <h3 className="text-xl font-semibold text-purple-300 mb-2">{titulo}</h3>
-                    <p className="text-sm text-gray-300 mb-4">{descricao}</p>
+                    <p className="text-sm text-gray-300 mb-4 h-20">{descricao}</p>
 
                     <ul className="flex flex-wrap gap-2 text-xs text-purple-400 mb-4">
                       {tecnologias.map((tech, index) => (
