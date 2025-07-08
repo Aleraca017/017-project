@@ -65,7 +65,7 @@ export default function Header() {
           <Link href="/#home" className="hover:text-purple-400 transition">Início</Link>
           <Link href="/#sobre" className="hover:text-purple-400 transition">Sobre</Link>
           <Link href="/#servicos" className="hover:text-purple-400 transition">Serviços</Link>
-          <Link href="/#projetos" className="hover:text-purple-400 transition">Projetos</Link>
+          <Link href="/projetos" className="hover:text-purple-400 transition">Projetos</Link>
           <Link href="/contato/contato" className="hover:text-purple-400 transition">Contato</Link>
         </nav>
 

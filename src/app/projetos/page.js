@@ -29,16 +29,17 @@ export default function ProjetosPage() {
     <Layout>
       {/* Conteúdo scrollável acima do fundo */}
       <section className="relative z-10 h-screen snap-y snap-mandatory overflow-y-scroll no-scrollbar bg-gradient-to-b from-black to-zinc-900">
+        <div className="relative z-10 h-screen snap-y snap-mandatory overflow-y-scroll no-scrollbar bg-gradient-to-b from-purple-950/40 to-black-950"> 
         {projetos.map((projeto, idx) => {
           const isEven = idx % 2 === 0
 
           return (
             <div
               key={idx}
-              className="h-screen snap-start flex flex-col items-center justify-center px-6 py-12 text-white"
+              className="h-screen w-full snap-start flex flex-col items-center justify-center px-6 py-12 text-white"
             >
               <div
-                className={`max-w-5xl w-full grid md:grid-cols-2 gap-10 items-center ${
+                className={`w-90/100 grid md:grid-cols-2 gap-10 items-center ${
                   isEven ? "" : "md:flex-row-reverse md:[&>*:first-child]:order-last"
                 }`}
               >
@@ -54,12 +55,14 @@ export default function ProjetosPage() {
 
                   <ul className="flex flex-wrap gap-2 text-sm">
                     {projeto.tecnologias.map((tech, i) => (
+                      <a href={'https://google.com.br/search?q=O que é '+tech+'?'} target="_blank">
                       <li
                         key={i}
-                        className="bg-purple-700/20 px-3 py-1 rounded-md border border-purple-500 text-purple-300"
+                        className="bg-purple-700/30 hover:bg-purple-700/70 px-3 py-1 rounded-md border-2 border-purple-500 hover:border-purple-300 text-purple-300 hover:text-purple-100 hover:cursor-pointer"
                       >
                         {tech}
                       </li>
+                      </a>
                     ))}
                   </ul>
                 </div>
@@ -67,6 +70,7 @@ export default function ProjetosPage() {
             </div>
           )
         })}
+        </div>
       </section>
     </Layout>
   )
