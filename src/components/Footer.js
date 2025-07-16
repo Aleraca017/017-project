@@ -1,14 +1,25 @@
 "use client"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { FaGithub, FaLinkedin, FaEnvelope, FaWhatsapp } from "react-icons/fa"
 
 export default function Footer() {
+  const pathname = usePathname()
+
   const mandaParaWpp = () => {
     window.open("https://wa.me/5511999999999", "_blank") // Substitua pelo seu número
   }
 
+  const isProjetosPage = pathname === "/projetos"
+
   return (
-    <footer className="relative bg-gradient-to-b from-zinc-900 to-purple-900 text-white pt-16 pb-10 px-6">
+    <footer
+      className={`relative z-10 pt-16 pb-10 px-6 text-white ${
+        isProjetosPage
+          ? "bg-gradient-to-b from-transparent to-purple-950/50"
+          : "bg-gradient-to-b from-zinc-900 to-purple-900"
+      }`}
+    >
       <div className="max-w-6xl mx-auto grid gap-10 md:grid-cols-4 sm:grid-cols-2 text-sm">
         
         {/* Logo e descrição */}

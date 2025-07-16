@@ -9,7 +9,8 @@ const projetos = [
     descricao: "Integrador de sistemas para gestão de pedidos, com painel administrativo e integração com AnotaAi.",
     imagem: "/projetos/project017.jpg",
     tecnologias: ["JavaScript", "Tailwind", "Firebase"],
-    link: "/",
+    link: "/projetos/#integrador-kds",
+    target: "",
     projetoStatus: "Projeto Privado",
   },
   {
@@ -18,6 +19,7 @@ const projetos = [
     imagem: "/projetos/laudos.jpg",
     tecnologias: ["Firebase", "Next.js", "Node.js", "Google Drive"],
     link: "https://laudos.017tag.com",
+    target: "_blank",
     projetoStatus: "Projeto em Produção",
   },
   {
@@ -26,6 +28,7 @@ const projetos = [
     imagem: "/projetos/wsa.jpg",
     tecnologias: ["WordPress", "Elementor"],
     link: "#",
+    target: "",
     projetoStatus: "Ver Projeto Pronto",
   },
 ]
@@ -36,7 +39,7 @@ function getStatusProps(status) {
       return {
         color: "bg-red-600 hover:bg-red-700",
         icon: <FaTimes className="text-xs" />,
-        tooltip: "Este projeto é privado e por isso não é possível exibi-lo.",
+        tooltip: "Este projeto é privado e por isso não é possível exibi-lo. Mas você pode ver mais detalhes sobre ele na seção de projetos.",
       }
     case "Projeto em Produção":
       return {
@@ -69,7 +72,7 @@ export default function ProjetosSection() {
         </h2>
 
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-          {projetos.map(({ titulo, descricao, imagem, tecnologias, link, projetoStatus }, i) => {
+          {projetos.map(({ titulo, descricao, imagem, tecnologias, link, projetoStatus, target }, i) => {
             const { color, icon, tooltip } = getStatusProps(projetoStatus)
 
             return (
@@ -106,7 +109,7 @@ export default function ProjetosSection() {
 
                   <a
                     href={link}
-                    target="_blank"
+                    target={target}
                     rel="noopener noreferrer"
                     data-tooltip-id="projetos-tooltip"
                     data-tooltip-content={tooltip}

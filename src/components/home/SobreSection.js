@@ -60,7 +60,7 @@ export default function SobreSection() {
           {/* Card 1 */}
           <motion.div
             whileHover={{ scale: 1.03 }}
-            className="bg-gray-900/70 p-6 rounded-2xl border-2 border-purple-600 shadow-lg"
+            className="bg-zinc-800/70 p-6 rounded-2xl border-2 border-purple-600 shadow-lg"
           >
             <FaCogs className="text-purple-400 text-4xl mb-4 mx-auto" />
             <h4 className="text-xl font-semibold mb-2">Soluções sob medida</h4>
@@ -72,7 +72,7 @@ export default function SobreSection() {
           {/* Card 2 */}
           <motion.div
             whileHover={{ scale: 1.03 }}
-            className="bg-gray-900/70 p-6 rounded-2xl border-2 border-purple-600 shadow-lg"
+            className="bg-zinc-800/70 p-6 rounded-2xl border-2 border-purple-600 shadow-lg"
           >
             <FaRocket className="text-purple-400 text-4xl mb-4 mx-auto" />
             <h4 className="text-xl font-semibold mb-2">Alta performance</h4>
@@ -84,7 +84,7 @@ export default function SobreSection() {
           {/* Card 3 */}
           <motion.div
             whileHover={{ scale: 1.03 }}
-            className="bg-gray-900/70 p-6 rounded-2xl border-2 border-purple-600 shadow-lg"
+            className="bg-zinc-800/70 p-6 rounded-2xl border-2 border-purple-600 shadow-lg"
           >
             <FaHeadset className="text-purple-400 text-4xl mb-4 mx-auto" />
             <h4 className="text-xl font-semibold mb-2">Suporte próximo</h4>

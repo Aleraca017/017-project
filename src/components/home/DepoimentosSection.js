@@ -33,10 +33,10 @@ export default function DepoimentosSection() {
   return (
     <section
       id="depoimentos"
-      className="relative py-24 px-6 text-center bg-cover bg-center bg-fixed"
-      style={{ backgroundImage: "url('/images/dinamico1.jpg')" }}
+      className="relative py-24 px-6 text-center bg-cover bg-center bg-fixed bg-amber-50"
+      style={{ backgroundImage: "url('/images/background-results.png')" }}
     >
-      <div className="absolute inset-0 bg-black/70  z-0" />
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-100/50 to-black/50 z-0" />
 
       <div className="relative z-10 max-w-7xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-14 drop-shadow-lg">
@@ -51,13 +51,13 @@ export default function DepoimentosSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.2 }}
-              className="bg-white/20 backdrop-blur-lg rounded-3xl p-8 text-white shadow-lg shadow-purple-500 border-3 border-purple-500 max-w-md mx-auto hover:scale-105 hover:shadow-2xl transition-transform duration-300 flex flex-col items-center"
+              className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 text-white shadow-sm shadow-black border-2 border-black max-w-md mx-auto hover:scale-105 hover:shadow-2xl transition-transform duration-300 flex flex-col items-center"
               style={{ minHeight: "360px" }}
             >
               <img
                 src={avatar}
                 alt={`Foto de ${nome}`}
-                className="w-20 h-20 rounded-full border-4 border-purple-500 object-cover shadow-md mb-4"
+                className="w-20 h-20 rounded-full border-4 border-gray-300 object-cover shadow-md mb-4"
               />
               <h3 className="font-semibold text-purple-300 text-xl">{nome}</h3>
               <p className="text-sm text-zinc-400 italic mb-1">{cargo}</p>  {/* cargo */}

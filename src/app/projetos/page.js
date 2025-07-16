@@ -5,6 +5,7 @@ import CarouselProjeto from "@/components/projetos/carousel"
 const projetos = [
   {
     titulo: "Integrador KDS",
+    id: "integrador-kds",
     descricao:
       "Sistema de integração entre PDVs e plataforma AnotaAi com painel de controle e autenticação.",
     imagens: [
@@ -30,16 +31,17 @@ export default function ProjetosPage() {
       {/* Conteúdo scrollável acima do fundo */}
       <section className="relative z-10 h-screen snap-y snap-mandatory overflow-y-scroll no-scrollbar bg-gradient-to-b from-black to-zinc-900">
         <div className="relative z-10 h-screen snap-y snap-mandatory overflow-y-scroll no-scrollbar bg-gradient-to-b from-purple-950/40 to-black-950"> 
+        <img src="images/star-coding.png" className="z-1 w-full h-screen fixed blur-xs"></img>
         {projetos.map((projeto, idx) => {
           const isEven = idx % 2 === 0
 
           return (
             <div
               key={idx}
-              className="h-screen w-full snap-start flex flex-col items-center justify-center px-6 py-12 text-white"
+              className="h-screen w-full z-10 snap-start flex flex-col items-center justify-center px-6 py-12 text-white"
             >
               <div
-                className={`w-90/100 grid md:grid-cols-2 gap-10 items-center ${
+                className={`w-90/100 grid z-10 md:grid-cols-2 gap-10 items-center ${
                   isEven ? "" : "md:flex-row-reverse md:[&>*:first-child]:order-last"
                 }`}
               >
@@ -47,11 +49,11 @@ export default function ProjetosPage() {
                   <CarouselProjeto imagens={projeto.imagens} />
                 </div>
 
-                <div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-purple-400 mb-4">
+                <div id={projeto.id} className="scroll-mt-20">
+                  <h2 className="text-3xl md:text-4xl font-bold text-purple-600 text-shadow-2xs text-shadow-purple-100/40 mb-4">
                     {projeto.titulo}
                   </h2>
-                  <p className="text-gray-300 mb-6">{projeto.descricao}</p>
+                  <p className="text-gray-100 mb-6">{projeto.descricao}</p>
 
                   <ul className="flex flex-wrap gap-2 text-sm">
                     {projeto.tecnologias.map((tech, i) => (

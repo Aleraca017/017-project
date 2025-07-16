@@ -22,11 +22,11 @@ export default function HeroSection() {
   return (
     <section
       className="relative min-h-[60vh] flex items-center justify-center px-6 py-24 text-center bg-cover bg-center bg-fixed overflow-hidden"
-      style={{ backgroundImage: "url('/images/hero.jpg')" }}
+      style={{ backgroundImage: "url('/images/background.png')" }}
       aria-label="Seção principal de apresentação da empresa"
     >
       {/* Camada escura + gradiente animado */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-0">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-xs z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-800/30 to-transparent animate-pulse-slow" />
       </div>
 
