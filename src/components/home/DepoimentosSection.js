@@ -43,7 +43,7 @@ export default function DepoimentosSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.2 }}
-              className="bg-black/40 backdrop-blur-lg rounded-3xl p-8 text-white shadow-sm shadow-black border-2 border-black max-w-md mx-auto hover:scale-105 hover:shadow-2xl transition-transform duration-300 flex flex-col items-center"
+              className="bg-black/40 backdrop-blur-sm hover:backdrop-blur-xl hover:cursor-pointer rounded-3xl p-8 text-white shadow-sm shadow-black border-2 border-black hover:border-white max-w-md mx-auto hover:scale-105 hover:shadow-2xl transition-transform duration-300 flex flex-col items-center"
               style={{ minHeight: "360px" }}
             >
               <img
