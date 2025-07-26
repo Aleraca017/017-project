@@ -56,17 +56,22 @@ export default function ProjetosPage() {
                   <p className="text-gray-100 mb-6">{projeto.descricao}</p>
 
                   <ul className="flex flex-wrap gap-2 text-sm">
-                    {projeto.tecnologias.map((tech, i) => (
-                      <a href={'https://google.com.br/search?q=O que é '+tech+'?'} target="_blank">
-                      <li
-                        key={i}
-                        className="bg-purple-700/30 hover:bg-purple-700/70 px-3 py-1 rounded-md border-2 border-purple-500 hover:border-purple-300 text-purple-300 hover:text-purple-100 hover:cursor-pointer"
-                      >
-                        {tech}
-                      </li>
-                      </a>
-                    ))}
-                  </ul>
+  {projeto.tecnologias.map((tech, i) => (
+    <li
+      key={i}
+      className="bg-purple-700/30 hover:bg-purple-700/70 px-3 py-1 rounded-md border-2 border-purple-500 hover:border-purple-300 text-purple-300 hover:text-purple-100 hover:cursor-pointer"
+    >
+      <a
+        href={`https://google.com.br/search?q=O que é ${encodeURIComponent(tech)}?`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {tech}
+      </a>
+    </li>
+  ))}
+</ul>
+
                 </div>
               </div>
             </div>
