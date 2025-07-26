@@ -22,15 +22,6 @@ const projetos = [
     target: "_blank",
     projetoStatus: "Projeto em Produção",
   },
-  {
-    titulo: "WSA Consórcios",
-    descricao: "Landing page institucional com área de vendas de veículos e integração via WhatsApp.",
-    imagem: "/projetos/wsa.jpg",
-    tecnologias: ["WordPress", "Elementor"],
-    link: "#",
-    target: "",
-    projetoStatus: "Ver Projeto Pronto",
-  },
 ]
 
 function getStatusProps(status) {
@@ -71,7 +62,7 @@ export default function ProjetosSection() {
           Projetos Recentes
         </h2>
 
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-10 md:grid-cols-1 lg:grid-cols-2">
           {projetos.map(({ titulo, descricao, imagem, tecnologias, link, projetoStatus, target }, i) => {
             const { color, icon, tooltip } = getStatusProps(projetoStatus)
 

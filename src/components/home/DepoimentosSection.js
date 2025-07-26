@@ -19,14 +19,6 @@ const depoimentos = [
       "Desenvolvimento moderno e atendimento personalizado. Fiquei muito satisfeito com o resultado.",
     avatar: "/avatars/carlos.jpg",
   },
-  {
-    nome: "Matheus Neves",
-    empresa: "WSA Administrdora de Consórcios",
-    cargo: "Gerente de negócios",
-    texto:
-      "Serviço excelente, entrega dentro do prazo e suporte impecável. Recomendo sem dúvidas!",
-    avatar: "/images/clients/matheus-WSA.png",
-  }
 ]
 
 export default function DepoimentosSection() {
@@ -43,7 +35,7 @@ export default function DepoimentosSection() {
           O que nossos clientes dizem
         </h2>
 
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+        <div className="grid gap-10 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2">
           {depoimentos.map(({ nome, empresa, cargo, texto, avatar }, idx) => (
             <motion.div
               key={idx}
