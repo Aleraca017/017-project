@@ -16,7 +16,7 @@ export default function Footer() {
     <footer
       className={`relative z-10 pt-16 pb-10 px-6 text-white ${
         isProjetosPage
-          ? "bg-gradient-to-b from-transparent to-purple-950/50"
+          ? "bg-zinc-950"
           : "bg-gradient-to-b from-zinc-900 to-purple-900"
       }`}
     >

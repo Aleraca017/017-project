@@ -54,6 +54,7 @@ html{
 .swiper-pagination-bullet {
   background-color: #a855f7 !important; /* roxo Tailwind */
   opacity: 1 !important;
+  transform: translateY(5px) !important;
 }
 .swiper-pagination-bullet-active {
   background-color: white !important;
