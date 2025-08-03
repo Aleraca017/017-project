@@ -93,8 +93,8 @@ export default function Header() {
           >
             <Link href="/" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Início</Link>
             <Link href="/#sobre" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Sobre</Link>
-            <Link href="/#servicos" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Serviços</Link>
-            <Link href="/#projetos" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Projetos</Link>
+            <Link href="/servicos" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Serviços</Link>
+            <Link href="/projetos" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Projetos</Link>
             <Link href="/contato/contato" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Contato</Link>
           </motion.div>
         )}

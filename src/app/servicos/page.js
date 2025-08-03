@@ -2,125 +2,81 @@
 
 import Layout from "@/components/Layout"
 import { useState } from "react"
-import { FaCode, FaCogs, FaGlobe, FaChartLine, FaRobot, FaTachometerAlt, FaMobileAlt, FaDatabase, FaShieldAlt, FaPaintBrush } from "react-icons/fa"
+import Lottie from "lottie-react"
 
 const servicos = [
   {
-    titulo: "Desenvolvimento de Sistemas",
-    resumo: "Soluções personalizadas para web e mobile.",
+    titulo: "Soluções Web e Mobile",
+    resumo: "Desenvolvimento de sites, sistemas e aplicativos sob medida.",
     descricao:
-      "Criamos sistemas sob medida para atender necessidades específicas da sua empresa, incluindo painel administrativo, autenticação segura, integração com APIs e muito mais.",
-    icone: <FaCode />,
+      "Criamos soluções digitais personalizadas com foco em performance, usabilidade e escalabilidade. Atendemos desde landing pages até sistemas completos e apps publicados nas lojas.",
+    lottie: "@/../lotties/servicos/dev-web.json",
   },
   {
-    titulo: "Integração de Sistemas",
-    resumo: "Conecte diferentes plataformas e softwares.",
+    titulo: "Integrações e Automação",
+    resumo: "Conecte ferramentas e otimize tarefas repetitivas.",
     descricao:
-      "Desenvolvemos soluções para integrar PDVs, CRMs, ERPs, marketplaces, APIs públicas ou privadas e diversas outras plataformas de forma eficiente e segura.",
-    icone: <FaCogs />,
+      "Automatizamos processos empresariais e integramos sistemas como CRMs, ERPs, APIs e plataformas externas, reduzindo erros e aumentando a produtividade.",
+    lottie: "@/../lotties/servicos/automation.json",
   },
   {
-    titulo: "Landing Pages",
-    resumo: "Páginas otimizadas para conversão.",
+    titulo: "Dashboards e Painéis",
+    resumo: "Visualização de dados com eficiência e clareza.",
     descricao:
-      "Criamos landing pages modernas, rápidas e responsivas com foco em conversão, ideais para campanhas de marketing, lançamentos ou captação de leads.",
-    icone: <FaGlobe />,
+      "Criamos painéis administrativos completos com gráficos, filtros e controle de permissões, facilitando o acompanhamento e tomada de decisões.",
+    lottie: "@/../lotties/servicos/dashboard.json",
   },
   {
-    titulo: "Sites Institucionais",
-    resumo: "Fortaleça sua presença digital.",
+    titulo: "Segurança e Back-end",
+    resumo: "Infraestrutura robusta e proteção de dados.",
     descricao:
-      "Desenvolvemos sites institucionais com identidade visual moderna, estrutura de SEO, acessibilidade e integração com ferramentas como Google Analytics e formulários de contato.",
-    icone: <FaChartLine />,
+      "Implementamos práticas avançadas de segurança com autenticação multifator, criptografia, monitoramento, além de back-ends eficientes com bancos relacionais e NoSQL.",
+    lottie: "@/../lotties/servicos/backend.json",
   },
   {
-    titulo: "Automação de Processos",
-    resumo: "Ganhe produtividade automatizando tarefas repetitivas.",
+    titulo: "Consultoria Digital",
+    resumo: "Planejamento e estratégias para o seu projeto.",
     descricao:
-      "Automatizamos rotinas administrativas, envio de relatórios, agendamentos, disparo de emails, monitoramento de sistemas e muito mais.",
-    icone: <FaRobot />,
-  },
-  {
-    titulo: "Painéis Administrativos",
-    resumo: "Gerencie seus dados com eficiência.",
-    descricao:
-      "Criamos dashboards personalizados com gráficos, filtros, tabelas dinâmicas e gestão de permissões para facilitar o controle de informações e operações.",
-    icone: <FaTachometerAlt />,
-  },
-  {
-    titulo: "Aplicativos Mobile",
-    resumo: "Apps nativos e híbridos para Android e iOS.",
-    descricao:
-      "Desenvolvemos aplicativos com foco em performance, usabilidade e escalabilidade, com publicação nas lojas e suporte técnico contínuo.",
-    icone: <FaMobileAlt />,
-  },
-  {
-    titulo: "Banco de Dados e Back-end",
-    resumo: "Infraestrutura sólida para seus sistemas.",
-    descricao:
-      "Projetamos e otimizamos bancos de dados relacionais e NoSQL, com APIs robustas e seguras para integração e performance em escala.",
-    icone: <FaDatabase />,
-  },
-  {
-    titulo: "Segurança de Sistemas",
-    resumo: "Proteja seus dados e aplicações.",
-    descricao:
-      "Implementamos práticas modernas de segurança, como criptografia, autenticação multifator, prevenção a ataques e monitoramento contínuo.",
-    icone: <FaShieldAlt />,
-  },
-  {
-    titulo: "Design de Interfaces",
-    resumo: "Experiências visuais impactantes.",
-    descricao:
-      "Criamos interfaces bonitas e funcionais, com foco em experiência do usuário, acessibilidade e consistência visual.",
-    icone: <FaPaintBrush />,
+      "Ajudamos empresas a tirar ideias do papel com planejamento técnico, estudo de viabilidade e definição das melhores tecnologias para cada cenário.",
+    lottie: "@/../lotties/servicos/digital-agency.json",
   },
 ]
 
 export default function ServicosPage() {
-  const [ativo, setAtivo] = useState(null)
-
   return (
     <Layout>
-      <section className="min-h-screen py-20 px-4 md:px-12 bg-gradient-to-b from-purple-400 via-black to-zinc-900 text-white">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-10 text-white text-center drop-shadow-md">
-            Serviços
+      <section className="relative min-h-screen py-20 px-4 text-white overflow-hidden">
+
+        {/* Fundo com blur */}
+        <div
+          className="absolute top-0 left-0 w-full h-full bg-[url('/images/mobile/code-sunset.png')] md:bg-[url('/images/code-sunset.png')] blur-[7px] bg-cover bg-center z-0"
+        />
+        <div className="absolute top-0 left-0 w-full h-full bg-black/70 z-10" />
+
+        {/* Conteúdo */}
+        <div className="relative z-20 w-full px-8 md:px-50 mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold mb-16 text-white text-center drop-shadow-md">
+            O que oferecemos
           </h1>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-32">
             {servicos.map((servico, index) => (
               <div
                 key={index}
-                className={`transition-all duration-500 ease-in-out bg-zinc-800 p-6 rounded-2xl border-2 border-purple-700/50 hover:border-purple-400/80 shadow-lg cursor-pointer relative group overflow-hidden ${
-                  ativo === index ? "bg-zinc-700/70" : ""
+                className={`flex flex-col md:flex-row items-center gap-8 ${
+                  index % 2 === 1 ? "md:flex-row-reverse" : ""
                 }`}
-                onClick={() => setAtivo(ativo === index ? null : index)}
               >
-                <div className="flex items-center gap-3">
-                  <div className="text-2xl text-purple-300">
-                    {servico.icone}
-                  </div>
-                  <h2 className="text-xl md:text-2xl font-semibold text-purple-300 group-hover:text-purple-100">
+                <div className="w-full md:w-1/2">
+                  <Lottie className="h-64" path={servico.lottie} loop autoplay />
+                </div>
+                <div className="w-full md:w-1/2">
+                  <h2 className="text-2xl md:text-3xl font-semibold text-purple-600 text-shadow-sm text-shadow-purple-700 mb-4">
                     {servico.titulo}
                   </h2>
+                  <p className="text-white text-lg mb-2 font-semibold">{servico.resumo}</p>
+                  <p className="text-purple-300 text-sm">{servico.descricao}</p>
                 </div>
-
-                <p className="text-gray-300 mb-2 mt-2 text-sm md:text-base">
-                  {servico.resumo}
-                </p>
-
-                <div className={`text-sm text-gray-200 mt-3 transition-all duration-300 ease-in-out ${
-                  ativo === index ? "opacity-100 max-h-[300px]" : "opacity-0 max-h-0 overflow-hidden"
-                }`}> 
-                  {servico.descricao}
-                </div>
-
-                {ativo !== index && (
-                  <p className="text-xs text-purple-400 mt-2 italic">
-                    Toque para expandir ↓
-                  </p>
-                )}
               </div>
             ))}
           </div>

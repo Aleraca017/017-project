@@ -10,7 +10,7 @@ export default function Footer() {
     window.open("https://wa.me/5511999999999", "_blank") // Substitua pelo seu número
   }
 
-  const isProjetosPage = pathname === "/projetos"
+  const isProjetosPage = pathname === "/projetos" || pathname === "/servicos"
 
   return (
     <footer
