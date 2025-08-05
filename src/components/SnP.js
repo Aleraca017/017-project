@@ -52,24 +52,24 @@ export default function SpotifyNowPlaying() {
   const progressPercent = (track.progress / track.duration) * 100
 
   return (
-    <div className="fixed -bottom-3 md:bottom-5 left-0 md:left-5 z-50 bg-zinc-800 bg-opacity-90 text-white text-xs flex flex-col gap-2 p-2 rounded-lg shadow-lg w-40 md:w-80 scale-70 md:scale-100">
+    <div className="fixed -bottom-2 md:bottom-5 -left-9 md:left-5 z-50 bg-zinc-950 border-2 border-white/5 bg-opacity-90 text-white text-xs flex flex-col gap-2 p-2 rounded-lg shadow-lg w-70 md:w-80 scale-60 md:scale-100">
       <a
         href={track.playlistUrl || "#"}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-purple-400 underline font-semibold hover:text-purple-300 text-center md:text-left md:text-sm"
+        className="text-purple-500 underline font-semibold hover:text-purple-300 text-left md:text-sm"
       >
         Veja o que nossa equipe está ouvindo
       </a>
 
-      <div className="flex md:flex-row flex-col items-center gap-2">
+      <div className="flex flex-row items-center gap-2">
         <img
           src={track.albumImageUrl}
           alt="Capa do álbum"
-          className="w-30 h-30 md:w-16 md:h-16 rounded"
+          className="w-16 h-16 rounded"
         />
 
-        <div className="flex-1 text-center w-full md:text-left">
+        <div className="flex-1 w-full text-left">
           {/* Título com animação condicional */}
           <div
             className="w-full overflow-hidden whitespace-nowrap relative h-5"
@@ -80,7 +80,7 @@ export default function SpotifyNowPlaying() {
               target="_blank"
               rel="noopener noreferrer"
               ref={titleTextRef}
-              className={`absolute font-semibold hover:underline text-xs md:text-base block text-white ${
+              className={`absolute font-semibold hover:underline text-base block text-white ${
                 shouldAnimateTitle ? "animate-marquee" : ""
               }`}
             >
@@ -105,7 +105,7 @@ export default function SpotifyNowPlaying() {
 
           {/* Dono da playlist */}
           {track.playlistOwner && (
-            <div className="flex items-center justify-center md:justify-start gap-2 mt-1 text-gray-400">
+            <div className="flex items-center justify-start gap-2 mt-1 text-gray-400">
               {track.playlistOwner.image && (
                 <img
                   src={track.playlistOwner.image}

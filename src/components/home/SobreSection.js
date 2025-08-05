@@ -7,31 +7,38 @@ export default function SobreSection() {
   return (
     <section
       id="sobre"
-      className="py-24 px-6 bg-black text-white"
+      className="relative py-24 px-6 text-white overflow-hidden"
       aria-label="Seção sobre a empresa"
     >
-      {/* Bloco principal */}
+      {/* IMAGEM DE FUNDO COM BLUR */}
+      <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none bg-black">
+      </div>
+
+      {/* SOBREPOSIÇÃO ESCURA */}
+      <div className="absolute inset-0 bg-black/30 z-0" />
+
+      {/* CONTEÚDO PRINCIPAL */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12"
+        className="relative z-10 max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12"
       >
-        {/* Conteúdo textual */}
+        {/* Texto */}
         <div className="flex-1 text-center md:text-left">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-purple-500 mb-6">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-purple-1  00 mb-6">
             Quem Somos
           </h2>
           <p className="text-gray-300 text-lg leading-relaxed mb-4">
-            A <strong className="text-white">017Tag</strong> é uma empresa de soluções tecnológicas especializada em desenvolvimento web, integração de sistemas e produtos digitais sob medida. 
+            A <strong className="text-white">017Tag</strong> é uma empresa de soluções tecnológicas especializada em desenvolvimento web, integração de sistemas e produtos digitais sob medida.
           </p>
           <p className="text-gray-400 text-base leading-relaxed">
             Combinamos estratégia, design e engenharia de software para transformar desafios em soluções inteligentes e escaláveis. Nosso time é formado por profissionais apaixonados por inovação, performance e boas práticas.
           </p>
         </div>
 
-        {/* Imagem ilustrativa */}
+        {/* IMAGEM ILUSTRATIVA VISÍVEL */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -52,7 +59,7 @@ export default function SobreSection() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.4 }}
-        className="mt-20 max-w-6xl mx-auto text-center"
+        className="relative z-10 mt-20 max-w-6xl mx-auto text-center"
       >
         <h3 className="text-3xl font-bold text-white mb-12">Nossos diferenciais</h3>
 
@@ -60,7 +67,7 @@ export default function SobreSection() {
           {/* Card 1 */}
           <motion.div
             whileHover={{ scale: 1.03 }}
-            className="bg-zinc-800/70 p-6 rounded-2xl border-2 border-purple-600 shadow-lg"
+            className="bg-zinc-800/70 backdrop-blur-xs p-6 rounded-2xl border-2 border-purple-600 shadow-lg"
           >
             <FaCogs className="text-purple-400 text-4xl mb-4 mx-auto" />
             <h4 className="text-xl font-semibold mb-2">Soluções sob medida</h4>
@@ -72,7 +79,7 @@ export default function SobreSection() {
           {/* Card 2 */}
           <motion.div
             whileHover={{ scale: 1.03 }}
-            className="bg-zinc-800/70 p-6 rounded-2xl border-2 border-purple-600 shadow-lg"
+            className="bg-zinc-800/70 p-6 backdrop-blur-xs rounded-2xl border-2 border-purple-600 shadow-lg"
           >
             <FaRocket className="text-purple-400 text-4xl mb-4 mx-auto" />
             <h4 className="text-xl font-semibold mb-2">Alta performance</h4>
@@ -84,7 +91,7 @@ export default function SobreSection() {
           {/* Card 3 */}
           <motion.div
             whileHover={{ scale: 1.03 }}
-            className="bg-zinc-800/70 p-6 rounded-2xl border-2 border-purple-600 shadow-lg"
+            className="bg-zinc-800/70 p-6 backdrop-blur-xs rounded-2xl border-2 border-purple-600 shadow-lg"
           >
             <FaHeadset className="text-purple-400 text-4xl mb-4 mx-auto" />
             <h4 className="text-xl font-semibold mb-2">Suporte próximo</h4>

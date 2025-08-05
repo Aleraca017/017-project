@@ -30,11 +30,16 @@ export default function ProjetosPage() {
     <Layout>
       <section className="relative min-h-screen snap-y snap-mandatory overflow-y-auto no-scrollbar bg-gradient-to-b from-black to-zinc-900">
         {/* Fundo */}
-        <img
-          src="/images/star-coding.png"
-          alt="Fundo estrelado"
-          className="fixed inset-0 w-full h-full object-cover blur-sm z-0"
-        />
+       <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none  brightness-[0.5]"
+        >
+          <source src="/videos/projetos.mp4" type="video/mp4" />
+          Seu navegador não suporta vídeos em HTML5.
+        </video>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 py-12 space-y-24">
           {projetos.map((projeto, idx) => {

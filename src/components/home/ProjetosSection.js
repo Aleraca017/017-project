@@ -11,26 +11,26 @@ const projetos = [
     tecnologias: ["JavaScript", "Tailwind", "Firebase"],
     link: "/projetos/#integrador-kds",
     target: "",
-    projetoStatus: "Projeto Privado",
+    projetoStatus: "Projeto privado",
   },
   {
     titulo: "Sistema de Laudos",
     descricao: "Plataforma com autenticação, upload e exibição de laudos do Google Drive, logs e envio automático de e-mails.",
     imagem: "/projetos/laudos.jpg",
     tecnologias: ["Firebase", "Next.js", "Node.js", "Google Drive"],
-    link: "https://laudos.017tag.com",
+    link: "https://laborativa.com.br",
     target: "_blank",
-    projetoStatus: "Projeto em Produção",
+    projetoStatus: "Projeto finalizado",
   },
 ]
 
 function getStatusProps(status) {
   switch (status) {
-    case "Projeto Privado":
+    case "Projeto privado":
       return {
         color: "bg-red-600 hover:bg-red-700",
         icon: <FaTimes className="text-xs" />,
-        tooltip: "Este projeto é privado e por isso não é possível exibi-lo. Mas você pode ver mais detalhes sobre ele na seção de projetos.",
+        tooltip: "Este projeto é privado e por isso não é possível exibi-lo. Mas você pode ver mais detalhes sobre o funcionamento dele na seção de projetos.",
       }
     case "Projeto em Produção":
       return {

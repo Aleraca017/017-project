@@ -63,7 +63,7 @@ export default function Header() {
         {/* Menu desktop */}
         <nav className="hidden md:flex space-x-8 text-sm font-medium">
           <Link href="/#home" className="hover:text-purple-400 transition">Início</Link>
-          <Link href="/#sobre" className="hover:text-purple-400 transition">Sobre</Link>
+          <Link href="/sobre" className="hover:text-purple-400 transition">Sobre</Link>
           <Link href="/servicos" className="hover:text-purple-400 transition">Serviços</Link>
           <Link href="/projetos" className="hover:text-purple-400 transition">Projetos</Link>
           <Link href="/contato/contato" className="hover:text-purple-400 transition">Contato</Link>
@@ -92,7 +92,7 @@ export default function Header() {
             className="md:hidden bg-black px-6 pb-6 pt-2 flex flex-col gap-4 text-sm font-medium border-t border-zinc-700"
           >
             <Link href="/" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Início</Link>
-            <Link href="/#sobre" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Sobre</Link>
+            <Link href="/sobre" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Sobre</Link>
             <Link href="/servicos" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Serviços</Link>
             <Link href="/projetos" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Projetos</Link>
             <Link href="/contato/contato" onClick={() => setIsMenuOpen(false)} className="hover:text-purple-400 transition">Contato</Link>

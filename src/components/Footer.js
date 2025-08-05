@@ -10,14 +10,14 @@ export default function Footer() {
     window.open("https://wa.me/5511999999999", "_blank") // Substitua pelo seu número
   }
 
-  const isProjetosPage = pathname === "/projetos" || pathname === "/servicos"
+  const isProjetosPage = pathname === "/"
 
   return (
     <footer
       className={`relative z-10 pt-16 pb-10 px-6 text-white ${
         isProjetosPage
-          ? "bg-zinc-950"
-          : "bg-gradient-to-b from-zinc-900 to-purple-900"
+          ? "bg-gradient-to-b from-zinc-900 to-purple-900"
+          : "bg-zinc-950"
       }`}
     >
       <div className="max-w-6xl mx-auto grid gap-10 md:grid-cols-4 sm:grid-cols-2 text-sm">

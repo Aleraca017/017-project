@@ -97,7 +97,7 @@ export default function ServicosSection() {
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className="flex items-center gap-3 bg-white text-purple-700 font-bold px-6 py-3 rounded-xl shadow-lg hover:bg-gray-100 transition"
+      className="flex items-center gap-3 bg-white text-purple-700 font-bold px-6 py-3 rounded-xl shadow-lg hover:cursor-pointer hover:bg-gray-100 transition"
       aria-label="Iniciar conversa no WhatsApp"
     >
       <FaWhatsapp className="text-xl" />

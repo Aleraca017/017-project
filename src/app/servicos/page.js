@@ -40,43 +40,37 @@ const servicos = [
       "Ajudamos empresas a tirar ideias do papel com planejamento técnico, estudo de viabilidade e definição das melhores tecnologias para cada cenário.",
     lottie: "@/../lotties/servicos/digital-agency.json",
   },
+  
 ]
 
 export default function ServicosPage() {
   return (
     <Layout>
       <section className="relative min-h-screen py-20 px-4 text-white overflow-hidden">
-
         {/* Fundo com blur */}
-        <div
-          className="absolute top-0 left-0 w-full h-full bg-[url('/images/mobile/code-sunset.png')] md:bg-[url('/images/code-sunset.png')] blur-[7px] bg-cover bg-center z-0"
-        />
-        <div className="absolute top-0 left-0 w-full h-full bg-black/70 z-10" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('/images/mobile/code-sunset.png')] md:bg-[url('/images/code-sunset.png')] blur-[px] bg-cover bg-center z-0" />
+        <div className="absolute top-0 left-0 w-full h-full bg-black/40 z-10" />
 
         {/* Conteúdo */}
         <div className="relative z-20 w-full px-8 md:px-50 mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-16 text-white text-center drop-shadow-md">
+          <h1 className="text-4xl md:text-5xl font-bold mb-16 text-white text-center">
             O que oferecemos
           </h1>
 
-          <div className="flex flex-col gap-32">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {servicos.map((servico, index) => (
               <div
                 key={index}
-                className={`flex flex-col md:flex-row items-center gap-8 ${
-                  index % 2 === 1 ? "md:flex-row-reverse" : ""
-                }`}
+                className="flex flex-col items-center text-center bg-white/5 backdrop-blur-xl rounded-2xl p-6"
               >
-                <div className="w-full md:w-1/2">
-                  <Lottie className="h-64" path={servico.lottie} loop autoplay />
+                <div className="w-full mb-4">
+                  <Lottie className="h-48 mx-auto" path={servico.lottie} loop autoplay />
                 </div>
-                <div className="w-full md:w-1/2">
-                  <h2 className="text-2xl md:text-3xl font-semibold text-purple-600 text-shadow-sm text-shadow-purple-700 mb-4">
-                    {servico.titulo}
-                  </h2>
-                  <p className="text-white text-lg mb-2 font-semibold">{servico.resumo}</p>
-                  <p className="text-purple-300 text-sm">{servico.descricao}</p>
-                </div>
+                <h2 className="text-xl font-semibold text-purple-100 mb-2">
+                  {servico.titulo}
+                </h2>
+                <p className="text-white font-medium mb-1">{servico.resumo}</p>
+                <p className="text-purple-200 text-sm">{servico.descricao}</p>
               </div>
             ))}
           </div>

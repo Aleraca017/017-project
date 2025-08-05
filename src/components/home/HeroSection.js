@@ -45,7 +45,7 @@ export default function HeroSection() {
         </p>
 
         <p className="text-base md:text-lg text-gray-300 mb-8 max-w-xl">
-          Somos especialistas em soluções personalizadas usando <span className="text-purple-400 font-semibold">Next.js</span>, <span className="text-purple-400 font-semibold">React</span> e ferramentas modernas para transformar ideias em realidade.
+          Somos especialistas em soluções personalizadas usando as <span className="text-purple-400 font-semibold">principais</span> ferramentas do mercado para transformar ideias em realidade.
         </p>
 
         {/* Texto animado */}
