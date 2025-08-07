@@ -34,7 +34,6 @@ export default function Footer() {
         <div>
           <h4 className="text-purple-400 font-semibold mb-3">Contato</h4>
           <ul className="space-y-2 text-gray-300 text-sm">
-            <li>CNPJ: 11.111.111/0001-11</li>
             <li>Mogi das Cruzes - SP</li>
             <li>
               <Link href="/contato/contato" className="hover:underline text-white">
@@ -65,10 +64,10 @@ export default function Footer() {
         <div>
           <h4 className="text-purple-400 font-semibold mb-3">Redes Sociais</h4>
           <div className="flex gap-4 text-2xl text-purple-400">
-            <Link href="https://github.com/seu-perfil" target="_blank" className="hover:text-white transition">
+            <Link href="https://github.com/aleraca017" target="_blank" className="hover:text-white transition">
               <FaGithub />
             </Link>
-            <Link href="https://linkedin.com/in/seu-perfil" target="_blank" className="hover:text-white transition">
+            <Link href="https://linkedin.com/in/alexandre-dm-jesus" target="_blank" className="hover:text-white transition">
               <FaLinkedin />
             </Link>
             <Link href="mailto:contato@017tag.com.br" className="hover:text-white transition">
