@@ -18,69 +18,68 @@ export default function PoliticaPage() {
 
          <div className="space-y-8 text-purple-100 text-justify text-sm md:text-base">
   <p>
-    Esta Política de Privacidade descreve como tratamos os dados fornecidos por você ao utilizar o formulário de contato disponível em nosso site.
+    Esta Política de Privacidade descreve como coletamos, utilizamos e protegemos os dados fornecidos por você ao acessar nosso site e a área restrita de usuários.
   </p>
 
   <div>
-    <h2 className="text-xl font-semibold text-white mb-2">1. Coleta de Dados</h2>
+    <h2 className="text-xl font-semibold text-white mb-2">1. Dados Coletados</h2>
     <p>
-      Coletamos apenas os dados inseridos voluntariamente por você no formulário de contato: nome, e-mail e número de WhatsApp. Nenhuma outra informação pessoal é coletada automaticamente durante sua navegação.
+      Coletamos:
+      <ul className="list-disc pl-5 mt-2">
+        <li>Nome, e-mail e número de WhatsApp enviados via formulário de contato.</li>
+        <li>Credenciais de acesso (e-mail e senha) para usuários com login autorizado pela equipe.</li>
+        <li>Informações de solicitações de suporte criadas na área restrita.</li>
+        <li>Dados técnicos como endereço IP e data/hora de acesso para fins de segurança.</li>
+      </ul>
     </p>
   </div>
 
   <div>
-    <h2 className="text-xl font-semibold text-white mb-2">2. Armazenamento</h2>
+    <h2 className="text-xl font-semibold text-white mb-2">2. Armazenamento e Segurança</h2>
     <p>
-      As informações enviadas por meio do formulário são armazenadas de forma segura em nossa base de dados no Firebase, um serviço de computação em nuvem fornecido pelo Google. Esse serviço segue padrões internacionais de segurança e proteção de dados.
+      Todos os dados são armazenados no Firebase (Google), que segue padrões internacionais de segurança e criptografia. Apenas a equipe autorizada tem acesso às informações, e o acesso é controlado por autenticação segura.
     </p>
   </div>
 
   <div>
     <h2 className="text-xl font-semibold text-white mb-2">3. Finalidade do Uso</h2>
     <p>
-      Utilizamos os dados exclusivamente para responder suas mensagens, prestar suporte, ou fornecer informações sobre nossos serviços. Não enviamos newsletters, propagandas ou qualquer comunicação automatizada sem sua solicitação.
+      Utilizamos seus dados para:
+      <ul className="list-disc pl-5 mt-2">
+        <li>Responder solicitações de contato enviadas pelo site.</li>
+        <li>Gerenciar seu acesso à área restrita.</li>
+        <li>Registrar e acompanhar solicitações de suporte.</li>
+        <li>Garantir a segurança da conta e do sistema.</li>
+      </ul>
     </p>
   </div>
 
   <div>
-    <h2 className="text-xl font-semibold text-white mb-2">4. Compartilhamento de Dados</h2>
+    <h2 className="text-xl font-semibold text-white mb-2">4. Compartilhamento</h2>
     <p>
-      Seus dados não são vendidos, compartilhados ou repassados a terceiros. O acesso é restrito à nossa equipe responsável pelo atendimento, e os dados são utilizados apenas para os fins informados nesta política.
+      Não compartilhamos seus dados com terceiros, exceto quando exigido por lei ou para cumprir obrigações legais.
     </p>
   </div>
 
   <div>
-    <h2 className="text-xl font-semibold text-white mb-2">5. Segurança</h2>
+    <h2 className="text-xl font-semibold text-white mb-2">5. Seus Direitos</h2>
     <p>
-      Adotamos medidas técnicas e organizacionais para proteger seus dados pessoais contra acesso não autorizado, perda ou alteração. O Firebase utiliza criptografia e autenticação para garantir a integridade e confidencialidade das informações.
+      Você pode solicitar a atualização ou exclusão de suas informações entrando em contato com nossa equipe. A exclusão de dados de login implica na perda de acesso à área restrita.
     </p>
   </div>
 
   <div>
-    <h2 className="text-xl font-semibold text-white mb-2">6. Seus Direitos</h2>
+    <h2 className="text-xl font-semibold text-white mb-2">6. Alterações</h2>
     <p>
-      Você pode solicitar a exclusão ou revisão de seus dados a qualquer momento, entrando em contato conosco pelos canais disponíveis no site. Responderemos o mais breve possível.
-    </p>
-  </div>
-
-  <div>
-    <h2 className="text-xl font-semibold text-white mb-2">7. Cookies e Rastreamento</h2>
-    <p>
-      Nosso site não utiliza cookies de rastreamento nem serviços de análise de navegação (como Google Analytics). A sua navegação é livre e anônima.
-    </p>
-  </div>
-
-  <div>
-    <h2 className="text-xl font-semibold text-white mb-2">8. Alterações nesta Política</h2>
-    <p>
-      Esta Política de Privacidade pode ser atualizada periodicamente para refletir mudanças nos nossos processos ou serviços. A data da última atualização será sempre informada ao final desta página.
+      Podemos alterar esta política a qualquer momento. Você receberá um e-mail informando qualquer alteração, porém, recomendamos que você a revise periodicamente.
     </p>
   </div>
 
   <p className="text-purple-300">
-    Última atualização: 07 de agosto de 2025
+    Última atualização: 13 de agosto de 2025
   </p>
-</div>  
+</div>
+
         </div>
       </section>
     </Layout>

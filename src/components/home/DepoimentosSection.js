@@ -8,7 +8,7 @@ const depoimentos = [
     empresa: "SuperDog do Luiz",
     cargo: "Business Intelligence",
     texto:
-      "A equipe da 017Tag foi fundamental para o sucesso do nosso projeto. Profissionalismo e dedicação excepcionais!",
+      '“A equipe da 017Tag foi fundamental para o sucesso do nosso projeto. Profissionalismo e dedicação excepcionais!”',
     avatar: "/images/clients/eduardo-SDL.png",
   },
   {
@@ -17,7 +17,7 @@ const depoimentos = [
     cargo: "Diretor Geral",
     texto:
       "Desenvolvimento moderno e atendimento personalizado. Fiquei muito satisfeito com o resultado.",
-    avatar: "/avatars/carlos.jpg",
+    avatar: "/avatars/gerson.jpg",
   },
 ]
 
@@ -55,7 +55,7 @@ export default function DepoimentosSection() {
               <p className="text-sm text-zinc-400 italic mb-1">{cargo}</p>  {/* cargo */}
               <p className="text-sm text-purple-200 mb-6">{empresa}</p>
               
-              <p className="text-sm md:text-base text-left text-purple-100 leading-relaxed tracking-wide relative before:content-['“'] before:text-purple-400 before:text-3xl before:absolute before:-left-4 before:-top-2 after:content-['”'] after:text-purple-400 after:text-3xl after:ml-1 block max-w-[90%]">
+              <p className="text-sm md:text-base text-left text-purple-100 leading-relaxed tracking-wide relative  block max-w-[90%]">
                 {texto}
               </p>
             </motion.div>

@@ -52,11 +52,6 @@ export default function Footer() {
                 Política de Privacidade
               </Link>
             </li>
-            <li>
-              <Link href="/politicas/termos-de-uso" className="hover:underline">
-                Termos de Uso
-              </Link>
-            </li>
           </ul>
         </div>
 
