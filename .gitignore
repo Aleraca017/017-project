@@ -41,4 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 #service account
-serviceAccountKey.json
+serviceAccountKey.jsonserviceAccountKey.json
