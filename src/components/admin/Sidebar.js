@@ -6,7 +6,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { 
   FaSignOutAlt, FaBars, FaTimes, FaUsers, FaProjectDiagram, 
-  FaFileAlt, FaTasks, FaCalendarAlt
+  FaFileAlt, FaTasks, FaCalendarAlt, FaUserAlt,
 } from "react-icons/fa";
 
 export default function Sidebar() {
@@ -45,15 +45,16 @@ export default function Sidebar() {
     { label: "Solicitações", href: "/admin/solicitacoes", icon: <FaTasks /> },
     { label: "Documentações", href: "/admin/docs", icon: <FaFileAlt /> },
     { label: "Gerência", href: "/admin/gerencia", icon: <FaCalendarAlt /> },
+    { label: "Clientes", href: "/admin/clientes", icon: <FaUserAlt /> },
   ];
 
   return (
     <>
       {/* Sidebar Desktop */}
-      <aside className="w-64 bg-purple-700 text-white p-6 hidden md:block">
+      <aside className="w-64 bg-purple-700 text-white hidden md:block">
         <div className="h-full w-full flex flex-col justify-between">
 
-        <div>
+        <div className="p-6">
           <h2 className="text-2xl font-bold mb-8">Painel Admin</h2>
           <nav className="flex flex-col gap-2">
             {links.map((link, i) => (
@@ -62,21 +63,30 @@ export default function Sidebar() {
               </a>
             ))}
           </nav>
-          <button
-            onClick={handleLogout}
-            className="mt-10 flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
-          >
-            <FaSignOutAlt /> Sair
-          </button>
+          
         </div>
 
-        <div className="flex flex-row gap-4 items-center justify-center">
+        <div className="flex flex-col h-40 items-center justify-between bg-purple-800">
+          <div className="flex flex-row items-center gap-4 justify-center w-full pt-10">
           <img 
           src={'https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-user-circle-icon.png'}
           className="w-15 h-15 rounded-full"
           ></img>
           <div>{periodo}, <span className="font-semibold">Alexandre</span></div>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="mt-5 flex items-center px-2 hover:*:translate-x-45 *:transition-transform *:duration-500 hover:cursor-pointer gap-2 bg-red-500 hover:bg-red-600 w-full py-2"
+          >
+            <div className="flex flex-row w-full items-center gap-2">
+            <FaSignOutAlt /> Sair
+            </div>
+          </button>
+          
         </div>
+
+        
 
         </div>
       </aside>
