@@ -77,7 +77,7 @@ export default function Sidebar() {
 
           <button
             onClick={handleLogout}
-            className="mt-5 flex items-center px-2 hover:*:translate-x-45 *:transition-transform *:duration-500 hover:cursor-pointer gap-2 bg-red-500 hover:bg-red-600 w-full py-2"
+            className="mt-5 flex items-center px-2 hover:*:translate-x-45 *:transition-transform *:duration-500 hover:cursor-pointer gap-2 bg-red-500  w-full py-2"
           >
             <div className="flex flex-row w-full items-center gap-2">
             <FaSignOutAlt /> Sair
