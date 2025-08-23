@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "@/components/admin/Sidebar";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ProjectManagementPage() {
   const [projects, setProjects] = useState([]);
@@ -12,12 +13,13 @@ export default function ProjectManagementPage() {
   const [showModal, setShowModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null); // Modal de detalhes (duplo clique)
   const [notification, setNotification] = useState({ message: "", type: "" });
 
+  // Opções dependentes
   const languages = ["JavaScript", "Python", "PHP", "Java", "C#", "Ruby"];
   const frameworksMap = {
-    JavaScript: ["React", "Angular", "Vue"],
+    JavaScript: ["React", "Angular", "Vue", "Vanilla JS"],
     Python: ["Django", "Flask", "FastAPI"],
     PHP: ["Laravel", "Symfony", "CodeIgniter"],
     Java: ["Spring", "JSF", "Struts"],
@@ -25,7 +27,7 @@ export default function ProjectManagementPage() {
     Ruby: ["Rails", "Sinatra"],
   };
   const technologiesMap = {
-    JavaScript: ["Next.js", "React Native", "Node.js"],
+    JavaScript: ["Next.js", "React Native", "Node.js", "Vanilla JS"],
     Python: ["NumPy", "Pandas", "TensorFlow"],
     PHP: ["Composer", "WordPress", "Drupal"],
     Java: ["Spring Boot", "Maven", "Jenkins"],
@@ -33,6 +35,7 @@ export default function ProjectManagementPage() {
     Ruby: ["Rails", "Sinatra"],
   };
 
+  // Cores dos status (rótulos tipo "botão")
   const statusColors = {
     andamento: "bg-yellow-400 text-black",
     concluido: "bg-green-500 text-white",
@@ -40,11 +43,13 @@ export default function ProjectManagementPage() {
     tratativa: "bg-gray-400 text-white",
   };
 
+  // Notificação no topo
   const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification({ message: "", type: "" }), 3000);
   };
 
+  // Buscar projetos e usuários
   useEffect(() => {
     const fetchProjects = async () => {
       const querySnapshot = await getDocs(collection(db, "projetos"));
@@ -68,12 +73,14 @@ export default function ProjectManagementPage() {
     fetchUsers();
   }, []);
 
+  // Abrir modal de edição
   const handleEditClick = (project) => {
     setEditingProject(project);
     setIsCreating(false);
     setShowModal(true);
   };
 
+  // Abrir modal de criação
   const handleCreateClick = () => {
     setEditingProject({
       titulo: "",
@@ -89,6 +96,7 @@ export default function ProjectManagementPage() {
     setShowModal(true);
   };
 
+  // Salvar (criar/editar)
   const handleSave = async () => {
     const user = users.find((u) => u.id === editingProject.responsavel);
 
@@ -114,7 +122,7 @@ export default function ProjectManagementPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        setProjects([...projects, { id: data.docId, ...projectData }]);
+        setProjects((prev) => [...prev, { id: data.docId, ...projectData }]);
         showNotification("Projeto criado com sucesso!", "success");
       } else {
         const res = await fetch("/api/projetos/update-projeto", {
@@ -125,9 +133,7 @@ export default function ProjectManagementPage() {
         if (!res.ok) throw new Error(data.error);
 
         setProjects((prev) =>
-          prev.map((p) =>
-            p.id === editingProject.id ? { ...p, ...projectData } : p
-          )
+          prev.map((p) => (p.id === editingProject.id ? { ...p, ...projectData } : p))
         );
         showNotification("Projeto atualizado com sucesso!", "success");
       }
@@ -138,6 +144,7 @@ export default function ProjectManagementPage() {
     }
   };
 
+  // Excluir
   const handleDelete = async (docId) => {
     if (!confirm("Tem certeza que deseja excluir este projeto?")) return;
     try {
@@ -148,13 +155,14 @@ export default function ProjectManagementPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      setProjects(projects.filter((p) => p.id !== docId));
+      setProjects((prev) => prev.filter((p) => p.id !== docId));
       showNotification("Projeto excluído com sucesso!", "success");
     } catch (err) {
       showNotification("Erro ao excluir projeto: " + err.message, "error");
     }
   };
 
+  // Mudança nos inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditingProject((prev) => ({
@@ -164,6 +172,7 @@ export default function ProjectManagementPage() {
     }));
   };
 
+  // Filtro de busca
   const filteredProjects = projects.filter((p) => {
     const term = searchTerm.toLowerCase();
     return (
@@ -178,34 +187,39 @@ export default function ProjectManagementPage() {
       <Sidebar />
       <main className="flex-1 p-6">
         {/* Notificação */}
-        {notification.message && (
-          <div
-            className={`fixed top-0 left-0 w-full text-center py-2 px-4 z-50 ${
-              notification.type === "success"
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
-            }`}
-          >
-            {notification.message}
-          </div>
-        )}
+<AnimatePresence>
+  {notification.message && (
+    <motion.div
+      key="notification"
+      initial={{ x: 400, opacity: 0 }} 
+      animate={{ x: -40, opacity: 1 }} 
+      exit={{ x: 400, opacity: 0 }} 
+      transition={{ duration: 0.4, ease: "easeInOut" }}
+      className={`fixed top-20 rounded-2xl -right-15 w-80 text-left py-2 px-4 z-50 shadow-lg ${
+        notification.type === "success"
+          ? "bg-green-500 text-white"
+          : "bg-red-500 text-white"
+      }`}
+    >
+      {notification.message}
+    </motion.div>
+  )}
+</AnimatePresence>
 
         {/* Cabeçalho */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Gerenciamento de Projetos
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-800">Gerenciamento de Projetos</h1>
           <div className="flex items-center gap-2">
             <input
               type="text"
               placeholder="Pesquisar projetos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-purple-400 rounded px-3 py-2 ring-2 ring-purple-600 outline-none placeholder-purple-400 text-gray-400"
+              className="border border-purple-400 rounded px-3 py-2 ring-2 ring-purple-600 outline-none placeholder-purple-400 text-gray-600"
             />
             <button
               onClick={handleCreateClick}
-              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
+              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer"
             >
               + Criar Projeto
             </button>
@@ -231,14 +245,14 @@ export default function ProjectManagementPage() {
                   className={`${
                     index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"
                   } hover:bg-gray-200 transition cursor-pointer`}
-                  onDoubleClick={() => setSelectedProject(p)}
+                  onDoubleClick={() => setSelectedProject(p)} 
                 >
                   <td className="p-3 text-gray-800">{p.titulo || "-"}</td>
                   <td className="p-3 text-gray-800">{p.descricao || "-"}</td>
                   <td className="p-3">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        statusColors[p.status] || "bg-gray-200"
+                        statusColors[p.status] || "bg-gray-300 text-black"
                       }`}
                     >
                       {p.status}
@@ -252,13 +266,13 @@ export default function ProjectManagementPage() {
                   <td className="p-3 flex gap-2">
                     <button
                       onClick={() => handleEditClick(p)}
-                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer"
                     >
                       Editar
                     </button>
                     <button
                       onClick={() => handleDelete(p.id)}
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
                     >
                       Excluir
                     </button>
@@ -277,6 +291,25 @@ export default function ProjectManagementPage() {
                 {isCreating ? "Criar Projeto" : "Editar Projeto"}
               </h2>
 
+              {/* Responsável */}
+              <label className="block mb-2 text-gray-700">
+                Responsável
+                <select
+                  name="responsavel"
+                  value={editingProject.responsavel || ""}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
+                >
+                  <option value="">Selecione um responsável</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.nome} ({u.email})
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {/* Título */}
               <label className="block mb-2 text-gray-700">
                 Título
                 <input
@@ -288,6 +321,7 @@ export default function ProjectManagementPage() {
                 />
               </label>
 
+              {/* Descrição */}
               <label className="block mb-2 text-gray-700">
                 Descrição
                 <textarea
@@ -298,6 +332,7 @@ export default function ProjectManagementPage() {
                 />
               </label>
 
+              {/* Status */}
               <label className="block mb-2 text-gray-700">
                 Status
                 <select
@@ -313,6 +348,7 @@ export default function ProjectManagementPage() {
                 </select>
               </label>
 
+              {/* Linguagem */}
               <label className="block mb-2 text-gray-700">
                 Linguagem
                 <select
@@ -330,6 +366,7 @@ export default function ProjectManagementPage() {
                 </select>
               </label>
 
+              {/* Framework */}
               <label className="block mb-2 text-gray-700">
                 Framework
                 <select
@@ -348,6 +385,7 @@ export default function ProjectManagementPage() {
                 </select>
               </label>
 
+              {/* Tecnologia */}
               <label className="block mb-2 text-gray-700">
                 Tecnologia
                 <select
@@ -366,6 +404,7 @@ export default function ProjectManagementPage() {
                 </select>
               </label>
 
+              {/* Autor */}
               <label className="block mb-4 text-gray-700">
                 Autor
                 <input
@@ -380,13 +419,13 @@ export default function ProjectManagementPage() {
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition"
+                  className="px-4 py-2 bg-red-600 rounded hover:bg-red-700 transition cursor-pointer text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer transition"
                 >
                   {isCreating ? "Criar" : "Salvar"}
                 </button>
@@ -395,7 +434,7 @@ export default function ProjectManagementPage() {
           </div>
         )}
 
-        {/* Modal de detalhes */}
+        {/* Modal de detalhes (abre com duplo clique) */}
         {selectedProject && (
           <div
             className="fixed inset-0 flex items-center justify-center bg-black/85 z-50 text-black"
@@ -408,29 +447,32 @@ export default function ProjectManagementPage() {
               <h2 className="text-3xl font-bold mb-4 text-purple-800 text-center">
                 Detalhes do Projeto
               </h2>
+
               <p>
-                <strong>Título:</strong> {selectedProject.titulo}
+                <strong>Título:</strong> {selectedProject.titulo || "-"}
               </p>
               <p>
-                <strong>Descrição:</strong> {selectedProject.descricao}
+                <strong>Descrição:</strong> {selectedProject.descricao || "-"}
               </p>
-              <p>
-                <strong>Status:</strong>{" "}
+              <p className="flex items-center gap-2">
+                <strong>Status:</strong>
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    statusColors[selectedProject.status] || "bg-gray-200"
+                    statusColors[selectedProject.status] || "bg-gray-300 text-black"
                   }`}
                 >
                   {selectedProject.status}
                 </span>
               </p>
-              <p>
-                <strong>Responsável:</strong>{" "}
+              <p className="flex items-center gap-2">
+                <strong>Responsável:</strong>
                 <span className="px-2 py-1 rounded-full bg-purple-200 text-purple-800 text-sm">
-                  {selectedProject.responsavelNome}
+                  {selectedProject.responsavelNome || "-"}
                 </span>
               </p>
+
               <hr className="my-3" />
+
               <p>
                 <strong>Linguagem:</strong> {selectedProject.linguagem || "-"}
               </p>
@@ -447,7 +489,7 @@ export default function ProjectManagementPage() {
               <div className="flex justify-end mt-4">
                 <button
                   onClick={() => setSelectedProject(null)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer"
                 >
                   Fechar
                 </button>
