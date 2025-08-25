@@ -14,22 +14,65 @@ export async function POST(req) {
   try {
     const { uid } = await req.json();
 
+    // Validação do UID
+    if (!uid || typeof uid !== "string" || uid.length > 128) {
+      return new Response(
+        JSON.stringify({ error: "UID inválido" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Deleta do Auth
-    await admin.auth().deleteUser(uid);
+    try {
+      await admin.auth().deleteUser(uid);
+    } catch (authErr) {
+      if (authErr.code === "auth/user-not-found") {
+        return new Response(
+          JSON.stringify({ error: "Usuário não encontrado no Auth" }),
+          {
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+      throw authErr; // outros erros do Auth
+    }
 
     // Deleta do Firestore
     const db = admin.firestore();
-    await db.collection("usuarios").doc(uid).delete();
+    const userDocRef = db.collection("usuarios").doc(uid);
+    const userDoc = await userDocRef.get();
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    if (!userDoc.exists) {
+      return new Response(
+        JSON.stringify({ warning: "Usuário deletado do Auth, mas não existia no Firestore" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    await userDocRef.delete();
+
+    return new Response(
+      JSON.stringify({ success: true }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   } catch (err) {
-    console.error(err);
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Erro ao deletar usuário:", err);
+    return new Response(
+      JSON.stringify({ error: "Erro interno ao deletar usuário" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }

@@ -1,97 +1,192 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { signOut, onAuthStateChanged, getIdTokenResult } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { 
   FaSignOutAlt, FaBars, FaTimes, FaUsers, FaProjectDiagram, 
-  FaFileAlt, FaTasks, FaCalendarAlt, FaUserAlt,
+  FaFileAlt, FaTasks, FaCalendarAlt, FaUserAlt, FaChevronDown, FaChevronUp,
 } from "react-icons/fa";
 
 export default function Sidebar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userName, setUserName] = useState("Carregando...");
+  const [userFullName, setUserFullName] = useState("Carregando...");
+  const [userImg, setUserImg] = useState(null); // imagem do Firestore
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [openSection, setOpenSection] = useState("");
   const router = useRouter();
   const pathname = usePathname();
 
+  // Logout
   const handleLogout = async () => {
     await signOut(auth);
     router.push("/login");
   };
 
+  // Pegar usuário logado, claims e dados do Firestore
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // claims
+        const tokenResult = await getIdTokenResult(user, true);
+        setIsAdmin(!!tokenResult.claims.admin);
+
+        // dados do Firestore
+        const userRef = doc(db, "usuarios", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          const nomeCompleto = data.nome || "Usuário";
+          setUserName(nomeCompleto.split(" ")[0]);
+          setUserFullName(nomeCompleto);
+          setUserImg(data.img || null);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Saudação
+  const horaAtual = new Date().getHours();
+  let periodo = "";
+  if (horaAtual < 12) periodo = "Bom dia";
+  else if (horaAtual < 18) periodo = "Boa tarde";
+  else periodo = "Boa noite";
+
+  // Links do Sidebar
+  const links = [
+    ...(isAdmin ? [{
+      label: "Gerência",
+      icon: <FaCalendarAlt />,
+      subLinks: [
+        { label: "Usuários", href: "/admin/usuarios", icon: <FaUsers /> },
+        { label: "Reuniões", href: "/admin/reunioes", icon: <FaCalendarAlt /> },
+        { label: "Prazos", href: "/admin/prazos", icon: <FaTasks /> },
+        { label: "Clientes", href: "/admin/clientes", icon: <FaUserAlt /> },
+      ],
+    }] : []),
+    {
+      label: "Projetos",
+      icon: <FaProjectDiagram />,
+      subLinks: [
+        { label: "Projetos", href: "/admin/projetos", icon: <FaProjectDiagram /> },
+        { label: "Documentações", href: "/admin/docs", icon: <FaFileAlt /> },
+      ],
+    },
+    {
+      label: "Suporte",
+      icon: <FaTasks />,
+      subLinks: [
+        { label: "Solicitações", href: "/admin/solicitacoes", icon: <FaTasks /> },
+      ],
+    },
+  ];
+
+  // Alterna a seção aberta
+  const toggleSection = (label) => {
+    setOpenSection(prev => (prev === label ? "" : label));
+  };
+
   const linkClass = (href) =>
     `flex items-center gap-2 p-2 rounded transition ${
       pathname === href
-        ? "bg-purple-600 font-semibold"
+        ? "bg-purple-600 font-semibold border-l-4 border-yellow-400"
         : "hover:bg-purple-600"
     }`;
 
-  const dataAtual = new Date();
-  const horaAtual = dataAtual.toLocaleTimeString([], { hour: '2-digit' });
+  const renderLinks = () => {
+    return links.map((section, idx) => {
+      const isActiveSection = section.subLinks.some(link => link.href === pathname);
+      const isOpen = openSection === section.label || isActiveSection;
 
-  var periodo = '';
-  if (horaAtual >= 0 && horaAtual < 12) {
-    periodo = 'Bom dia';
-  } else if (horaAtual >= 12 && horaAtual < 18) {
-    periodo = 'Boa tarde';
-  } else {
-    periodo = 'Boa noite';
-  }
-  
+      return (
+        <div key={idx} className="mb-4">
+          <button
+            onClick={() => toggleSection(section.label)}
+            className={`flex items-center justify-between w-full p-2 font-semibold hover:bg-purple-600 rounded ${
+              isActiveSection ? "bg-purple-600" : ""
+            }`}
+          >
+            <div className="flex items-center gap-2">{section.icon} {section.label}</div>
+            {isOpen ? <FaChevronUp /> : <FaChevronDown />}
+          </button>
 
-  const links = [
-    { label: "Usuários", href: "/admin/usuarios", icon: <FaUsers /> },
-    { label: "Projetos", href: "/admin/projetos", icon: <FaProjectDiagram /> },
-    { label: "Solicitações", href: "/admin/solicitacoes", icon: <FaTasks /> },
-    { label: "Documentações", href: "/admin/docs", icon: <FaFileAlt /> },
-    { label: "Gerência", href: "/admin/gerencia", icon: <FaCalendarAlt /> },
-    { label: "Clientes", href: "/admin/clientes", icon: <FaUserAlt /> },
-  ];
+          <div
+            className={`ml-4 mt-2 overflow-hidden transition-all duration-300 ${
+              isOpen ? "max-h-96" : "max-h-0"
+            }`}
+          >
+            <nav className="flex flex-col gap-2">
+              {section.subLinks.map((link, i) => (
+                <a key={i} href={link.href} className={linkClass(link.href)}>
+                  {link.icon} {link.label}
+                </a>
+              ))}
+            </nav>
+          </div>
+        </div>
+      );
+    });
+  };
+
+  // Avatar com fallback para iniciais
+  const renderAvatar = () => {
+    if (userImg) {
+      return (
+        <img
+          src={userImg}
+          className="w-15 h-15 rounded-full object-cover"
+          alt="Avatar do usuário"
+          onError={() => setUserImg(null)}
+        />
+      );
+    } else {
+      const initials = userFullName
+        .split(" ")
+        .slice(0, 2)
+        .map(n => n[0])
+        .join("")
+        .toUpperCase();
+
+      return (
+        <div className="w-15 h-15 rounded-full bg-yellow-400 text-purple-700 flex items-center justify-center font-bold text-xl">
+          {initials}
+        </div>
+      );
+    }
+  };
 
   return (
     <>
       {/* Sidebar Desktop */}
-      <aside className="w-64 bg-purple-700 text-white hidden md:block">
-        <div className="h-full w-full flex flex-col justify-between">
-
+      <aside className="w-64 bg-purple-700 text-white hidden md:flex flex-col justify-between h-screen">
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-8">Painel Admin</h2>
-          <nav className="flex flex-col gap-2">
-            {links.map((link, i) => (
-              <a key={i} href={link.href} className={linkClass(link.href)}>
-                {link.icon} {link.label}
-              </a>
-            ))}
-          </nav>
-          
+          {renderLinks()}
         </div>
 
-        <div className="flex flex-col h-40 items-center justify-between bg-purple-800">
-          <div className="flex flex-row items-center gap-4 justify-center w-full pt-10">
-          <img 
-          src={'https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-user-circle-icon.png'}
-          className="w-15 h-15 rounded-full"
-          ></img>
-          <div>{periodo}, <span className="font-semibold">Alexandre</span></div>
+        <div className="flex flex-col h-40 items-center justify-between bg-purple-800 w-full p-4">
+          <div className="flex flex-row items-center gap-4 justify-center w-full pt-4">
+            {renderAvatar()}
+            <div>
+              {periodo}, <span className="font-semibold">{userName}</span>
+            </div>
           </div>
 
           <button
             onClick={handleLogout}
-            className="mt-5 flex items-center px-2 hover:*:translate-x-45 *:transition-transform *:duration-500 hover:cursor-pointer gap-2 bg-red-500  w-full py-2"
+            className="mt-5 flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded w-full justify-center"
           >
-            <div className="flex flex-row w-full items-center gap-2">
             <FaSignOutAlt /> Sair
-            </div>
           </button>
-          
-        </div>
-
-        
-
         </div>
       </aside>
 
-      {/* Sidebar Mobile (Drawer) */}
+      {/* Sidebar Mobile */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex">
           <aside className="w-64 bg-purple-700 text-white p-6">
@@ -101,18 +196,7 @@ export default function Sidebar() {
                 <FaTimes size={20} />
               </button>
             </div>
-            <nav className="flex flex-col gap-2">
-              {links.map((link, i) => (
-                <a
-                  key={i}
-                  href={link.href}
-                  className={linkClass(link.href)}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {link.icon} {link.label}
-                </a>
-              ))}
-            </nav>
+            {renderLinks()}
             <button
               onClick={handleLogout}
               className="mt-10 flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
@@ -120,7 +204,6 @@ export default function Sidebar() {
               <FaSignOutAlt /> Sair
             </button>
           </aside>
-          {/* Clique fora fecha o menu */}
           <div className="flex-1" onClick={() => setMenuOpen(false)}></div>
         </div>
       )}

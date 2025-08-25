@@ -16,12 +16,17 @@ export default function UserManagementPage() {
   // 🔹 Buscar usuários do Firestore
   useEffect(() => {
     const fetchUsers = async () => {
-      const querySnapshot = await getDocs(collection(db, "usuarios"));
-      const userList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUsers(userList);
+      try {
+        const querySnapshot = await getDocs(collection(db, "usuarios"));
+        const userList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,       // ID do Firestore
+          uid: doc.id,      // UID do Auth (assumindo que é igual ao docId)
+          ...doc.data(),
+        }));
+        setUsers(userList);
+      } catch (err) {
+        console.error("Erro ao buscar usuários:", err);
+      }
     };
     fetchUsers();
   }, []);
@@ -54,18 +59,28 @@ export default function UserManagementPage() {
         // Criação de usuário via backend
         const res = await fetch("/api/users/create-user", {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...userData, password: defaultPassword }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        setUsers([...users, { id: data.docId, uid: data.uid, ...userData }]);
+        // Adiciona novo usuário ao estado
+        setUsers((prev) => [
+          ...prev,
+          {
+            id: data.docId,
+            uid: data.uid,
+            ...userData,
+          },
+        ]);
       } else {
         // Atualiza usuário via backend (Auth + Firestore)
         const res = await fetch("/api/users/update-user", {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            uid: editingUser.id, // UID do Auth
+            uid: editingUser.uid, // UID do Auth
             docId: editingUser.id, // ID do Firestore
             ...userData,
           }),
@@ -73,6 +88,7 @@ export default function UserManagementPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
+        // Atualiza usuário no estado
         setUsers((prev) =>
           prev.map((u) =>
             u.id === editingUser.id ? { ...u, ...userData, uid: editingUser.uid } : u
@@ -90,17 +106,20 @@ export default function UserManagementPage() {
   // 🔹 Excluir usuário
   const handleDelete = async (uid) => {
     if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
+
     try {
       const res = await fetch("/api/users/delete-user", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      setUsers(users.filter((u) => u.uid !== uid));
+      setUsers((prev) => prev.filter((u) => u.uid !== uid));
     } catch (err) {
       alert("Erro ao excluir usuário: " + err.message);
+      console.error(err);
     }
   };
 
@@ -111,6 +130,7 @@ export default function UserManagementPage() {
     try {
       const res = await fetch("/api/users/reset-password", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid }),
       });
       const data = await res.json();
@@ -122,6 +142,7 @@ export default function UserManagementPage() {
       }
     } catch (err) {
       alert("Erro ao resetar senha: " + err.message);
+      console.error(err);
     }
   };
 
