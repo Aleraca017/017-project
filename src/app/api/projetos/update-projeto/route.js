@@ -26,6 +26,7 @@ export async function POST(req) {
     await updateDoc(projectRef, {
       titulo: body.titulo,
       descricao: body.descricao,
+      cliente: body.clienteNome,
       status: body.status,
       ...responsavelData,
       atualizadoEm: new Date(),

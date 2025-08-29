@@ -17,6 +17,7 @@ export async function POST(req) {
       titulo: body.titulo,
       descricao: body.descricao,
       status: body.status || "andamento",
+      cliente: body.clienteNome || "",
       responsavel: body.responsavel || "",
       responsavelNome: body.responsavelNome || "",
       responsavelEmail: body.responsavelEmail || "",
