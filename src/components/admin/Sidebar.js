@@ -5,9 +5,18 @@ import { useRouter, usePathname } from "next/navigation";
 import { signOut, onAuthStateChanged, getIdTokenResult } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { 
-  FaSignOutAlt, FaBars, FaTimes, FaUsers, FaProjectDiagram, 
-  FaFileAlt, FaTasks, FaCalendarAlt, FaUserAlt, FaChevronDown, FaChevronUp,
+import {
+  FaSignOutAlt,
+  FaBars,
+  FaTimes,
+  FaUsers,
+  FaProjectDiagram,
+  FaFileAlt,
+  FaTasks,
+  FaCalendarAlt,
+  FaUserAlt,
+  FaChevronDown,
+  FaChevronUp,
 } from "react-icons/fa";
 
 export default function Sidebar() {
@@ -28,21 +37,27 @@ export default function Sidebar() {
 
   // Pegar usuário logado, claims e dados do Firestore
   useEffect(() => {
+    console.log("Sidebar conectada no Firestore Project:", db._databaseId?.projectId);
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // claims
-        const tokenResult = await getIdTokenResult(user, true);
-        setIsAdmin(!!tokenResult.claims.admin);
+        try {
+          // claims
+          const tokenResult = await getIdTokenResult(user, true);
+          setIsAdmin(!!tokenResult.claims.admin);
 
-        // dados do Firestore
-        const userRef = doc(db, "usuarios", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          const nomeCompleto = data.nome || "Usuário";
-          setUserName(nomeCompleto.split(" ")[0]);
-          setUserFullName(nomeCompleto);
-          setUserImg(data.img || null);
+          // dados do Firestore
+          const userRef = doc(db, "usuarios", user.uid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+            const nomeCompleto = data.nome || "Usuário";
+            setUserName(nomeCompleto.split(" ")[0]);
+            setUserFullName(nomeCompleto);
+            setUserImg(data.img || null);
+          }
+        } catch (err) {
+          console.error("Erro ao buscar usuário no Sidebar:", err);
         }
       }
     });
@@ -59,16 +74,20 @@ export default function Sidebar() {
 
   // Links do Sidebar
   const links = [
-    ...(isAdmin ? [{
-      label: "Gerência",
-      icon: <FaCalendarAlt />,
-      subLinks: [
-        { label: "Usuários", href: "/admin/usuarios", icon: <FaUsers /> },
-        { label: "Reuniões", href: "/admin/reunioes", icon: <FaCalendarAlt /> },
-        { label: "Prazos", href: "/admin/prazos", icon: <FaTasks /> },
-        { label: "Clientes", href: "/admin/clientes", icon: <FaUserAlt /> },
-      ],
-    }] : []),
+    ...(isAdmin
+      ? [
+          {
+            label: "Gerência",
+            icon: <FaCalendarAlt />,
+            subLinks: [
+              { label: "Usuários", href: "/admin/usuarios", icon: <FaUsers /> },
+              { label: "Reuniões", href: "/admin/reunioes", icon: <FaCalendarAlt /> },
+              { label: "Prazos", href: "/admin/prazos", icon: <FaTasks /> },
+              { label: "Clientes", href: "/admin/clientes", icon: <FaUserAlt /> },
+            ],
+          },
+        ]
+      : []),
     {
       label: "Projetos",
       icon: <FaProjectDiagram />,
@@ -88,19 +107,21 @@ export default function Sidebar() {
 
   // Alterna a seção aberta
   const toggleSection = (label) => {
-    setOpenSection(prev => (prev === label ? "" : label));
+    setOpenSection((prev) => (prev === label ? "" : label));
   };
 
   const linkClass = (href) =>
     `flex items-center gap-2 p-2 rounded transition ${
-      pathname === href
+      pathname.startsWith(href)
         ? "bg-purple-600 font-semibold border-l-4 border-yellow-400"
         : "hover:bg-purple-600"
     }`;
 
   const renderLinks = () => {
     return links.map((section, idx) => {
-      const isActiveSection = section.subLinks.some(link => link.href === pathname);
+      const isActiveSection = section.subLinks.some((link) =>
+        pathname.startsWith(link.href)
+      );
       const isOpen = openSection === section.label || isActiveSection;
 
       return (
@@ -111,7 +132,9 @@ export default function Sidebar() {
               isActiveSection ? "bg-purple-600" : ""
             }`}
           >
-            <div className="flex items-center gap-2">{section.icon} {section.label}</div>
+            <div className="flex items-center gap-2">
+              {section.icon} {section.label}
+            </div>
             {isOpen ? <FaChevronUp /> : <FaChevronDown />}
           </button>
 
@@ -139,21 +162,24 @@ export default function Sidebar() {
       return (
         <img
           src={userImg}
-          className="w-15 h-15 rounded-full object-cover"
+          className="w-16 h-16 rounded-full object-cover"
           alt="Avatar do usuário"
-          onError={() => setUserImg(null)}
+          onError={(e) => {
+            e.currentTarget.onerror = null; // evita loop infinito
+            setUserImg(null);
+          }}
         />
       );
     } else {
       const initials = userFullName
         .split(" ")
         .slice(0, 2)
-        .map(n => n[0])
+        .map((n) => n[0])
         .join("")
         .toUpperCase();
 
       return (
-        <div className="w-15 h-15 rounded-full bg-yellow-400 text-purple-700 flex items-center justify-center font-bold text-xl">
+        <div className="w-16 h-16 rounded-full bg-yellow-400 text-purple-700 flex items-center justify-center font-bold text-xl">
           {initials}
         </div>
       );
