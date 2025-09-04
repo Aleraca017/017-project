@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { frame } from "framer-motion";
 
 export async function POST(req) {
   try {
@@ -30,6 +31,11 @@ export async function POST(req) {
       status: body.status,
       ...responsavelData,
       atualizadoEm: new Date(),
+      linguagem: body.linguagem || "",
+      framework: body.framework || "",
+      tecnologia: body.tecnologia || "",
+      autor: body.autor || "",
+      githubUrl: body.githubUrl || "",
     });
 
     return NextResponse.json({ success: true });

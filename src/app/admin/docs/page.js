@@ -116,26 +116,33 @@ export default function ProjectManagementPage() {
               <tr>
                 <th className="p-3 text-gray-700">Título</th>
                 <th className="p-3 text-gray-700">Descrição</th>
-                <th className="p-3 text-gray-700">Status</th>
+                <th className="p-3 text-gray-700">Documentação</th>
               </tr>
             </thead>
             <tbody>
-              {filteredProjects.map((p, index) => (
-                <tr
-                  key={p.id}
-                  className={`${index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"} hover:bg-gray-200 transition cursor-pointer`}
-                  onDoubleClick={() => loadReadme(p)}
-                >
-                  <td className="p-3 text-gray-800">{p.titulo || "-"}</td>
-                  <td className="p-3 text-gray-800">{p.descricao || "-"}</td>
-                  <td className="p-3">
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusColors[p.status] || "bg-gray-300 text-black"}`}>
-                      {p.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+  {filteredProjects.map((p, index) => (
+    <tr
+      key={p.id}
+      className={`${index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"} hover:bg-gray-200 transition cursor-pointer`}
+      onDoubleClick={() => loadReadme(p)}
+    >
+      <td className="p-3 text-gray-800">{p.titulo || "-"}</td>
+      <td className="p-3 text-gray-800">{p.descricao || "-"}</td>
+      <td className="p-3">
+        <span
+          className={`px-3 py-1 rounded-full text-sm font-semibold ${
+            p.githubUrl
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
+          }`}
+        >
+          {p.githubUrl ? "Com documentação" : "Sem documentação"}
+        </span>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
           </table>
         </div>
 

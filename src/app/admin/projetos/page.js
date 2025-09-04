@@ -174,6 +174,7 @@ export default function ProjectManagementPage() {
       framework: "",
       tecnologia: "",
       autor: "",
+      githubUrl: "",
     });
     setIsCreating(true);
     setShowModal(true);
@@ -197,6 +198,7 @@ export default function ProjectManagementPage() {
       framework: editingProject.framework,
       tecnologia: editingProject.tecnologia,
       autor: editingProject.autor,
+      githubUrl: editingProject.githubUrl,
     };
 
     try {
@@ -524,6 +526,18 @@ export default function ProjectManagementPage() {
                   type="text"
                   name="autor"
                   value={editingProject.autor || ""}
+                  onChange={handleChange}
+                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
+                />
+              </label>
+
+              {/* URL da doc no GitHub */}
+              <label className="block mb-4 text-gray-700">
+                URL da Documentação (GitHub)
+                <input
+                  type="text"
+                  name="githubUrl"
+                  value={editingProject.githubUrl || ""}
                   onChange={handleChange}
                   className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
                 />

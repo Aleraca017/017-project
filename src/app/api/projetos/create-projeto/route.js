@@ -22,6 +22,10 @@ export async function POST(req) {
       responsavelNome: body.responsavelNome || "",
       responsavelEmail: body.responsavelEmail || "",
       criadoEm: new Date(),
+      linguagem: body.linguagem || "",
+      framework: body.framework || "",
+      tecnologia: body.tecnologia || "",
+      autor: body.autor || "",
     });
 
     return NextResponse.json({ docId: docRef.id });
