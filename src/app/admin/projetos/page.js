@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/admin/Sidebar";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function ProjectManagementPage() {
@@ -14,8 +14,10 @@ export default function ProjectManagementPage() {
   const [showModal, setShowModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProject, setSelectedProject] = useState(null); // Modal de detalhes (duplo clique)
+  const [selectedProject, setSelectedProject] = useState(null);
   const [notification, setNotification] = useState({ message: "", type: "" });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Opções dependentes
   const languages = ["JavaScript", "Python", "PHP", "Java", "C#", "Ruby"];
@@ -36,7 +38,7 @@ export default function ProjectManagementPage() {
     Ruby: ["Rails", "Sinatra"],
   };
 
-  // Cores dos status (rótulos tipo "botão")
+  // Cores dos status
   const statusColors = {
     andamento: "bg-yellow-400 text-black",
     concluido: "bg-green-500 text-white",
@@ -54,54 +56,42 @@ export default function ProjectManagementPage() {
     Ruby: "bg-rose-100 text-rose-800 ring-rose-300",
   };
   const frameworkColors = {
-    // JS
     React: "bg-cyan-100 text-cyan-800 ring-cyan-300",
     Angular: "bg-red-100 text-red-800 ring-red-300",
     Vue: "bg-emerald-100 text-emerald-800 ring-emerald-300",
     "Vanilla JS": "bg-yellow-50 text-yellow-700 ring-yellow-200",
-    // Python
     Django: "bg-green-100 text-green-800 ring-green-300",
     Flask: "bg-slate-100 text-slate-800 ring-slate-300",
     FastAPI: "bg-teal-100 text-teal-800 ring-teal-300",
-    // PHP
     Laravel: "bg-red-50 text-red-700 ring-red-200",
     Symfony: "bg-stone-100 text-stone-800 ring-stone-300",
     CodeIgniter: "bg-amber-100 text-amber-800 ring-amber-300",
-    // Java
     Spring: "bg-lime-100 text-lime-800 ring-lime-300",
     JSF: "bg-gray-100 text-gray-800 ring-gray-300",
     Struts: "bg-zinc-100 text-zinc-800 ring-zinc-300",
-    // C#
     "ASP.NET": "bg-blue-50 text-blue-700 ring-blue-200",
     Blazor: "bg-purple-100 text-purple-800 ring-purple-300",
     Unity: "bg-black/5 text-black ring-black/20",
-    // Ruby
     Rails: "bg-rose-50 text-rose-700 ring-rose-200",
     Sinatra: "bg-pink-100 text-pink-800 ring-pink-300",
   };
   const technologyColors = {
-    // JS
     "Next.js": "bg-neutral-100 text-neutral-800 ring-neutral-300",
     "React Native": "bg-sky-100 text-sky-800 ring-sky-300",
     "Node.js": "bg-green-50 text-green-700 ring-green-200",
     "Vanilla JS": "bg-yellow-50 text-yellow-700 ring-yellow-200",
-    // Python
     NumPy: "bg-indigo-50 text-indigo-700 ring-indigo-200",
     Pandas: "bg-slate-50 text-slate-700 ring-slate-200",
     TensorFlow: "bg-orange-50 text-orange-700 ring-orange-200",
-    // PHP
     Composer: "bg-amber-50 text-amber-700 ring-amber-200",
     WordPress: "bg-blue-100 text-blue-800 ring-blue-300",
     Drupal: "bg-cyan-50 text-cyan-700 ring-cyan-200",
-    // Java
     "Spring Boot": "bg-lime-50 text-lime-700 ring-lime-200",
     Maven: "bg-red-100 text-red-800 ring-red-300",
     Jenkins: "bg-gray-50 text-gray-700 ring-gray-200",
-    // C#
     ".NET Core": "bg-violet-50 text-violet-700 ring-violet-200",
     Xamarin: "bg-blue-50 text-blue-700 ring-blue-200",
     "Unity Engine": "bg-black/5 text-black ring-black/20",
-    // Ruby
     Rails: "bg-rose-50 text-rose-700 ring-rose-200",
     Sinatra: "bg-pink-50 text-pink-700 ring-pink-200",
   };
@@ -115,39 +105,42 @@ export default function ProjectManagementPage() {
   const getTechBadge = (val) =>
     `${badgeBase} ${technologyColors[val] || "bg-gray-100 text-gray-800 ring-gray-300"}`;
 
-  // Notificação no topo
+  // Notificação
   const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification({ message: "", type: "" }), 3000);
   };
 
+  // Verifica claim admin do Firebase Auth
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        setCurrentUser(user);
+        const tokenResult = await user.getIdTokenResult();
+        setIsAdmin(!!tokenResult.claims.admin);
+      } else {
+        setCurrentUser(null);
+        setIsAdmin(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Buscar projetos, usuários e clientes
   useEffect(() => {
     const fetchProjects = async () => {
       const querySnapshot = await getDocs(collection(db, "projetos"));
-      const projectList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setProjects(projectList);
+      setProjects(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     };
 
     const fetchUsers = async () => {
       const querySnapshot = await getDocs(collection(db, "usuarios"));
-      const userList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUsers(userList);
+      setUsers(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     };
 
     const fetchClients = async () => {
       const querySnapshot = await getDocs(collection(db, "clientes"));
-      const clientList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setClients(clientList);
+      setClients(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     };
 
     fetchProjects();
@@ -155,15 +148,16 @@ export default function ProjectManagementPage() {
     fetchClients();
   }, []);
 
-  // Abrir modal de edição
+  // Funções de criação/edição/exclusão agora usam isAdmin
   const handleEditClick = (project) => {
+    if (!isAdmin) return showNotification("Apenas admins podem editar!", "error");
     setEditingProject(project);
     setIsCreating(false);
     setShowModal(true);
   };
 
-  // Abrir modal de criação
   const handleCreateClick = () => {
+    if (!isAdmin) return showNotification("Apenas admins podem criar!", "error");
     setEditingProject({
       titulo: "",
       descricao: "",
@@ -180,8 +174,9 @@ export default function ProjectManagementPage() {
     setShowModal(true);
   };
 
-  // Salvar (criar/editar) — usa suas rotas /api/*
   const handleSave = async () => {
+    if (!isAdmin) return showNotification("Apenas admins podem salvar!", "error");
+
     const user = users.find((u) => u.id === editingProject.responsavel);
     const client = clients.find((c) => c.id === editingProject.cliente);
 
@@ -232,8 +227,8 @@ export default function ProjectManagementPage() {
     }
   };
 
-  // Excluir
   const handleDelete = async (docId) => {
+    if (!isAdmin) return showNotification("Apenas admins podem excluir!", "error");
     if (!confirm("Tem certeza que deseja excluir este projeto?")) return;
     try {
       const res = await fetch("/api/projetos/delete-projeto", {
@@ -250,7 +245,6 @@ export default function ProjectManagementPage() {
     }
   };
 
-  // Mudança nos inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditingProject((prev) => ({
@@ -260,7 +254,6 @@ export default function ProjectManagementPage() {
     }));
   };
 
-  // Filtro de busca
   const filteredProjects = projects.filter((p) => {
     const term = searchTerm.toLowerCase();
     return (
@@ -321,16 +314,19 @@ export default function ProjectManagementPage() {
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead className="bg-gray-200">
-              <tr>
+              <tr className="">
                 <th className="p-3 text-gray-700">Título</th>
                 <th className="p-3 text-gray-700">Descrição</th>
                 <th className="p-3 text-gray-700">Status</th>
                 <th className="p-3 text-gray-700">Cliente</th>
                 <th className="p-3 text-gray-700">Responsável</th>
-                <th className="p-3 text-gray-700">Ações</th>
+                
+  {isAdmin && (
+  <th className="p-3 text-gray-700">Ações</th>
+  )}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="">
               {filteredProjects.map((p, index) => (
                 <tr
                   key={p.id}
@@ -360,20 +356,27 @@ export default function ProjectManagementPage() {
                       {p.responsavelNome || "-"}
                     </span>
                   </td>
-                  <td className="p-3 flex gap-2">
-                    <button
-                      onClick={() => handleEditClick(p)}
-                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
-                    >
-                      Excluir
-                    </button>
-                  </td>
+                  {/* Botões Editar/Excluir */}
+
+  {isAdmin && (
+    <td className="p-3 flex gap-2">
+    <>
+      <button
+        onClick={() => handleEditClick(p)}
+        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer"
+      >
+        Editar
+      </button>
+      <button
+        onClick={() => handleDelete(p.id)}
+        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
+      >
+        Excluir
+      </button>
+    </>
+    </td>
+  )}
+
                 </tr>
               ))}
             </tbody>
