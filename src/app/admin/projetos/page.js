@@ -6,6 +6,21 @@ import { collection, getDocs } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 
+//shaicn
+  import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+
 export default function ProjectManagementPage() {
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
@@ -18,6 +33,9 @@ export default function ProjectManagementPage() {
   const [notification, setNotification] = useState({ message: "", type: "" });
   const [currentUser, setCurrentUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+
+
+  
 
   // Opções dependentes
   const languages = ["JavaScript", "Python", "PHP", "Java", "C#", "Ruby"];
@@ -384,264 +402,148 @@ export default function ProjectManagementPage() {
         </div>
 
         {/* Modal de criação/edição */}
-        {showModal && editingProject && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 border">
-              <h2 className="text-xl font-bold mb-4 text-gray-800">
-                {isCreating ? "Criar Projeto" : "Editar Projeto"}
-              </h2>
+        <Dialog open={showModal} onOpenChange={setShowModal}>
+  <DialogContent className="max-w-lg">
+    <DialogHeader>
+      <DialogTitle>
+        {isCreating ? "Criar Projeto" : "Editar Projeto"}
+      </DialogTitle>
+      <DialogDescription>
+        Preencha os dados do projeto e salve.
+      </DialogDescription>
+    </DialogHeader>
 
-              {/* Responsável */}
-              <label className="block mb-2 text-gray-700">
-                Responsável
-                <select
-                  name="responsavel"
-                  value={editingProject.responsavel || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                >
-                  <option value="">Selecione um responsável</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.nome} ({u.email})
-                    </option>
-                  ))}
-                </select>
-              </label>
+    {/* Responsável */}
+    <div className="space-y-4 py-2">
+      <label className="text-sm font-medium">Responsável</label>
+      <Select
+        value={editingProject?.responsavel || ""}
+        onValueChange={(val) => setEditingProject(prev => ({ ...prev, responsavel: val }))}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Selecione um responsável" />
+        </SelectTrigger>
+        <SelectContent>
+          {users.map((u) => (
+            <SelectItem key={u.id} value={u.id}>
+              {u.nome} ({u.email})
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
 
-              {/* Cliente */}
-              <label className="block mb-2 text-gray-700">
-                Cliente
-                <select
-                  name="cliente"
-                  value={editingProject.cliente || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-green-600 outline-none"
-                >
-                  <option value="">Selecione um cliente</option>
-                  {clients.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nome || c.empresa}
-                    </option>
-                  ))}
-                </select>
-              </label>
+    {/* Cliente */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium">Cliente</label>
+      <Select
+        value={editingProject?.cliente || ""}
+        onValueChange={(val) => setEditingProject(prev => ({ ...prev, cliente: val }))}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Selecione um cliente" />
+        </SelectTrigger>
+        <SelectContent>
+          {clients.map((c) => (
+            <SelectItem key={c.id} value={c.id}>
+              {c.nome || c.empresa}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
 
-              {/* Título */}
-              <label className="block mb-2 text-gray-700">
-                Título
-                <input
-                  type="text"
-                  name="titulo"
-                  value={editingProject.titulo || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                />
-              </label>
+    {/* Título */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium">Título</label>
+      <Input
+        value={editingProject?.titulo || ""}
+        onChange={(e) => setEditingProject(prev => ({ ...prev, titulo: e.target.value }))}
+      />
+    </div>
 
-              {/* Descrição */}
-              <label className="block mb-2 text-gray-700">
-                Descrição
-                <textarea
-                  name="descricao"
-                  value={editingProject.descricao || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                />
-              </label>
+    {/* Descrição */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium">Descrição</label>
+      <Textarea
+        value={editingProject?.descricao || ""}
+        onChange={(e) => setEditingProject(prev => ({ ...prev, descricao: e.target.value }))}
+      />
+    </div>
 
-              {/* Status */}
-              <label className="block mb-2 text-gray-700">
-                Status
-                <select
-                  name="status"
-                  value={editingProject.status || "andamento"}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                >
-                  <option value="andamento">Em andamento</option>
-                  <option value="concluido">Concluído</option>
-                  <option value="cancelado">Cancelado</option>
-                  <option value="tratativa">Em tratativa</option>
-                </select>
-              </label>
+    {/* Status */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium">Status</label>
+      <Select
+        value={editingProject?.status || "andamento"}
+        onValueChange={(val) => setEditingProject(prev => ({ ...prev, status: val }))}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Selecione um status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="andamento">Em andamento</SelectItem>
+          <SelectItem value="concluido">Concluído</SelectItem>
+          <SelectItem value="cancelado">Cancelado</SelectItem>
+          <SelectItem value="tratativa">Em tratativa</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
 
-              {/* Linguagem */}
-              <label className="block mb-2 text-gray-700">
-                Linguagem
-                <select
-                  name="linguagem"
-                  value={editingProject.linguagem || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                >
-                  <option value="">Selecione uma linguagem</option>
-                  {languages.map((lang) => (
-                    <option key={lang} value={lang}>
-                      {lang}
-                    </option>
-                  ))}
-                </select>
-              </label>
+    {/* Autor */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium">Autor</label>
+      <Input
+        value={editingProject?.autor || ""}
+        onChange={(e) => setEditingProject(prev => ({ ...prev, autor: e.target.value }))}
+      />
+    </div>
 
-              {/* Framework */}
-              <label className="block mb-2 text-gray-700">
-                Framework
-                <select
-                  name="framework"
-                  value={editingProject.framework || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                  disabled={!editingProject.linguagem}
-                >
-                  <option value="">Selecione um framework</option>
-                  {frameworksMap[editingProject.linguagem]?.map((f) => (
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  ))}
-                </select>
-              </label>
+    {/* GitHub URL */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium">URL da Documentação (GitHub)</label>
+      <Input
+        value={editingProject?.githubUrl || ""}
+        onChange={(e) => setEditingProject(prev => ({ ...prev, githubUrl: e.target.value }))}
+      />
+    </div>
 
-              {/* Tecnologia */}
-              <label className="block mb-2 text-gray-700">
-                Tecnologia
-                <select
-                  name="tecnologia"
-                  value={editingProject.tecnologia || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                  disabled={!editingProject.linguagem}
-                >
-                  <option value="">Selecione uma tecnologia</option>
-                  {technologiesMap[editingProject.linguagem]?.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </label>
+    <DialogFooter>
+      <Button variant="destructive" onClick={() => setShowModal(false)}>
+        Cancelar
+      </Button>
+      <Button onClick={handleSave}>
+        {isCreating ? "Criar" : "Salvar"}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
 
-              {/* Autor */}
-              <label className="block mb-4 text-gray-700">
-                Autor
-                <input
-                  type="text"
-                  name="autor"
-                  value={editingProject.autor || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                />
-              </label>
-
-              {/* URL da doc no GitHub */}
-              <label className="block mb-4 text-gray-700">
-                URL da Documentação (GitHub)
-                <input
-                  type="text"
-                  name="githubUrl"
-                  value={editingProject.githubUrl || ""}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                />
-              </label>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-red-600 rounded hover:bg-red-700 transition cursor-pointer text-white"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 cursor-pointer transition"
-                >
-                  {isCreating ? "Criar" : "Salvar"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Modal de detalhes (abre com duplo clique) */}
-        {selectedProject && (
-          <div
-            className="fixed inset-0 flex items-center justify-center bg-black/85 z-50 text-black"
-            onClick={() => setSelectedProject(null)}
-          >
-            <div
-              className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 border"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-3xl font-bold mb-4 text-purple-800 text-center">
-                Detalhes do Projeto
-              </h2>
+        <Dialog open={!!selectedProject} onOpenChange={() => setSelectedProject(null)}>
+  <DialogContent className="max-w-lg">
+    <DialogHeader>
+      <DialogTitle>Detalhes do Projeto</DialogTitle>
+    </DialogHeader>
 
-              <p className="mb-2">
-                <strong>Título:</strong> {selectedProject.titulo || "-"}
-              </p>
-              <p className="mb-2">
-                <strong>Descrição:</strong> {selectedProject.descricao || "-"}
-              </p>
-              <p className="flex items-center gap-2 mb-2">
-                <strong>Status:</strong>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    statusColors[selectedProject.status] || "bg-gray-300 text-black"
-                  }`}
-                >
-                  {selectedProject.status}
-                </span>
-              </p>
-              <p className="flex items-center gap-2 mb-2">
-                <strong>Cliente:</strong>
-                <span className="px-2 py-1 rounded-full bg-green-200 text-green-800 text-sm">
-                  {selectedProject.cliente || "-"}
-                </span>
-              </p>
-              <p className="flex items-center gap-2 mb-2">
-                <strong>Responsável:</strong>
-                <span className="px-2 py-1 rounded-full bg-purple-200 text-purple-800 text-sm">
-                  {selectedProject.responsavelNome || "-"}
-                </span>
-              </p>
+    {selectedProject && (
+      <div className="space-y-3">
+        <p><strong>Título:</strong> {selectedProject.titulo || "-"}</p>
+        <p><strong>Descrição:</strong> {selectedProject.descricao || "-"}</p>
+        <p><strong>Status:</strong> {selectedProject.status}</p>
+        <p><strong>Cliente:</strong> {selectedProject.clienteNome || "-"}</p>
+        <p><strong>Responsável:</strong> {selectedProject.responsavelNome || "-"}</p>
+        <p><strong>Autor:</strong> {selectedProject.autor || "-"}</p>
+      </div>
+    )}
 
-              <hr className="my-4" />
-
-              <div className="flex flex-wrap gap-2">
-                {selectedProject.linguagem && (
-                  <span className={getLangBadge(selectedProject.linguagem)}>
-                    {selectedProject.linguagem}
-                  </span>
-                )}
-                {selectedProject.framework && (
-                  <span className={getFrameworkBadge(selectedProject.framework)}>
-                    {selectedProject.framework}
-                  </span>
-                )}
-                {selectedProject.tecnologia && (
-                  <span className={getTechBadge(selectedProject.tecnologia)}>
-                    {selectedProject.tecnologia}
-                  </span>
-                )}
-              </div>
-
-              <p className="mt-3">
-                <strong>Autor:</strong> {selectedProject.autor || "-"}
-              </p>
-
-              <div className="flex justify-end mt-6">
-                <button
-                  onClick={() => setSelectedProject(null)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition cursor-pointer"
-                >
-                  Fechar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+    <DialogFooter>
+      <Button onClick={() => setSelectedProject(null)}>Fechar</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+    
       </main>
     </div>
   );

@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { dbSolicitacoes } from "@/lib/firebase-solicitacoes";
 import Sidebar from "@/components/admin/Sidebar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export default function SolicitacoesPage() {
   const [solicitacoes, setSolicitacoes] = useState([]);
@@ -49,10 +58,14 @@ export default function SolicitacoesPage() {
   const formatDate = (str) => {
     if (!str) return "-";
     const d = new Date(str);
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()} - ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}/${d.getFullYear()} - ${String(d.getHours()).padStart(2, "0")}:${String(
+      d.getMinutes()
+    ).padStart(2, "0")}`;
   };
 
-  // Função unificada para atualizar status
   const atualizarStatus = async (id, novoStatus, emailAutor, cancelReason = "") => {
     try {
       const res = await fetch("/api/solicitacoes/set-tratativa", {
@@ -100,7 +113,9 @@ export default function SolicitacoesPage() {
               >
                 <div className="flex justify-between items-center mb-2 text-black">
                   <span className="font-bold">{sol.aplicação || "-"}</span>
-                  <span className={`text-white px-2 py-1 rounded ${statusColors[sol.status] || "bg-gray-400"}`}>
+                  <span
+                    className={`text-white px-2 py-1 rounded ${statusColors[sol.status] || "bg-gray-400"}`}
+                  >
                     {sol.status || "-"}
                   </span>
                 </div>
@@ -113,98 +128,102 @@ export default function SolicitacoesPage() {
           <p>Nenhuma solicitação encontrada.</p>
         )}
 
-        {/* Modal */}
-        {selectedSolicitacao && (
-          <div
-            className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
-            onClick={() => setSelectedSolicitacao(null)}
-          >
-            <div
-              className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 text-purple-950"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-xl font-bold">{selectedSolicitacao.aplicação}</h2>
-                <span className={`text-white px-2 py-1 rounded ${statusColors[selectedSolicitacao.status] || "bg-gray-400"}`}>
-                  {selectedSolicitacao.status}
-                </span>
-              </div>
-              <p className="text-gray-500">{selectedSolicitacao.emailAutor} - {formatDate(selectedSolicitacao.data)}</p>
-              <hr className="my-3" />
-              <p><strong>Assunto:</strong> {selectedSolicitacao.assunto || "-"}</p>
-              <p><strong>Detalhamento:</strong> {selectedSolicitacao.detalhamento || "-"}</p>
-              <p><strong>Mensagem:</strong> {selectedSolicitacao.mensagem || "-"}</p>
-              <hr className="my-3" />
-              <p><strong>Linguagem:</strong> {selectedSolicitacao.linguagem || "-"}</p>
-              <p><strong>Framework:</strong> {selectedSolicitacao.framework || "-"}</p>
-              <p><strong>Tecnologia:</strong> {selectedSolicitacao.tecnologia || "-"}</p>
-              <p><strong>Rotas:</strong> {selectedSolicitacao.rotas || "-"}</p>
+        {/* Modal usando shadcn/ui Dialog */}
+        <Dialog open={!!selectedSolicitacao} onOpenChange={() => setSelectedSolicitacao(null)}>
+          <DialogContent className="max-w-lg">
+            {selectedSolicitacao && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>{selectedSolicitacao.aplicação}</DialogTitle>
+                  <DialogDescription className="flex justify-between">
+                    <span className={`text-white px-2 py-1 rounded ${statusColors[selectedSolicitacao.status]}`}>
+                      {selectedSolicitacao.status}
+                    </span>
+                    <span>{selectedSolicitacao.emailAutor} - {formatDate(selectedSolicitacao.data)}</span>
+                  </DialogDescription>
+                </DialogHeader>
 
-              {/* Botões e input de cancelamento */}
-              <div className="flex flex-col gap-2 mt-4">
-                <div className="flex justify-end gap-2">
-                  {selectedSolicitacao.status === "pendente" && (
-                    <button
-                      onClick={() => atualizarStatus(selectedSolicitacao.id, "em tratativa", selectedSolicitacao.emailAutor)}
-                      className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
-                    >
-                      Colocar em tratativa
-                    </button>
-                  )}
+                <div className="mt-2 space-y-2 text-black">
+                  <p><strong>Assunto:</strong> {selectedSolicitacao.assunto || "-"}</p>
+                  <p><strong>Detalhamento:</strong> {selectedSolicitacao.detalhamento || "-"}</p>
+                  <p><strong>Mensagem:</strong> {selectedSolicitacao.mensagem || "-"}</p>
+                  <p><strong>Linguagem:</strong> {selectedSolicitacao.linguagem || "-"}</p>
+                  <p><strong>Framework:</strong> {selectedSolicitacao.framework || "-"}</p>
+                  <p><strong>Tecnologia:</strong> {selectedSolicitacao.tecnologia || "-"}</p>
+                  <p><strong>Rotas:</strong> {selectedSolicitacao.rotas || "-"}</p>
 
-                  {selectedSolicitacao.status === "em tratativa" && (
-                    <>
-                      <button
-                        onClick={() => atualizarStatus(selectedSolicitacao.id, "concluido", selectedSolicitacao.emailAutor)}
-                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-                      >
-                        Concluir
-                      </button>
-                      <button
-                        onClick={() => setShowCancelInput(!showCancelInput)}
-                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                      >
-                        Cancelar
-                      </button>
-                    </>
-                  )}
+                  {/* Botões e input de cancelamento */}
+                  <div className="flex flex-col gap-2 mt-4">
+                    <div className="flex justify-end gap-2">
+                      {selectedSolicitacao.status === "pendente" && (
+                        <Button
+                          variant="yellow"
+                          onClick={() =>
+                            atualizarStatus(selectedSolicitacao.id, "em tratativa", selectedSolicitacao.emailAutor)
+                          }
+                        >
+                          Colocar em tratativa
+                        </Button>
+                      )}
 
-                  <button
-                    onClick={() => setSelectedSolicitacao(null)}
-                    className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition"
-                  >
-                    Fechar
-                  </button>
-                </div>
+                      {selectedSolicitacao.status === "em tratativa" && (
+                        <>
+                          <Button
+                            variant="green"
+                            className={"bg-green-500 text-white hover:bg-green-600 hover:scale-105 hover:cursor-pointer transition-all"}
+                            onClick={() =>
+                              atualizarStatus(selectedSolicitacao.id, "concluido", selectedSolicitacao.emailAutor)
+                            }
+                          >
+                            Concluir
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            className={"bg-red-500 text-white hover:bg-red-600 hover:scale-105 hover:cursor-pointer transition-all"}
+                            onClick={() => setShowCancelInput(!showCancelInput)}
+                          >
+                            Cancelar
+                          </Button>
+                        </>
+                      )}
 
-                {showCancelInput && (
-                  <div className="flex flex-col gap-2 mt-2">
-                    <input
-                      type="text"
-                      placeholder="Motivo do cancelamento"
-                      className="w-full border p-2 rounded"
-                      value={cancelReason}
-                      onChange={(e) => setCancelReason(e.target.value)}
-                    />
-                    <button
-                      onClick={() =>
-                        atualizarStatus(
-                          selectedSolicitacao.id,
-                          "cancelado",
-                          selectedSolicitacao.emailAutor,
-                          cancelReason
-                        )
-                      }
-                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                    >
-                      Enviar cancelamento
-                    </button>
+                      <Button variant="outline" 
+                      className={"bg-gray-500 text-white hover:bg-gray-600 hover:scale-105 hover:text-white hover:cursor-pointer transition-all"}
+                      onClick={() => setSelectedSolicitacao(null)}>
+                        Fechar
+                      </Button>
+                    </div>
+
+                    {showCancelInput && (
+                      <div className="flex flex-col gap-2 mt-2">
+                        <input
+                          type="text"
+                          placeholder="Motivo do cancelamento"
+                          className="w-full border p-2 rounded"
+                          value={cancelReason}
+                          onChange={(e) => setCancelReason(e.target.value)}
+                        />
+                        <Button
+                          variant="destructive"
+                          onClick={() =>
+                            atualizarStatus(
+                              selectedSolicitacao.id,
+                              "cancelado",
+                              selectedSolicitacao.emailAutor,
+                              cancelReason
+                            )
+                          }
+                        >
+                          Enviar cancelamento
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Notificação */}
         {notification.message && (
