@@ -26,6 +26,8 @@ export async function POST(req) {
       framework: body.framework || "",
       tecnologia: body.tecnologia || "",
       autor: body.autor || "",
+      tipo: body.tipo || "", // novo campo: tipo de projeto
+      dataEntrega: body.dataEntrega ? new Date(body.dataEntrega) : null, // novo campo: data de entrega
     });
 
     return NextResponse.json({ docId: docRef.id });

@@ -6,7 +6,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
 
-//shaicn
+//shadcn
   import {
   Dialog,
   DialogContent,
@@ -17,6 +17,17 @@ import { motion, AnimatePresence } from "framer-motion";
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+//calendario
+import { Label } from "@/components/ui/label";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -187,6 +198,8 @@ export default function ProjectManagementPage() {
       tecnologia: "",
       autor: "",
       githubUrl: "",
+      tipo: editingProject.tipo || "",
+      dataEntrega: editingProject.dataEntrega || "",
     });
     setIsCreating(true);
     setShowModal(true);
@@ -405,116 +418,159 @@ export default function ProjectManagementPage() {
         <Dialog open={showModal} onOpenChange={setShowModal}>
   <DialogContent className="max-w-lg">
     <DialogHeader>
-      <DialogTitle>
-        {isCreating ? "Criar Projeto" : "Editar Projeto"}
-      </DialogTitle>
-      <DialogDescription>
-        Preencha os dados do projeto e salve.
-      </DialogDescription>
+      <DialogTitle>{isCreating ? "Criar Projeto" : "Editar Projeto"}</DialogTitle>
+      <DialogDescription>Preencha os dados do projeto e salve.</DialogDescription>
     </DialogHeader>
 
-    {/* Responsável */}
     <div className="space-y-4 py-2">
-      <label className="text-sm font-medium">Responsável</label>
-      <Select
-        value={editingProject?.responsavel || ""}
-        onValueChange={(val) => setEditingProject(prev => ({ ...prev, responsavel: val }))}
+      {/* Responsável */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Responsável</label>
+        <Select
+          value={editingProject?.responsavel || ""}
+          onValueChange={(val) => setEditingProject(prev => ({ ...prev, responsavel: val }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione um responsável" />
+          </SelectTrigger>
+          <SelectContent>
+            {users.map((u) => (
+              <SelectItem key={u.id} value={u.id}>
+                {u.nome} ({u.email})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Cliente */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Cliente</label>
+        <Select
+          value={editingProject?.cliente || ""}
+          onValueChange={(val) => setEditingProject(prev => ({ ...prev, cliente: val }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione um cliente" />
+          </SelectTrigger>
+          <SelectContent>
+            {clients.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.nome || c.empresa}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Título */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Título</label>
+        <Input
+          value={editingProject?.titulo || ""}
+          onChange={(e) => setEditingProject(prev => ({ ...prev, titulo: e.target.value }))}
+        />
+      </div>
+
+      {/* Descrição */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Descrição</label>
+        <Textarea
+          value={editingProject?.descricao || ""}
+          onChange={(e) => setEditingProject(prev => ({ ...prev, descricao: e.target.value }))}
+        />
+      </div>
+
+      {/* Status */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Status</label>
+        <Select
+          value={editingProject?.status || "andamento"}
+          onValueChange={(val) => setEditingProject(prev => ({ ...prev, status: val }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione um status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="andamento">Em andamento</SelectItem>
+            <SelectItem value="concluido">Concluído</SelectItem>
+            <SelectItem value="cancelado">Cancelado</SelectItem>
+            <SelectItem value="tratativa">Em tratativa</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Tipo de projeto */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Tipo de Projeto</label>
+        <Select
+          value={editingProject?.tipo || ""}
+          onValueChange={(val) => setEditingProject(prev => ({ ...prev, tipo: val }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o tipo de projeto" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="fixo">Fixo</SelectItem>
+            <SelectItem value="recorrente">Recorrente</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Data de entrega */}
+      <div className="space-y-2">
+  <Label>Data de Entrega</Label>
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button
+        variant="outline"
+        className="w-full justify-start text-left"
       >
-        <SelectTrigger>
-          <SelectValue placeholder="Selecione um responsável" />
-        </SelectTrigger>
-        <SelectContent>
-          {users.map((u) => (
-            <SelectItem key={u.id} value={u.id}>
-              {u.nome} ({u.email})
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-
-    {/* Cliente */}
-    <div className="space-y-2">
-      <label className="text-sm font-medium">Cliente</label>
-      <Select
-        value={editingProject?.cliente || ""}
-        onValueChange={(val) => setEditingProject(prev => ({ ...prev, cliente: val }))}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Selecione um cliente" />
-        </SelectTrigger>
-        <SelectContent>
-          {clients.map((c) => (
-            <SelectItem key={c.id} value={c.id}>
-              {c.nome || c.empresa}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-
-    {/* Título */}
-    <div className="space-y-2">
-      <label className="text-sm font-medium">Título</label>
-      <Input
-        value={editingProject?.titulo || ""}
-        onChange={(e) => setEditingProject(prev => ({ ...prev, titulo: e.target.value }))}
+        {editingProject?.dataEntrega
+          ? format(new Date(editingProject.dataEntrega), "dd/MM/yyyy")
+          : "Selecione a data"}
+        <CalendarIcon className="ml-auto h-4 w-4" />
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-auto p-0">
+      <Calendar
+        mode="single"
+        selected={editingProject?.dataEntrega ? new Date(editingProject.dataEntrega) : undefined}
+        onSelect={(date) =>
+          setEditingProject(prev => ({
+            ...prev,
+            dataEntrega: date ? date.toISOString().split("T")[0] : "",
+          }))
+        }
       />
-    </div>
+    </PopoverContent>
+  </Popover>
+</div>
 
-    {/* Descrição */}
-    <div className="space-y-2">
-      <label className="text-sm font-medium">Descrição</label>
-      <Textarea
-        value={editingProject?.descricao || ""}
-        onChange={(e) => setEditingProject(prev => ({ ...prev, descricao: e.target.value }))}
-      />
-    </div>
+      {/* Autor */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Autor</label>
+        <Input
+          value={editingProject?.autor || ""}
+          onChange={(e) => setEditingProject(prev => ({ ...prev, autor: e.target.value }))}
+        />
+      </div>
 
-    {/* Status */}
-    <div className="space-y-2">
-      <label className="text-sm font-medium">Status</label>
-      <Select
-        value={editingProject?.status || "andamento"}
-        onValueChange={(val) => setEditingProject(prev => ({ ...prev, status: val }))}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Selecione um status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="andamento">Em andamento</SelectItem>
-          <SelectItem value="concluido">Concluído</SelectItem>
-          <SelectItem value="cancelado">Cancelado</SelectItem>
-          <SelectItem value="tratativa">Em tratativa</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-
-    {/* Autor */}
-    <div className="space-y-2">
-      <label className="text-sm font-medium">Autor</label>
-      <Input
-        value={editingProject?.autor || ""}
-        onChange={(e) => setEditingProject(prev => ({ ...prev, autor: e.target.value }))}
-      />
-    </div>
-
-    {/* GitHub URL */}
-    <div className="space-y-2">
-      <label className="text-sm font-medium">URL da Documentação (GitHub)</label>
-      <Input
-        value={editingProject?.githubUrl || ""}
-        onChange={(e) => setEditingProject(prev => ({ ...prev, githubUrl: e.target.value }))}
-      />
+      {/* GitHub URL */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">URL da Documentação (GitHub)</label>
+        <Input
+          value={editingProject?.githubUrl || ""}
+          onChange={(e) => setEditingProject(prev => ({ ...prev, githubUrl: e.target.value }))}
+        />
+      </div>
     </div>
 
     <DialogFooter>
       <Button variant="destructive" onClick={() => setShowModal(false)}>
         Cancelar
       </Button>
-      <Button onClick={handleSave}>
-        {isCreating ? "Criar" : "Salvar"}
-      </Button>
+      <Button onClick={handleSave}>{isCreating ? "Criar" : "Salvar"}</Button>
     </DialogFooter>
   </DialogContent>
 </Dialog>

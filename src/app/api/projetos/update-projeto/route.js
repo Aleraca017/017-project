@@ -10,6 +10,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "ID do projeto é obrigatório." }, { status: 400 });
     }
 
+    // Buscar dados do responsável
     let responsavelData = {};
     if (body.responsavel) {
       const userRef = doc(db, "usuarios", body.responsavel);
@@ -26,7 +27,7 @@ export async function POST(req) {
     await updateDoc(projectRef, {
       titulo: body.titulo,
       descricao: body.descricao,
-      cliente: body.clienteNome,
+      cliente: body.clienteNome || "",
       status: body.status,
       ...responsavelData,
       atualizadoEm: new Date(),
@@ -35,6 +36,8 @@ export async function POST(req) {
       tecnologia: body.tecnologia || "",
       autor: body.autor || "",
       githubUrl: body.githubUrl || "",
+      tipo: body.tipo || "", // novo campo: tipo de projeto
+      dataEntrega: body.dataEntrega ? new Date(body.dataEntrega) : null, // novo campo: data de entrega
     });
 
     return NextResponse.json({ success: true });
