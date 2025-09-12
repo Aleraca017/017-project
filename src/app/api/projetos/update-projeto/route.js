@@ -24,11 +24,13 @@ export async function POST(req) {
     }
 
     const projectRef = doc(db, "projetos", body.docId);
+
+    // Atualizar projeto
     await updateDoc(projectRef, {
-      titulo: body.titulo,
-      descricao: body.descricao,
-      cliente: body.clienteNome || "",
-      status: body.status,
+      titulo: body.titulo || "",
+      descricao: body.descricao || "",
+      cliente: body.cliente || "",
+      status: body.status || "andamento",
       ...responsavelData,
       atualizadoEm: new Date(),
       linguagem: body.linguagem || "",
@@ -36,8 +38,8 @@ export async function POST(req) {
       tecnologia: body.tecnologia || "",
       autor: body.autor || "",
       githubUrl: body.githubUrl || "",
-      tipo: body.tipo || "", // novo campo: tipo de projeto
-      dataEntrega: body.dataEntrega ? new Date(body.dataEntrega) : null, // novo campo: data de entrega
+      tipo: body.tipo || "",
+      dataEntrega: body.dataEntrega ? new Date(body.dataEntrega) : null,
     });
 
     return NextResponse.json({ success: true });
