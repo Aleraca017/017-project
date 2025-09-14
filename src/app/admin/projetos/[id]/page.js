@@ -32,6 +32,8 @@ export default function ProjetoPage() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   const languages = ["JavaScript", "Python", "PHP", "Java", "C#", "Ruby"];
+  const projectTypes = ["Fixo", "Recorrente"]; // <- tipos dinâmicos controlados aqui
+
   const frameworksMap = {
     JavaScript: ["React", "Angular", "Vue", "Vanilla JS"],
     Python: ["Django", "Flask", "FastAPI"],
@@ -131,14 +133,14 @@ export default function ProjetoPage() {
         setProjeto(data);
         setEditingProject({
           ...data,
-          linguagem: data.linguagem ? data.linguagem.split(",") : [],
-          framework: data.framework ? data.framework.split(",") : [],
-          tecnologia: data.tecnologia ? data.tecnologia.split(",") : [],
+          tipo: data.tipo || "",
+          linguagem: data.linguagem || "",
+          framework: data.framework || "",
+          tecnologia: data.tecnologia || "",
         });
 
-        const langs = data.linguagem ? data.linguagem.split(",") : [];
-        setAvailableFrameworks([...new Set(langs.flatMap((l) => frameworksMap[l] || []))]);
-        setAvailableTechnologies([...new Set(langs.flatMap((l) => technologiesMap[l] || []))]);
+        setAvailableFrameworks(frameworksMap[data.linguagem] || []);
+        setAvailableTechnologies(technologiesMap[data.linguagem] || []);
       }
     };
 
@@ -174,9 +176,10 @@ export default function ProjetoPage() {
       const bodyToSend = {
         ...editingProject,
         docId: editingProject.id,
-         linguagem: editingProject.linguagem,
-         framework: editingProject.framework,
-         tecnologia: editingProject.tecnologia,
+        tipo: editingProject.tipo || "",
+        linguagem: editingProject.linguagem || "",
+        framework: editingProject.framework || "",
+        tecnologia: editingProject.tecnologia || "",
       };
       const res = await fetch("/api/projetos/update-projeto", {
         method: "POST",
@@ -197,22 +200,30 @@ export default function ProjetoPage() {
   return (
     <div className="flex">
       <Sidebar />
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 bg-zinc-950 text-white min-h-screen">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Detalhes do Projeto</h1>
           {isAdmin && (
             <div className="flex gap-2">
               <Button
                 onClick={() => {
-                  if (isEditing)
+                  if (isEditing) {
+                    // cancelar → volta para dados originais
                     setEditingProject({
-  ...data,
-  // manter como string
-  linguagem: data.linguagem || "",
-  framework: data.framework || "",
-  tecnologia: data.tecnologia || "",
-});
-
+                      ...projeto,
+                      linguagem: projeto.linguagem || "",
+                      framework: projeto.framework || "",
+                      tecnologia: projeto.tecnologia || "",
+                    });
+                  } else {
+                    // editar → prepara para edição
+                    setEditingProject({
+                      ...projeto,
+                      linguagem: projeto.linguagem || "",
+                      framework: projeto.framework || "",
+                      tecnologia: projeto.tecnologia || "",
+                    });
+                  }
                   setIsEditing(!isEditing);
                 }}
               >
@@ -223,306 +234,316 @@ export default function ProjetoPage() {
           )}
         </div>
 
-        <Card className="w-full h-full shadow-lg overflow-auto p-4 space-y-6">
-          <Card className="w-full h-full shadow-lg overflow-auto p-4 space-y-6">
-  {/* Administrativo */}
-  <div className="p-4 bg-gray-50 rounded-md shadow-md space-y-4">
-    <CardTitle className="text-lg font-semibold">Administrativo</CardTitle>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* Responsável */}
-      <div>
-        <Label>Responsável</Label>
-        {isEditing ? (
-          <Select
-            value={editingProject.responsavel || ""}
-            onValueChange={(val) =>
-              setEditingProject((prev) => ({ ...prev, responsavel: val }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione um responsável" />
-            </SelectTrigger>
-            <SelectContent>
-              {users.map((u) => (
-                <SelectItem key={u.id} value={u.id}>
-                  {u.nome} ({u.email})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <div className="p-2 bg-white rounded-md shadow-sm">
-            <p className="font-medium">{getUserName(projeto.responsavel)}</p>
+        <Card className="bg-zinc-900 border-0 w-full h-210 shadow-lg overflow-auto p-4 space-y-6">
+          {/* Administrativo */}
+          <div className="p-4 bg-zinc-950 text-white rounded-md shadow-md space-y-4">
+            <CardTitle className="text-lg font-semibold">Administrativo</CardTitle>
+            <hr className="border-zinc-800" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Responsável */}
+              <div>
+                <Label className="mb-2">Responsável</Label>
+                {isEditing ? (
+                  <Select
+                    value={editingProject.responsavel || ""}
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({ ...prev, responsavel: val }))
+                    }
+                  >
+                    <SelectTrigger className="text-black bg-gray-50 w-full">
+                      <SelectValue placeholder="Selecione um responsável" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.nome} ({u.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="p-2 bg-zinc-900 rounded-md shadow-sm">
+                    <p className="font-medium">{getUserName(projeto.responsavel)}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Autor */}
+              <div>
+                <Label className="mb-2">Autor</Label>
+                {isEditing ? (
+                  <Input
+                    className="text-black bg-gray-50 w-full"
+                    value={editingProject.autor || ""}
+                    onChange={(e) =>
+                      setEditingProject((prev) => ({ ...prev, autor: e.target.value }))
+                    }
+                  />
+                ) : (
+                  <div className="p-2 bg-zinc-900 rounded-md shadow-sm">{projeto.autor || "—"}</div>
+                )}
+              </div>
+
+              {/* Cliente */}
+              <div>
+                <Label className="mb-2">Cliente</Label>
+                {isEditing ? (
+                  <Select
+                    className="text-black"
+                    value={editingProject.cliente || ""}
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({ ...prev, cliente: val }))
+                    }
+                  >
+                    <SelectTrigger className="text-black bg-gray-50 w-full">
+                      <SelectValue placeholder="Selecione um cliente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clients.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.nome || c.empresa}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="p-2 bg-zinc-900 rounded-md shadow-sm">
+                    {getClientName(projeto.cliente)}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Autor */}
-      <div>
-        <Label>Autor</Label>
-        {isEditing ? (
-          <Input
-            value={editingProject.autor || ""}
-            onChange={(e) =>
-              setEditingProject((prev) => ({ ...prev, autor: e.target.value }))
-            }
-          />
-        ) : (
-          <div className="p-2 bg-white rounded-md shadow-sm">{projeto.autor || "—"}</div>
-        )}
-      </div>
 
-      {/* Cliente */}
-      <div>
-        <Label>Cliente</Label>
-        {isEditing ? (
-          <Select
-            value={editingProject.cliente || ""}
-            onValueChange={(val) =>
-              setEditingProject((prev) => ({ ...prev, cliente: val }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione um cliente" />
-            </SelectTrigger>
-            <SelectContent>
-              {clients.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.nome || c.empresa}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <div className="p-2 bg-white rounded-md shadow-sm">
-            {getClientName(projeto.cliente)}
+
+          {/* Contrato */}
+          <div className="bg-zinc-950 text-white p-4 rounded-md shadow-md space-y-4">
+            <CardTitle className=" text-lg font-semibold">Contrato</CardTitle>
+            <hr className="border-zinc-800" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Tipo */}
+              <div>
+                <Label className="mb-2">Tipo</Label>
+                {isEditing ? (
+                  <Select
+                    value={editingProject.tipo || ""}
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({ ...prev, tipo: val }))
+                    }
+                  >
+                    <SelectTrigger className="text-black bg-gray-50 w-full">
+                      <SelectValue placeholder="Selecione tipo de projeto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {projectTypes.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="p-2 bg-zinc-900 rounded-md shadow-sm">{projeto.tipo || "—"}</div>
+                )}
+              </div>
+
+              {/* Criado em */}
+              <div>
+                <Label className="mb-2">Data de Criação</Label>
+                <div className="p-2 bg-zinc-900 rounded-md shadow-sm">
+                  {projeto.criadoEm?.seconds
+                    ? format(new Date(projeto.criadoEm.seconds * 1000), "dd/MM/yyyy")
+                    : "—"}
+                </div>
+              </div>
+
+              {/* Data de Entrega */}
+              <div>
+                <Label className="mb-2">Data de Entrega</Label>
+                {isEditing ? (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start text-left text-black">
+                        {editingProject.dataEntrega
+                          ? format(new Date(editingProject.dataEntrega), "dd/MM/yyyy")
+                          : "Selecione a data"}
+                        <CalendarIcon className="ml-auto h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          editingProject.dataEntrega
+                            ? new Date(editingProject.dataEntrega)
+                            : undefined
+                        }
+                        onSelect={(date) =>
+                          setEditingProject((prev) => ({
+                            ...prev,
+                            dataEntrega: date ? date.toISOString().split("T")[0] : "",
+                          }))
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
+                ) : (
+                  <div className="p-2 bg-zinc-900 rounded-md shadow-sm">
+                    {projeto.dataEntrega
+                      ? projeto.dataEntrega.seconds
+                        ? format(new Date(projeto.dataEntrega.seconds * 1000), "dd/MM/yyyy")
+                        : format(new Date(projeto.dataEntrega), "dd/MM/yyyy")
+                      : "Sem data prevista"}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
-    </div>
-  </div>
 
-  {/* Contrato */}
-  <div className="p-4 bg-blue-50 rounded-md shadow-md space-y-4">
-    <CardTitle className="text-lg font-semibold">Contrato</CardTitle>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* Tipo */}
-<div>
-  <Label>Tipo</Label>
-  {isEditing ? (
-    <Select
-      value={editingProject.tipo || ""}
-      onValueChange={(val) =>
-        setEditingProject((prev) => ({ ...prev, tipo: val }))
-      }
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Selecione tipo de projeto" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="fixo">Fixo</SelectItem>
-        <SelectItem value="recorrente">Recorrente</SelectItem>
-      </SelectContent>
-    </Select>
-  ) : (
-    <div className="p-2 bg-white rounded-md shadow-sm">{projeto.tipo || "—"}</div>
-  )}
-</div>
+          {/* Stacks */}
+          <div className="bg-zinc-950 text-white p-4 rounded-md shadow-md space-y-4">
+            <CardTitle className="text-lg font-semibold">Stacks</CardTitle>
+            <hr className="border-zinc-800" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Linguagem */}
+              <div>
+                <Label className="mb-2">Linguagem</Label>
+                {isEditing ? (
+                  <Select
+                    value={editingProject.linguagem || ""}
+                    onValueChange={(val) => {
+                      setEditingProject((prev) => ({
+                        ...prev,
+                        linguagem: val,
+                        framework: frameworksMap[val]?.includes(prev.framework)
+                          ? prev.framework
+                          : "",
+                        tecnologia: technologiesMap[val]?.includes(prev.tecnologia)
+                          ? prev.tecnologia
+                          : "",
+                      }));
+                      setAvailableFrameworks(frameworksMap[val] || []);
+                      setAvailableTechnologies(technologiesMap[val] || []);
+                    }}
+                  >
+                    <SelectTrigger className="text-black bg-gray-50 w-full">
+                      <SelectValue placeholder="Selecione uma linguagem" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languages.map((lang) => (
+                        <SelectItem key={lang} value={lang}>
+                          {lang}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Badge className={languageColors[projeto.linguagem] || "bg-gray-200"}>
+                    {projeto.linguagem}
+                  </Badge>
+                )}
+              </div>
 
-      {/* Criado em */}
-      <div>
-        <Label>Data de Criação</Label>
-        <div className="p-2 bg-white rounded-md shadow-sm">
-          {projeto.criadoEm?.seconds
-            ? format(new Date(projeto.criadoEm.seconds * 1000), "dd/MM/yyyy")
-            : "—"}
-        </div>
-      </div>
+              {/* Framework */}
+              <div>
+                <Label className="mb-2">Framework</Label>
+                {isEditing ? (
+                  <Select
+                    value={
+                      availableFrameworks.includes(editingProject.framework)
+                        ? editingProject.framework
+                        : ""
+                    }
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({ ...prev, framework: val }))
+                    }
+                  >
+                    <SelectTrigger className="text-black bg-gray-50 w-full">
+                      <SelectValue placeholder="Selecione um framework" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableFrameworks.map((fw) => (
+                        <SelectItem key={fw} value={fw}>
+                          {fw}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Badge className={frameworkColors[projeto.framework] || "bg-gray-200"}>
+                    {projeto.framework}
+                  </Badge>
+                )}
+              </div>
 
-      {/* Data de Entrega */}
-      <div>
-        <Label>Data de Entrega</Label>
-        {isEditing ? (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-left">
-                {editingProject.dataEntrega
-                  ? format(new Date(editingProject.dataEntrega), "dd/MM/yyyy")
-                  : "Selecione a data"}
-                <CalendarIcon className="ml-auto h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={
-                  editingProject.dataEntrega
-                    ? new Date(editingProject.dataEntrega)
-                    : undefined
-                }
-                onSelect={(date) =>
-                  setEditingProject((prev) => ({
-                    ...prev,
-                    dataEntrega: date ? date.toISOString().split("T")[0] : "",
-                  }))
-                }
-              />
-            </PopoverContent>
-          </Popover>
-        ) : (
-          <div className="p-2 bg-white rounded-md shadow-sm">
-            {projeto.dataEntrega
-              ? projeto.dataEntrega.seconds
-                ? format(new Date(projeto.dataEntrega.seconds * 1000), "dd/MM/yyyy")
-                : format(new Date(projeto.dataEntrega), "dd/MM/yyyy")
-              : "Sem data prevista"}
+              {/* Tecnologia */}
+              <div>
+                <Label className="mb-2">Tecnologia</Label>
+                {isEditing ? (
+                  <Select
+                    value={
+                      availableTechnologies.includes(editingProject.tecnologia)
+                        ? editingProject.tecnologia
+                        : ""
+                    }
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({ ...prev, tecnologia: val }))
+                    }
+                  >
+                    <SelectTrigger className="text-black bg-gray-50 w-full">
+                      <SelectValue placeholder="Selecione uma tecnologia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableTechnologies.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Badge className={technologyColors[projeto.tecnologia] || "bg-gray-200"}>
+                    {projeto.tecnologia}
+                  </Badge>
+                )}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
-    </div>
-  </div>
 
- {/* Stacks */}
-<div className="p-4 bg-green-50 rounded-md shadow-md space-y-4">
-  <CardTitle className="text-lg font-semibold">Stacks</CardTitle>
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-    {/* Linguagem */}
-    <div>
-      <Label>Linguagem</Label>
-      {isEditing ? (
-        <Select
-  value={editingProject.linguagem || ""}
-  onValueChange={(val) => {
-    setEditingProject((prev) => ({
-      ...prev,
-      linguagem: val,
-      // limpa framework/tecnologia se não estiver disponível
-      framework: frameworksMap[val]?.includes(prev.framework) ? prev.framework : "",
-      tecnologia: technologiesMap[val]?.includes(prev.tecnologia) ? prev.tecnologia : "",
-    }));
-    setAvailableFrameworks(frameworksMap[val] || []);
-    setAvailableTechnologies(technologiesMap[val] || []);
-  }}
->
+          {/* Documentação */}
+          <div className="p-4 bg-zinc-950 text-white rounded-md shadow-md space-y-4">
+            <CardTitle className="text-lg font-semibold">Documentação</CardTitle>
+            <hr className="border-zinc-800" />
+            <div>
+              {isEditing ? (
+                <Input
+                  className="text-black bg-gray-50 focus:shadow-lg focus:shadow-purple-500"
+                  value={editingProject.githubUrl || ""}
+                  onChange={(e) =>
+                    setEditingProject((prev) => ({ ...prev, githubUrl: e.target.value }))
+                  }
+                />
+              ) : projeto.githubUrl ? (
+                <a href={projeto.githubUrl} target="_blank" className="text-blue-300 underline">
+                  {projeto.githubUrl}
+                </a>
+              ) : (
+                <div className="p-2 bg-white rounded-md shadow-sm">Sem documentação</div>
+              )}
+            </div>
+          </div>
 
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione uma linguagem" />
-          </SelectTrigger>
-          <SelectContent>
-            {languages.map((lang) => (
-              <SelectItem key={lang} value={lang}>
-                {lang}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : (
-        <div className="flex flex-wrap gap-2">
-          {projeto.linguagem && (
-            <Badge className={languageColors[projeto.linguagem] || "bg-gray-200"}>
-              {projeto.linguagem}
+          {/* Status */}
+          <div className="flex justify-end items-center">
+            <label className="mr-2 font-medium text-white">Status do projeto:</label>
+            <Badge className={`text-lg px-4 py-2 ${statusColors[projeto.status] || "bg-gray-200"}`}>
+              {projeto.status || "—"}
             </Badge>
-          )}
-        </div>
-      )}
-    </div>
-
-    {/* Framework */}
-    <div>
-      <Label>Framework</Label>
-      {isEditing ? (
-        <Select
-          value={editingProject.framework || ""}
-          onValueChange={(val) =>
-            setEditingProject((prev) => ({ ...prev, framework: val }))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione um framework" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableFrameworks.map((fw) => (
-              <SelectItem key={fw} value={fw}>
-                {fw}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : (
-        <div className="flex flex-wrap gap-2">
-          {projeto.framework && (
-            <Badge className={frameworkColors[projeto.framework] || "bg-gray-200"}>
-              {projeto.framework}
-            </Badge>
-          )}
-        </div>
-      )}
-    </div>
-
-    {/* Tecnologia */}
-    <div>
-      <Label>Tecnologia</Label>
-      {isEditing ? (
-        <Select
-          value={editingProject.tecnologia || ""}
-          onValueChange={(val) =>
-            setEditingProject((prev) => ({ ...prev, tecnologia: val }))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione uma tecnologia" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableTechnologies.map((t) => (
-              <SelectItem key={t} value={t}>
-                {t}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : (
-        <div className="flex flex-wrap gap-2">
-          {projeto.tecnologia && (
-            <Badge className={technologyColors[projeto.tecnologia] || "bg-gray-200"}>
-              {projeto.tecnologia}
-            </Badge>
-          )}
-        </div>
-      )}
-    </div>
-  </div>
-</div>
-
-  {/* Documentação */}
-  <div className="p-4 bg-purple-50 rounded-md shadow-md space-y-4">
-    <CardTitle className="text-lg font-semibold">Documentação</CardTitle>
-    <div>
-      {isEditing ? (
-        <Input
-          value={editingProject.githubUrl || ""}
-          onChange={(e) =>
-            setEditingProject((prev) => ({ ...prev, githubUrl: e.target.value }))
-          }
-        />
-      ) : projeto.githubUrl ? (
-        <a href={projeto.githubUrl} target="_blank" className="text-blue-600 underline">
-          {projeto.githubUrl}
-        </a>
-      ) : (
-        <div className="p-2 bg-white rounded-md shadow-sm">Sem documentação</div>
-      )}
-    </div>
-  </div>
-
-  {/* Status */}
-  <div className="flex justify-end">
-    <Badge className={`text-lg px-4 py-2 ${statusColors[projeto.status] || "bg-gray-200"}`}>
-      {projeto.status || "—"}
-    </Badge>
-  </div>
-</Card>
-
+          </div>
         </Card>
+
+
       </main>
     </div>
   );

@@ -76,17 +76,17 @@ export default function Sidebar() {
   const links = [
     ...(isAdmin
       ? [
-          {
-            label: "Gerência",
-            icon: <FaCalendarAlt />,
-            subLinks: [
-              { label: "Usuários", href: "/admin/usuarios", icon: <FaUsers /> },
-              { label: "Reuniões", href: "/admin/reunioes", icon: <FaCalendarAlt /> },
-              { label: "Prazos", href: "/admin/prazos", icon: <FaTasks /> },
-              { label: "Clientes", href: "/admin/clientes", icon: <FaUserAlt /> },
-            ],
-          },
-        ]
+        {
+          label: "Gerência",
+          icon: <FaCalendarAlt />,
+          subLinks: [
+            { label: "Usuários", href: "/admin/usuarios", icon: <FaUsers /> },
+            { label: "Reuniões", href: "/admin/reunioes", icon: <FaCalendarAlt /> },
+            { label: "Prazos", href: "/admin/prazos", icon: <FaTasks /> },
+            { label: "Clientes", href: "/admin/clientes", icon: <FaUserAlt /> },
+          ],
+        },
+      ]
       : []),
     {
       label: "Projetos",
@@ -111,10 +111,9 @@ export default function Sidebar() {
   };
 
   const linkClass = (href) =>
-    `flex items-center gap-2 p-2 rounded transition ${
-      pathname.startsWith(href)
-        ? "bg-purple-600 font-semibold border-l-4 border-yellow-400"
-        : "hover:bg-purple-600"
+    `flex items-center gap-2 p-2 rounded transition ${pathname.startsWith(href)
+      ? "bg-zinc-600 font-semibold border-l-4 border-zinc-400"
+      : "hover:bg-zinc-400"
     }`;
 
   const renderLinks = () => {
@@ -128,9 +127,8 @@ export default function Sidebar() {
         <div key={idx} className="mb-4">
           <button
             onClick={() => toggleSection(section.label)}
-            className={`flex items-center justify-between w-full p-2 font-semibold hover:bg-purple-600 rounded ${
-              isActiveSection ? "bg-purple-600" : ""
-            }`}
+            className={`flex items-center justify-between w-full p-2 font-semibold hover:bg-zinc-600 rounded ${isActiveSection ? "bg-zinc-600" : ""
+              }`}
           >
             <div className="flex items-center gap-2">
               {section.icon} {section.label}
@@ -139,9 +137,8 @@ export default function Sidebar() {
           </button>
 
           <div
-            className={`ml-4 mt-2 overflow-hidden transition-all duration-300 ${
-              isOpen ? "max-h-96" : "max-h-0"
-            }`}
+            className={`ml-4 mt-2 overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96" : "max-h-0"
+              }`}
           >
             <nav className="flex flex-col gap-2">
               {section.subLinks.map((link, i) => (
@@ -179,7 +176,7 @@ export default function Sidebar() {
         .toUpperCase();
 
       return (
-        <div className="w-16 h-16 rounded-full bg-yellow-400 text-purple-700 flex items-center justify-center font-bold text-xl">
+        <div className="w-16 h-16 rounded-full bg-zinc-400 text-white flex items-center justify-center font-bold text-xl">
           {initials}
         </div>
       );
@@ -189,13 +186,13 @@ export default function Sidebar() {
   return (
     <>
       {/* Sidebar Desktop */}
-      <aside className="w-64 bg-purple-700 text-white hidden md:flex flex-col justify-between h-screen">
+      <aside className="w-64 bg-gray-800 text-white hidden md:flex flex-col justify-between h-screen">
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-8">Painel Admin</h2>
           {renderLinks()}
         </div>
 
-        <div className="flex flex-col h-40 items-center justify-between bg-purple-800 w-full p-4">
+        <div className="flex flex-col h-40 items-center justify-between bg-gray-700 w-full p-4">
           <div className="flex flex-row items-center gap-4 justify-center w-full pt-4">
             {renderAvatar()}
             <div>
@@ -215,7 +212,7 @@ export default function Sidebar() {
       {/* Sidebar Mobile */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex">
-          <aside className="w-64 bg-purple-700 text-white p-6">
+          <aside className="w-64 bg-gray-800 text-white p-6">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-bold">Menu</h2>
               <button onClick={() => setMenuOpen(false)}>
@@ -237,7 +234,7 @@ export default function Sidebar() {
       {/* Botão abre menu no mobile */}
       <button
         onClick={() => setMenuOpen(true)}
-        className="md:hidden bg-purple-600 text-white p-2 rounded fixed top-4 right-4 z-40"
+        className="md:hidden bg-gray-800 text-white p-2 rounded fixed top-4 right-4 z-40"
       >
         <FaBars size={20} />
       </button>
