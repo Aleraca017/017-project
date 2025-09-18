@@ -195,7 +195,14 @@ export default function ProjetoPage() {
     }
   };
 
-  if (!projeto) return <div className="ml-64 p-6">Carregando...</div>;
+  if (!projeto) {
+    return (
+      <div className="flex">
+        <Sidebar />
+        <div className="ml-64 p-6">Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex">

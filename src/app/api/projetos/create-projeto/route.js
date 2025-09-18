@@ -19,8 +19,6 @@ export async function POST(req) {
       status: body.status || "andamento",
       cliente: body.clienteNome || "",
       responsavel: body.responsavel || "",
-      responsavelNome: body.responsavelNome || "",
-      responsavelEmail: body.responsavelEmail || "",
       criadoEm: new Date(),
       linguagem: body.linguagem || "",
       framework: body.framework || "",

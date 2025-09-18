@@ -186,13 +186,13 @@ export default function Sidebar() {
   return (
     <>
       {/* Sidebar Desktop */}
-      <aside className="w-64 bg-gray-800 text-white hidden md:flex flex-col justify-between h-screen">
+      <aside className="w-64 bg-stone-800 text-white hidden md:flex flex-col justify-between h-screen">
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-8">Painel Admin</h2>
           {renderLinks()}
         </div>
 
-        <div className="flex flex-col h-40 items-center justify-between bg-gray-700 w-full p-4">
+        <div className="flex flex-col h-50 items-center justify-between bg-stone-700 w-full p-4 pb-8">
           <div className="flex flex-row items-center gap-4 justify-center w-full pt-4">
             {renderAvatar()}
             <div>
@@ -202,7 +202,7 @@ export default function Sidebar() {
 
           <button
             onClick={handleLogout}
-            className="mt-5 flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded w-full justify-center"
+            className="mt-5 flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded w-full justify-center hover:cursor-pointer"
           >
             <FaSignOutAlt /> Sair
           </button>

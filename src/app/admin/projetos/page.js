@@ -190,7 +190,7 @@ export default function ProjetosPage() {
   });
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-black">
       <Sidebar />
       <main className="flex-1 p-6">
         {/* Notificação */}
@@ -202,11 +202,10 @@ export default function ProjetosPage() {
               animate={{ x: -40, opacity: 1 }}
               exit={{ x: 400, opacity: 0 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
-              className={`fixed top-20 rounded-2xl -right-15 w-80 text-left py-2 px-4 z-50 shadow-lg ${
-                notification.type === "success"
-                  ? "bg-green-500 text-white"
-                  : "bg-red-500 text-white"
-              }`}
+              className={`fixed top-20 rounded-2xl -right-15 w-80 text-left py-2 px-4 z-50 shadow-lg ${notification.type === "success"
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
+                }`}
             >
               {notification.message}
             </motion.div>
@@ -215,7 +214,7 @@ export default function ProjetosPage() {
 
         {/* Cabeçalho */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-gray-50">
             Gerenciamento de Projetos
           </h1>
           <div className="flex items-center gap-2">
@@ -224,11 +223,11 @@ export default function ProjetosPage() {
               placeholder="Pesquisar projetos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-purple-400 rounded px-3 py-2 ring-2 ring-purple-600 outline-none placeholder-purple-400 text-gray-600"
+              className="shadow-lg shadow-purple-950 focus:shadow-purple-700 rounded px-3 py-2 ring-2 ring-purple-600 outline-none placeholder-purple-400 text-gray-50"
             />
             <button
               onClick={handleCreateClick}
-              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer"
+              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer "
             >
               + Criar Projeto
             </button>
@@ -236,56 +235,83 @@ export default function ProjetosPage() {
         </div>
 
         {/* Lista */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="shadow rounded-lg overflow-hidden">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-200">
+            <thead className="bg-zinc-700 border-b-2 border-zinc-500">
               <tr>
-                <th className="p-3 text-gray-700">Título</th>
-                <th className="p-3 text-gray-700">Descrição</th>
-                <th className="p-3 text-gray-700">Status</th>
-                <th className="p-3 text-gray-700">Cliente</th>
-                <th className="p-3 text-gray-700">Responsável</th>
-                {isAdmin && <th className="p-3 text-gray-700">Ações</th>}
+                <th className="p-3 text-gray-50">Título</th>
+                <th className="p-3 text-gray-50">Descrição</th>
+                <th className="p-3 text-gray-50">Status</th>
+                <th className="p-3 text-gray-50">Cliente</th>
+                <th className="p-3 text-gray-50">Responsável</th>
+                {isAdmin && <th className="p-3 text-gray-50">Ações</th>}
               </tr>
             </thead>
             <tbody>
-              {filteredProjects.map((p, index) => (
-                <tr
-                  key={p.id}
-                  className={`${
-                    index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"
-                  } hover:bg-gray-200 transition cursor-pointer`}
-                  onDoubleClick={() => router.push(`/admin/projetos/${p.id}`)}
-                >
-                  <td className="p-3 text-gray-800">{p.titulo || "-"}</td>
-                  <td className="p-3 text-gray-800">{p.descricao || "-"}</td>
-                  <td className="p-3">
-                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-gray-300 text-black">
-                      {p.status}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <span className="px-2 py-1 rounded-full bg-green-200 text-green-800 text-sm">
-                      {p.clienteNome || "-"}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <span className="px-2 py-1 rounded-full bg-purple-200 text-purple-800 text-sm">
-                      {p.responsavelNome || "-"}
-                    </span>
-                  </td>
-                  {isAdmin && (
-                    <td className="p-3 flex gap-2">
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
+              {filteredProjects.map((p, index) => {
+                // Busca o cliente pelo id salvo no projeto
+                const client = clients.find((c) => c.id === p.cliente);
+                const clientName = client?.nome || client?.empresa || "-";
+
+                // Busca o responsável pelo id
+                const responsavel = users.find((u) => u.id === p.responsavel);
+                const responsavelNome = responsavel?.nome || "-";
+
+                // Função para cor do status
+                const getStatusClass = (status) => {
+                  switch (status) {
+                    case "cancelado":
+                      return "bg-red-500 text-white";
+                    case "concluido":
+                      return "bg-green-500 text-white";
+                    case "andamento":
+                      return "bg-yellow-400 text-black";
+                    default:
+                      return "bg-gray-300 text-black";
+                  }
+                };
+
+                return (
+                  <tr
+                    key={p.id}
+                    className={`${index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"
+                      } hover:bg-zinc-600 transition cursor-pointer`}
+                    onDoubleClick={() => router.push(`/admin/projetos/${p.id}`)}
+                  >
+                    <td className="p-3 text-zinc-50">{p.titulo || "-"}</td>
+                    <td className="p-3 text-zinc-50">{p.descricao || "-"}</td>
+                    <td className="p-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusClass(
+                          p.status
+                        )}`}
                       >
-                        Excluir
-                      </button>
+                        {p.status}
+                      </span>
                     </td>
-                  )}
-                </tr>
-              ))}
+                    <td className="p-3">
+                      <span className="px-2 py-1 rounded-full bg-green-200 text-green-800 text-sm">
+                        {clientName}
+                      </span>
+                    </td>
+                    <td className="p-3">
+                      <span className="px-2 py-1 rounded-full bg-purple-200 text-purple-800 text-sm">
+                        {responsavelNome}
+                      </span>
+                    </td>
+                    {isAdmin && (
+                      <td className="p-3 flex gap-2">
+                        <button
+                          onClick={() => handleDelete(p.id)}
+                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
+                        >
+                          Excluir
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -427,9 +453,9 @@ export default function ProjetosPage() {
                     >
                       {editingProject?.dataEntrega
                         ? format(
-                            new Date(editingProject.dataEntrega),
-                            "dd/MM/yyyy"
-                          )
+                          new Date(editingProject.dataEntrega),
+                          "dd/MM/yyyy"
+                        )
                         : "Selecione a data"}
                       <CalendarIcon className="ml-auto h-4 w-4" />
                     </Button>

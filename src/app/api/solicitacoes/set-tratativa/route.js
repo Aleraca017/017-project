@@ -45,11 +45,10 @@ export async function POST(req) {
         assunto = "Sua solicitação foi concluída";
       } else if (finalStatus === "cancelado") {
         assunto = "Sua solicitação foi cancelada";
-        mensagem += `\n\nMotivo do cancelamento: ${
-          cancelReason && cancelReason.trim() !== ""
+        mensagem += `\n\nMotivo do cancelamento: ${cancelReason && cancelReason.trim() !== ""
             ? cancelReason
             : "Não informado"
-        }`;
+          }`;
       }
 
       mensagem += `\n\nAtenciosamente,\nEquipe de Suporte 017Tag.`;

@@ -5,6 +5,15 @@ import Sidebar from "@/components/admin/Sidebar";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
 export default function UserManagementPage() {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
@@ -19,8 +28,8 @@ export default function UserManagementPage() {
       try {
         const querySnapshot = await getDocs(collection(db, "usuarios"));
         const userList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,       // ID do Firestore
-          uid: doc.id,      // UID do Auth (assumindo que é igual ao docId)
+          id: doc.id,
+          uid: doc.id,
           ...doc.data(),
         }));
         setUsers(userList);
@@ -31,21 +40,18 @@ export default function UserManagementPage() {
     fetchUsers();
   }, []);
 
-  // 🔹 Abrir modal para edição
   const handleEditClick = (user) => {
     setEditingUser(user);
     setIsCreating(false);
     setShowModal(true);
   };
 
-  // 🔹 Abrir modal para criação
   const handleCreateClick = () => {
     setEditingUser({ nome: "", email: "", funcao: "", permissao: "leitor" });
     setIsCreating(true);
     setShowModal(true);
   };
 
-  // 🔹 Salvar alterações ou criar usuário
   const handleSave = async () => {
     const userData = {
       nome: editingUser.nome?.trim(),
@@ -56,7 +62,6 @@ export default function UserManagementPage() {
 
     try {
       if (isCreating) {
-        // Criação de usuário via backend
         const res = await fetch("/api/users/create-user", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -65,30 +70,23 @@ export default function UserManagementPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        // Adiciona novo usuário ao estado
         setUsers((prev) => [
           ...prev,
-          {
-            id: data.docId,
-            uid: data.uid,
-            ...userData,
-          },
+          { id: data.docId, uid: data.uid, ...userData },
         ]);
       } else {
-        // Atualiza usuário via backend (Auth + Firestore)
         const res = await fetch("/api/users/update-user", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            uid: editingUser.uid, // UID do Auth
-            docId: editingUser.id, // ID do Firestore
+            uid: editingUser.uid,
+            docId: editingUser.id,
             ...userData,
           }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        // Atualiza usuário no estado
         setUsers((prev) =>
           prev.map((u) =>
             u.id === editingUser.id ? { ...u, ...userData, uid: editingUser.uid } : u
@@ -103,7 +101,6 @@ export default function UserManagementPage() {
     }
   };
 
-  // 🔹 Excluir usuário
   const handleDelete = async (uid) => {
     if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
 
@@ -123,7 +120,6 @@ export default function UserManagementPage() {
     }
   };
 
-  // 🔹 Resetar senha
   const handleResetPassword = async (uid, email) => {
     if (!confirm(`Deseja resetar a senha de ${email} para a padrão?`)) return;
 
@@ -152,61 +148,47 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-zinc-950">
       <Sidebar />
       <main className="flex-1 p-6">
-        {/* Cabeçalho */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Gerenciamento de Usuários</h1>
-          <button
-            onClick={handleCreateClick}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-          >
+          <h1 className="text-2xl font-bold text-gray-50">Gerenciamento de Usuários</h1>
+          <Button onClick={handleCreateClick} className="bg-green-600 hover:bg-green-700">
             + Criar Usuário
-          </button>
+          </Button>
         </div>
 
-        {/* Lista de usuários */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="shadow rounded-lg overflow-hidden">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-200">
+            <thead className="bg-zinc-700 border-b-2 border-zinc-500">
               <tr>
-                <th className="p-3 text-gray-700">Nome</th>
-                <th className="p-3 text-gray-700">Email</th>
-                <th className="p-3 text-gray-700">Função</th>
-                <th className="p-3 text-gray-700">Permissão</th>
-                <th className="p-3 text-gray-700">Ações</th>
+                <th className="p-3 text-gray-50">Nome</th>
+                <th className="p-3 text-gray-50">Email</th>
+                <th className="p-3 text-gray-50">Função</th>
+                <th className="p-3 text-gray-50">Permissão</th>
+                <th className="p-3 text-gray-50">Ações</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u, index) => (
                 <tr
                   key={u.id}
-                  className={`${index % 2 === 0 ? "bg-gray-50" : "bg-gray-100"} hover:bg-gray-200`}
+                  className={`${index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"} hover:bg-zinc-700`}
                 >
-                  <td className="p-3 text-gray-800">{u.nome || "-"}</td>
-                  <td className="p-3 text-gray-800">{u.email || "-"}</td>
-                  <td className="p-3 text-gray-800">{u.funcao || "-"}</td>
-                  <td className="p-3 text-gray-800 capitalize">{u.permissao || "-"}</td>
+                  <td className="p-3 text-gray-50">{u.nome || "-"}</td>
+                  <td className="p-3 text-gray-50">{u.email || "-"}</td>
+                  <td className="p-3 text-gray-50">{u.funcao || "-"}</td>
+                  <td className="p-3 text-gray-50 capitalize">{u.permissao || "-"}</td>
                   <td className="p-3 flex gap-2">
-                    <button
-                      onClick={() => handleEditClick(u)}
-                      className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                    >
+                    <Button onClick={() => handleEditClick(u)} className="bg-blue-600 hover:bg-blue-700">
                       Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(u.uid)}
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                    >
+                    </Button>
+                    <Button onClick={() => handleDelete(u.uid)} className="bg-red-600 hover:bg-red-700">
                       Excluir
-                    </button>
-                    <button
-                      onClick={() => handleResetPassword(u.uid, u.email)}
-                      className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
-                    >
+                    </Button>
+                    <Button onClick={() => handleResetPassword(u.uid, u.email)} className="bg-yellow-500 hover:bg-yellow-600">
                       Resetar Senha
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -214,52 +196,49 @@ export default function UserManagementPage() {
           </table>
         </div>
 
-        {/* Modal de edição/criação */}
-        {showModal && editingUser && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 border">
-              <h2 className="text-xl font-bold mb-4 text-gray-800">
-                {isCreating ? "Criar Usuário" : "Editar Usuário"}
-              </h2>
+        {/* Modal ShadCN */}
+        <Dialog open={showModal} onOpenChange={setShowModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{isCreating ? "Criar Usuário" : "Editar Usuário"}</DialogTitle>
+            </DialogHeader>
 
-              <label className="block mb-2 text-gray-700">
+            <div className="space-y-4 mt-2">
+              <label className="block">
                 Nome
                 <input
                   type="text"
                   name="nome"
-                  value={editingUser.nome || ""}
+                  value={editingUser?.nome || ""}
                   onChange={handleChange}
                   className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
                 />
               </label>
-
-              <label className="block mb-2 text-gray-700">
+              <label className="block">
                 Email
                 <input
                   type="email"
                   name="email"
-                  value={editingUser.email || ""}
+                  value={editingUser?.email || ""}
                   onChange={handleChange}
                   className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
                 />
               </label>
-
-              <label className="block mb-2 text-gray-700">
+              <label className="block">
                 Função
                 <input
                   type="text"
                   name="funcao"
-                  value={editingUser.funcao || ""}
+                  value={editingUser?.funcao || ""}
                   onChange={handleChange}
                   className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
                 />
               </label>
-
-              <label className="block mb-4 text-gray-700">
+              <label className="block">
                 Permissão
                 <select
                   name="permissao"
-                  value={editingUser.permissao || "leitor"}
+                  value={editingUser?.permissao || "leitor"}
                   onChange={handleChange}
                   className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
                 >
@@ -268,24 +247,16 @@ export default function UserManagementPage() {
                   <option value="leitor">Leitor</option>
                 </select>
               </label>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                >
-                  {isCreating ? "Criar" : "Salvar"}
-                </button>
-              </div>
             </div>
-          </div>
-        )}
+
+            <DialogFooter className="mt-4 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowModal(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSave}>{isCreating ? "Criar" : "Salvar"}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
