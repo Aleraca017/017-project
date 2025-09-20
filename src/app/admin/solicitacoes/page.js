@@ -216,31 +216,33 @@ export default function SolicitacoesPage() {
         {loading ? (
           <p>Carregando...</p>
         ) : filteredSolicitacoes.length > 0 ? (
-          <ul className="space-y-4">
-            {filteredSolicitacoes.map((sol) => (
-              <li
-                key={sol.id}
-                className="border-2 border-zinc-700 p-4 rounded-lg shadow-sm bg-zinc-900 hover:shadow-md cursor-pointer"
-                onDoubleClick={() => {
-                  setSelectedSolicitacao(sol);
-                  setShowCancelInput(false);
-                  setCancelReason("");
-                }}
-              >
-                <div className="flex justify-between items-center mb-2 text-white">
-                  <span className="font-bold">{sol.aplicação || "-"}</span>
-                  <span
-                    className={`text-white px-2 py-1 rounded ${statusColors[sol.status] || "bg-gray-100"
-                      }`}
-                  >
-                    {sol.status || "-"}
-                  </span>
-                </div>
-                <p className="text-purple-200">{sol.emailAutor || "-"}</p>
-                <p className="text-zinc-200 text-sm">{formatDate(sol.data)}</p>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-y-auto max-h-170 no-scrollbar">
+            <ul className="space-y-4">
+              {filteredSolicitacoes.map((sol) => (
+                <li
+                  key={sol.id}
+                  className="border-2 border-zinc-700 p-4 rounded-lg shadow-sm bg-zinc-900 hover:shadow-md cursor-pointer"
+                  onDoubleClick={() => {
+                    setSelectedSolicitacao(sol);
+                    setShowCancelInput(false);
+                    setCancelReason("");
+                  }}
+                >
+                  <div className="flex justify-between items-center mb-2 text-white">
+                    <span className="font-bold">{sol.aplicação || "-"}</span>
+                    <span
+                      className={`text-white px-2 py-1 rounded ${statusColors[sol.status] || "bg-gray-100"
+                        }`}
+                    >
+                      {sol.status || "-"}
+                    </span>
+                  </div>
+                  <p className="text-purple-200">{sol.emailAutor || "-"}</p>
+                  <p className="text-zinc-200 text-sm">{formatDate(sol.data)}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
         ) : (
           <p className="text-white">Nenhuma solicitação encontrada.</p>
         )}

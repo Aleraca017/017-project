@@ -240,9 +240,9 @@ export default function ProjetosPage() {
             <thead className="bg-zinc-700 border-b-2 border-zinc-500">
               <tr>
                 <th className="p-3 text-gray-50">Título</th>
+                <th className="p-3 text-gray-50">Cliente</th>
                 <th className="p-3 text-gray-50">Descrição</th>
                 <th className="p-3 text-gray-50">Status</th>
-                <th className="p-3 text-gray-50">Cliente</th>
                 <th className="p-3 text-gray-50">Responsável</th>
                 {isAdmin && <th className="p-3 text-gray-50">Ações</th>}
               </tr>
@@ -279,6 +279,11 @@ export default function ProjetosPage() {
                     onDoubleClick={() => router.push(`/admin/projetos/${p.id}`)}
                   >
                     <td className="p-3 text-zinc-50">{p.titulo || "-"}</td>
+                    <td className="p-3">
+                      <span className="px-2 py-1 rounded-full bg-green-200 text-green-800 text-sm">
+                        {clientName}
+                      </span>
+                    </td>
                     <td className="p-3 text-zinc-50">{p.descricao || "-"}</td>
                     <td className="p-3">
                       <span
@@ -289,11 +294,7 @@ export default function ProjetosPage() {
                         {p.status}
                       </span>
                     </td>
-                    <td className="p-3">
-                      <span className="px-2 py-1 rounded-full bg-green-200 text-green-800 text-sm">
-                        {clientName}
-                      </span>
-                    </td>
+
                     <td className="p-3">
                       <span className="px-2 py-1 rounded-full bg-purple-200 text-purple-800 text-sm">
                         {responsavelNome}

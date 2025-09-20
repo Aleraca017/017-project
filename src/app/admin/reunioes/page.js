@@ -68,113 +68,113 @@ export default function ReunioesPage() {
   }, [clientes]);
 
   const handleCreateMeeting = async () => {
-  if (!newMeeting.data || !newMeeting.hora || !newMeeting.cliente) {
-    showMsg("error", "Preencha todos os campos");
-    return;
-  }
-
-  const clienteNome =
-    clientes.find((c) => c.id === newMeeting.cliente)?.nome || "";
-
-  try {
-    // 1️⃣ Criar reunião no Firestore
-    const res = await fetch("/api/reunioes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newMeeting),
-    });
-
-    if (!res.ok) throw new Error("Erro ao criar reunião");
-    const created = await res.json();
-
-    setReunioes((prev) => [...prev, created]);
-    setNewMeeting({ data: "", hora: "", cliente: "" });
-    setShowNewModal(false);
-
-    showMsg("success", "Reunião criada com sucesso!");
-
-    // 2️⃣ Criar evento no Google Agenda
-    const [hour, minute] = created.hora.split(":").map(Number);
-    const startDate = new Date(`${created.data}T${created.hora}:00-03:00`);
-    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1h
-
-    const googleRes = await fetch("/api/reunioes/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        summary: `Reunião com ${clienteNome}`,
-        description: `Reunião agendada via sistema`,
-        start: {
-          dateTime: startDate.toISOString(),
-          timeZone: "America/Sao_Paulo",
-        },
-        end: {
-          dateTime: endDate.toISOString(),
-          timeZone: "America/Sao_Paulo",
-        },
-        attendees: [],
-      }),
-    });
-
-    if (!googleRes.ok) {
-      const err = await googleRes.json();
-      console.error("Erro ao criar evento no Google Agenda:", err);
-      showMsg(
-        "error",
-        "Reunião criada, mas não foi possível adicionar ao Google Agenda."
-      );
-    } else {
-      showMsg("success", "Reunião adicionada ao Google Agenda!");
+    if (!newMeeting.data || !newMeeting.hora || !newMeeting.cliente) {
+      showMsg("error", "Preencha todos os campos");
+      return;
     }
-  } catch (err) {
-    showMsg("error", "Erro ao criar reunião");
-    console.error(err);
-  }
-};
+
+    const clienteNome =
+      clientes.find((c) => c.id === newMeeting.cliente)?.nome || "";
+
+    try {
+      // 1️⃣ Criar reunião no Firestore
+      const res = await fetch("/api/reunioes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newMeeting),
+      });
+
+      if (!res.ok) throw new Error("Erro ao criar reunião");
+      const created = await res.json();
+
+      setReunioes((prev) => [...prev, created]);
+      setNewMeeting({ data: "", hora: "", cliente: "" });
+      setShowNewModal(false);
+
+      showMsg("success", "Reunião criada com sucesso!");
+
+      // 2️⃣ Criar evento no Google Agenda
+      const [hour, minute] = created.hora.split(":").map(Number);
+      const startDate = new Date(`${created.data}T${created.hora}:00-03:00`);
+      const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1h
+
+      const googleRes = await fetch("/api/reunioes/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          summary: `Reunião com ${clienteNome}`,
+          description: `Reunião agendada via sistema`,
+          start: {
+            dateTime: startDate.toISOString(),
+            timeZone: "America/Sao_Paulo",
+          },
+          end: {
+            dateTime: endDate.toISOString(),
+            timeZone: "America/Sao_Paulo",
+          },
+          attendees: [],
+        }),
+      });
+
+      if (!googleRes.ok) {
+        const err = await googleRes.json();
+        console.error("Erro ao criar evento no Google Agenda:", err);
+        showMsg(
+          "error",
+          "Reunião criada, mas não foi possível adicionar ao Google Agenda."
+        );
+      } else {
+        showMsg("success", "Reunião adicionada ao Google Agenda!");
+      }
+    } catch (err) {
+      showMsg("error", "Erro ao criar reunião");
+      console.error(err);
+    }
+  };
 
 
 
 
 
   const handleSaveEdit = async () => {
-  if (!editingMeeting.data || !editingMeeting.hora || !editingMeeting.cliente) {
-    showMsg("error", "Preencha todos os campos");
-    return;
-  }
+    if (!editingMeeting.data || !editingMeeting.hora || !editingMeeting.cliente) {
+      showMsg("error", "Preencha todos os campos");
+      return;
+    }
 
-  const clienteNome = clientes.find(c => c.id === editingMeeting.cliente)?.nome || "";
+    const clienteNome = clientes.find(c => c.id === editingMeeting.cliente)?.nome || "";
 
-  try {
-    // 1️⃣ Atualizar reunião no Firestore
-    const res = await fetch(`/api/reunioes/${editingMeeting.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editingMeeting),
-    });
-    if (!res.ok) throw new Error("Erro ao atualizar reunião");
-    const updated = await res.json();
-    setReunioes(prev => prev.map(r => (r.id === updated.id ? updated : r)));
-    setEditingMeeting(null);
-    setShowEditModal(false);
-    showMsg("success", "Reunião atualizada com sucesso!");
+    try {
+      // 1️⃣ Atualizar reunião no Firestore
+      const res = await fetch(`/api/reunioes/${editingMeeting.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingMeeting),
+      });
+      if (!res.ok) throw new Error("Erro ao atualizar reunião");
+      const updated = await res.json();
+      setReunioes(prev => prev.map(r => (r.id === updated.id ? updated : r)));
+      setEditingMeeting(null);
+      setShowEditModal(false);
+      showMsg("success", "Reunião atualizada com sucesso!");
 
-    // 2️⃣ Atualizar evento no Google Agenda
-    await fetch("/api/reunioes/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        eventId: editingMeeting.googleEventId, // se você já armazenou
-        data: updated.data,
-        hora: updated.hora,
-        clienteNome,
-      }),
-    });
+      // 2️⃣ Atualizar evento no Google Agenda
+      await fetch("/api/reunioes/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: editingMeeting.googleEventId, // se você já armazenou
+          data: updated.data,
+          hora: updated.hora,
+          clienteNome,
+        }),
+      });
 
-  } catch (err) {
-    showMsg("error", "Erro ao atualizar reunião");
-    console.error(err);
-  }
-};
+    } catch (err) {
+      showMsg("error", "Erro ao atualizar reunião");
+      console.error(err);
+    }
+  };
 
   const handleDeleteMeeting = async (id) => {
     if (!confirm("Tem certeza que deseja excluir esta reunião?")) return;
@@ -234,35 +234,35 @@ export default function ReunioesPage() {
 
 
   // Função para criar evento no Google Calendar
-const addToGoogleCalendar = async (meeting) => {
-  try {
-    const res = await fetch("/api/reunioes/calendar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        summary: `Reunião com ${getClienteNome(meeting.cliente)}`,
-        description: `Reunião agendada via sistema`,
-        start: `${meeting.data}T${meeting.hora}:00-03:00`,
-        end: `${meeting.data}T${meeting.hora}:00-03:00`,
-        attendees: [], // opcional: emails dos convidados
-      }),
-    });
+  const addToGoogleCalendar = async (meeting) => {
+    try {
+      const res = await fetch("/api/reunioes/calendar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          summary: `Reunião com ${getClienteNome(meeting.cliente)}`,
+          description: `Reunião agendada via sistema`,
+          start: `${meeting.data}T${meeting.hora}:00-03:00`,
+          end: `${meeting.data}T${meeting.hora}:00-03:00`,
+          attendees: [], // opcional: emails dos convidados
+        }),
+      });
 
-    if (!res.ok) throw new Error("Erro ao criar evento no Calendar");
-    const data = await res.json();
-    console.log("Evento criado no Google Calendar:", data);
-    showMsg("success", "Evento adicionado ao Google Calendar!");
-  } catch (err) {
-    console.error(err);
-    showMsg("error", "Não foi possível adicionar no Google Calendar");
-  }
-};
+      if (!res.ok) throw new Error("Erro ao criar evento no Calendar");
+      const data = await res.json();
+      console.log("Evento criado no Google Calendar:", data);
+      showMsg("success", "Evento adicionado ao Google Calendar!");
+    } catch (err) {
+      console.error(err);
+      showMsg("error", "Não foi possível adicionar no Google Calendar");
+    }
+  };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-black  ">
       <Sidebar />
       <main className="flex-1 p-6 overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-4">Reuniões</h1>
+        <h1 className="text-2xl font-bold mb-4 text-gray-50">Reuniões</h1>
 
         {message && (
           <div
@@ -274,24 +274,24 @@ const addToGoogleCalendar = async (meeting) => {
 
         {/* Busca e botão */}
         <div className="flex items-center justify-between mb-6">
-          <Input placeholder="Buscar por cliente..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" />
+          <Input placeholder="Buscar por cliente..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm bg-zinc-900 border-0 text-white" />
           <button onClick={() => setShowNewModal(true)} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer">
             + Nova Reunião
           </button>
         </div>
 
         {/* Calendário */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <div className="bg-zinc-950 rounded-lg shadow p-4 mb-6">
           <Calendar onChange={setDate} value={date} onClickDay={handleDayClick} className="border rounded-lg shadow bg-white p-3" />
         </div>
 
         {/* Lista agrupada com dropdown */}
         <div className="space-y-4">
           {Object.entries(grouped).map(([year, months]) => (
-            <div key={year} className="border rounded-lg bg-white shadow">
+            <div key={year} className="rounded-lg border-0 shadow">
               <button
                 onClick={() => toggleYear(year)}
-                className="w-full text-left px-4 py-2 font-bold bg-gray-100 hover:bg-gray-200 flex justify-between items-center"
+                className="w-full text-left px-4 py-2 font-bold bg-zinc-800 hover:bg-zinc-900 border-0 flex justify-between items-center rounded-lg rounded-br-none text-white hover:cursor-pointer"
               >
                 {year} {openYears[year] ? "▲" : "▼"}
               </button>
@@ -301,7 +301,7 @@ const addToGoogleCalendar = async (meeting) => {
                   <div key={month} className="ml-4">
                     <button
                       onClick={() => toggleMonth(year, month)}
-                      className="w-full text-left px-4 py-1 font-medium bg-gray-50 hover:bg-gray-100 flex justify-between items-center"
+                      className="w-full text-left px-4 py-1 font-medium bg-zinc-700 hover:bg-zinc-900 flex justify-between items-center text-white hover:cursor-pointer rounded-bl-lg"
                     >
                       {new Date(year, month - 1).toLocaleString("pt-BR", { month: "long" })}{" "}
                       {openMonths[`${year}-${month}`] ? "▲" : "▼"}
@@ -312,7 +312,7 @@ const addToGoogleCalendar = async (meeting) => {
                         <div key={day} className="ml-4 mb-2">
                           <button
                             onClick={() => toggleDay(year, month, day)}
-                            className="w-full text-left px-4 py-1 bg-gray-50 hover:bg-gray-100 flex justify-between items-center"
+                            className="w-full text-left px-4 py-1 bg-zinc-800 hover:bg-zinc-900 flex justify-between items-center text-white hover:cursor-pointer rounded-bl-lg"
                           >
                             {day}/{month}/{year} {openDays[`${year}-${month}-${day}`] ? "▲" : "▼"}
                           </button>
@@ -320,13 +320,13 @@ const addToGoogleCalendar = async (meeting) => {
                           {openDays[`${year}-${month}-${day}`] && (
                             <ul className="ml-4 list-disc space-y-1">
                               {meetings.map((r) => (
-                                <li key={r.id} className="flex justify-between items-center gap-2 px-5 py-5">
+                                <li key={r.id} className="flex justify-between items-center gap-2 px-5 py-5 bg-purple-700 text-white">
                                   {r.hora} - {getClienteNome(r.cliente)}
                                   <div className="flex gap-2">
-                                    <button onClick={() => handleEditMeeting(r)} className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                    <button onClick={() => handleEditMeeting(r)} className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 hover:cursor-pointer">
                                       Editar
                                     </button>
-                                    <button onClick={() => handleDeleteMeeting(r.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                                    <button onClick={() => handleDeleteMeeting(r.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 hover:cursor-pointer">
                                       Excluir
                                     </button>
                                   </div>
@@ -343,8 +343,8 @@ const addToGoogleCalendar = async (meeting) => {
         </div>
 
         {/* Modal Nova Reunião */}
-        <Dialog open={showNewModal} onOpenChange={setShowNewModal}>
-          <DialogContent>
+        <Dialog open={showNewModal} onOpenChange={setShowNewModal} >
+          <DialogContent className="max-w-100">
             <DialogHeader>
               <DialogTitle>Nova Reunião</DialogTitle>
             </DialogHeader>
@@ -379,7 +379,7 @@ const addToGoogleCalendar = async (meeting) => {
               </select>
               <button
                 onClick={handleCreateMeeting}
-                className="w-full py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                className="w-full py-2 bg-purple-600 text-white rounded hover:bg-purple-700 hover:cursor-pointer"
               >
                 Salvar
               </button>
@@ -389,7 +389,7 @@ const addToGoogleCalendar = async (meeting) => {
 
         {/* Modal Editar Reunião */}
         <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-          <DialogContent>
+          <DialogContent className="max-w-100">
             <DialogHeader>
               <DialogTitle>Editar Reunião</DialogTitle>
             </DialogHeader>
@@ -428,7 +428,7 @@ const addToGoogleCalendar = async (meeting) => {
                 </select>
                 <button
                   onClick={handleSaveEdit}
-                  className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 hover:cursor-pointer"
                 >
                   Salvar Alterações
                 </button>

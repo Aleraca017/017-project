@@ -43,16 +43,30 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-html{
+html {
   scroll-behavior: smooth;
 }
 
 @keyframes slide-marquee {
-  0%   { transform: translateX(0%); }
-  20%  { transform: translateX(0%); }
-  50%  { transform: translateX(-50%); }
-  70%  { transform: translateX(-50%); }
-  100% { transform: translateX(0%); }
+  0% {
+    transform: translateX(0%);
+  }
+
+  20% {
+    transform: translateX(0%);
+  }
+
+  50% {
+    transform: translateX(-50%);
+  }
+
+  70% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0%);
+  }
 }
 
 .animate-marquee {
@@ -64,16 +78,19 @@ html{
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
 .swiper-pagination-bullet {
-  background-color: #a855f7 !important; /* roxo Tailwind */
+  background-color: #a855f7 !important;
+  /* roxo Tailwind */
   opacity: 1 !important;
   transform: translateY(5px) !important;
 }
+
 .swiper-pagination-bullet-active {
   background-color: white !important;
 }
@@ -83,7 +100,8 @@ html{
   width: 100%;
   background: white;
   border-radius: 0.75rem;
-  border: 1px solid #e5e7eb; /* gray-200 */
+  border: 1px solid #e5e7eb;
+  /* gray-200 */
   font-family: inherit;
   padding: 1rem;
 }
@@ -95,17 +113,20 @@ html{
 }
 
 .react-calendar__tile:hover {
-  background: #f3e8ff; /* purple-100 */
+  background: #f3e8ff;
+  /* purple-100 */
   cursor: pointer;
 }
 
 .react-calendar__tile--active {
-  background: #9333ea !important; /* purple-600 */
+  background: #9333ea !important;
+  /* purple-600 */
   color: white !important;
 }
 
 .react-calendar__navigation button {
-  color: #4b5563; /* gray-600 */
+  color: #4b5563;
+  /* gray-600 */
   font-weight: 600;
 }
 
@@ -182,6 +203,7 @@ html{
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

@@ -1,15 +1,14 @@
 import admin from "firebase-admin";
 import fs from "fs";
 
-// Lê o arquivo JSON manualmente
-const serviceAccount = JSON.parse(fs.readFileSync("./serviceAccountKey.json", "utf8"));
+const serviceAccount = JSON.parse(fs.readFileSync("./project017tag-28b6aaca7153.json", "utf8"));
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-// Substitua pelo UID do usuário que deseja tornar admin
-const uid = "IFcNA44TNZY81DmRPdKZGc2518x1";
+// Substutua pelo id do usuário do firebase que deseja tornarr adm
+const uid = "m9m4EhhloVUcywwbkAY5QvKC0QB2";
 
 async function setAdminClaim() {
   try {
