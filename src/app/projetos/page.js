@@ -30,7 +30,7 @@ export default function ProjetosPage() {
     <Layout>
       <section className="relative min-h-screen snap-y snap-mandatory overflow-y-auto no-scrollbar bg-gradient-to-b from-black to-zinc-900">
         {/* Fundo */}
-       <video
+        <video
           autoPlay
           loop
           muted
@@ -49,9 +49,8 @@ export default function ProjetosPage() {
               <section
                 key={idx}
                 id={projeto.id}
-                className={`snap-start flex flex-col items-center justify-center gap-12 text-white ${
-                  isEven ? "md:flex-row" : "md:flex-row-reverse"
-                }`}
+                className={`snap-start flex flex-col items-center justify-center gap-12 text-white ${isEven ? "md:flex-row" : "md:flex-row-reverse"
+                  }`}
               >
                 <div className="w-full md:w-1/2">
                   <CarouselProjeto imagens={projeto.imagens} />
@@ -81,12 +80,12 @@ export default function ProjetosPage() {
                       </li>
                     ))}
                   </ul>
-                </div> 
+                </div>
               </section>
             )
           })}
         </div>
-        
+
       </section>
     </Layout>
   )

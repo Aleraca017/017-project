@@ -160,6 +160,28 @@ export default function ProjetosPage() {
     }
   };
 
+  // linguagens, frameworks e tecnologias
+  // --- listas ---
+  const linguagens = ["JavaScript", "Python", "PHP", "Java", "C#", "Ruby"];
+
+  const frameworks = {
+    JavaScript: ["React", "Angular", "Vue", "Vanilla JS"],
+    Python: ["Django", "Flask", "FastAPI"],
+    PHP: ["Laravel", "Symfony", "CodeIgniter"],
+    Java: ["Spring", "JSF", "Struts"],
+    "C#": ["ASP.NET", "Blazor", "Unity"],
+    Ruby: ["Rails", "Sinatra"],
+  };
+
+  const tecnologias = {
+    JavaScript: ["Next.js", "React Native", "Node.js", "Vanilla JS"],
+    Python: ["NumPy", "Pandas", "TensorFlow"],
+    PHP: ["Composer", "WordPress", "Drupal"],
+    Java: ["Spring Boot", "Maven", "Jenkins"],
+    "C#": [".NET Core", "Xamarin", "Unity Engine"],
+    Ruby: ["Rails", "Sinatra"],
+  };
+
   const handleDelete = async (docId) => {
     if (!isAdmin)
       return showNotification("Apenas admins podem excluir!", "error");
@@ -319,7 +341,7 @@ export default function ProjetosPage() {
 
         {/* Modal de criação */}
         <Dialog open={showModal} onOpenChange={setShowModal}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg h-200 overflow-y-auto no-scrollbar">
             <DialogHeader>
               <DialogTitle>Criar Projeto</DialogTitle>
               <DialogDescription>
@@ -416,13 +438,93 @@ export default function ProjetosPage() {
                     <SelectValue placeholder="Selecione um status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="andamento">Em andamento</SelectItem>
+                    <SelectItem value="pendente">Pendente</SelectItem>
                     <SelectItem value="concluido">Concluído</SelectItem>
                     <SelectItem value="cancelado">Cancelado</SelectItem>
                     <SelectItem value="tratativa">Em tratativa</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Linguagem */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Linguagem</label>
+                <Select
+                  value={editingProject?.linguagem || ""}
+                  onValueChange={(val) =>
+                    setEditingProject((prev) => ({
+                      ...prev,
+                      linguagem: val,
+                      framework: "",   // reseta quando mudar linguagem
+                      tecnologia: "",  // reseta quando mudar linguagem
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a linguagem" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {linguagens.map((lang) => (
+                      <SelectItem key={lang} value={lang}>
+                        {lang}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Framework */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Framework</label>
+                <Select
+                  value={editingProject?.framework || ""}
+                  onValueChange={(val) =>
+                    setEditingProject((prev) => ({
+                      ...prev,
+                      framework: val,
+                    }))
+                  }
+                  disabled={!editingProject?.linguagem} // só habilita se linguagem escolhida
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um framework" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(frameworks[editingProject?.linguagem] || []).map((fw) => (
+                      <SelectItem key={fw} value={fw}>
+                        {fw}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Tecnologia */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Tecnologia</label>
+                <Select
+                  value={editingProject?.tecnologia || ""}
+                  onValueChange={(val) =>
+                    setEditingProject((prev) => ({
+                      ...prev,
+                      tecnologia: val,
+                    }))
+                  }
+                  disabled={!editingProject?.linguagem} // só habilita se linguagem escolhida
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma tecnologia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(tecnologias[editingProject?.linguagem] || []).map((tech) => (
+                      <SelectItem key={tech} value={tech}>
+                        {tech}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
 
               {/* Tipo */}
               <div className="space-y-2">

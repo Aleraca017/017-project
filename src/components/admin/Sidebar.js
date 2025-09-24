@@ -80,10 +80,10 @@ export default function Sidebar() {
           label: "Gerência",
           icon: <FaCalendarAlt />,
           subLinks: [
-            { label: "Usuários", href: "/admin/usuarios", icon: <FaUsers /> },
-            { label: "Reuniões", href: "/admin/reunioes", icon: <FaCalendarAlt /> },
-            { label: "Prazos", href: "/admin/prazos", icon: <FaTasks /> },
-            { label: "Clientes", href: "/admin/clientes", icon: <FaUserAlt /> },
+            { label: "Usuários", href: "/admin/gerencia/usuarios", icon: <FaUsers /> },
+            { label: "Reuniões", href: "/admin/gerencia/reunioes", icon: <FaCalendarAlt /> },
+            { label: "Prazos", href: "/admin/gerencia/prazos", icon: <FaTasks /> },
+            { label: "Clientes", href: "/admin/gerencia/clientes", icon: <FaUserAlt /> },
           ],
         },
       ]
@@ -92,15 +92,15 @@ export default function Sidebar() {
       label: "Projetos",
       icon: <FaProjectDiagram />,
       subLinks: [
-        { label: "Projetos", href: "/admin/projetos", icon: <FaProjectDiagram /> },
-        { label: "Documentações", href: "/admin/docs", icon: <FaFileAlt /> },
+        { label: "Projetos", href: "/admin/projetos/projetos", icon: <FaProjectDiagram /> },
+        { label: "Documentações", href: "/admin/projetos/docs", icon: <FaFileAlt /> },
       ],
     },
     {
       label: "Suporte",
       icon: <FaTasks />,
       subLinks: [
-        { label: "Solicitações", href: "/admin/solicitacoes", icon: <FaTasks /> },
+        { label: "Solicitações", href: "/admin/suporte/solicitacoes", icon: <FaTasks /> },
       ],
     },
   ];
@@ -159,7 +159,7 @@ export default function Sidebar() {
       return (
         <img
           src={userImg}
-          className="w-16 h-16 rounded-full object-cover"
+          className="w-16 h-16 rounded-full object-cover ring-3 ring-purple-700 shadow-lg shadow-purple-500"
           alt="Avatar do usuário"
           onError={(e) => {
             e.currentTarget.onerror = null; // evita loop infinito
@@ -176,7 +176,7 @@ export default function Sidebar() {
         .toUpperCase();
 
       return (
-        <div className="w-16 h-16 rounded-full bg-zinc-400 text-white flex items-center justify-center font-bold text-xl">
+        <div className="w-16 h-16 rounded-full bg-zinc-400 text-white flex items-center justify-center font-bold text-xl ring-3 ring-purple-700 shadow-lg shadow-purple-500">
           {initials}
         </div>
       );
@@ -192,8 +192,8 @@ export default function Sidebar() {
           {renderLinks()}
         </div>
 
-        <div className="flex flex-col h-50 items-center justify-between bg-stone-700 w-full p-4 pb-8">
-          <div className="flex flex-row items-center gap-4 justify-center w-full pt-4">
+        <div className="flex flex-col h-50 items-center justify-between bg-stone-700 w-full p-4 pb-8 ">
+          <div className="flex flex-row items-center gap-4 justify-center w-full pt-4 ">
             {renderAvatar()}
             <div>
               {periodo}, <span className="font-semibold">{userName}</span>

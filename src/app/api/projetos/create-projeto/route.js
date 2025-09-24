@@ -16,8 +16,8 @@ export async function POST(req) {
     const docRef = await addDoc(collection(db, "projetos"), {
       titulo: body.titulo,
       descricao: body.descricao,
-      status: body.status || "andamento",
-      cliente: body.clienteNome || "",
+      status: body.status || "pendente",
+      cliente: body.cliente || "",
       responsavel: body.responsavel || "",
       criadoEm: new Date(),
       linguagem: body.linguagem || "",

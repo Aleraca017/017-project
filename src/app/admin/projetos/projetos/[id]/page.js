@@ -241,7 +241,7 @@ export default function ProjetoPage() {
           )}
         </div>
 
-        <Card className="bg-zinc-900 border-0 w-full h-210 shadow-lg overflow-auto p-4 space-y-6">
+        <Card className="bg-zinc-900 border-0 w-full h-210 shadow-lg overflow-auto p-4 space-y-6 scrollbar-black">
           {/* Administrativo */}
           <div className="p-4 bg-zinc-950 text-white rounded-md shadow-md space-y-4">
             <CardTitle className="text-lg font-semibold">Administrativo</CardTitle>
@@ -536,7 +536,7 @@ export default function ProjetoPage() {
                   {projeto.githubUrl}
                 </a>
               ) : (
-                <div className="p-2 bg-white rounded-md shadow-sm">Sem documentação</div>
+                <div className="p-2 bg-transparent rounded-md shadow-sm">Sem documentação</div>
               )}
             </div>
           </div>

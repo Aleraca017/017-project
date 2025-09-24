@@ -217,9 +217,9 @@ export default function SolicitacoesPage() {
           <p>Carregando...</p>
         ) : filteredSolicitacoes.length > 0 ? (
           <div className="overflow-y-auto max-h-170 no-scrollbar">
-            <ul className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredSolicitacoes.map((sol) => (
-                <li
+                <div
                   key={sol.id}
                   className="border-2 border-zinc-700 p-4 rounded-lg shadow-sm bg-zinc-900 hover:shadow-md cursor-pointer"
                   onDoubleClick={() => {
@@ -239,10 +239,11 @@ export default function SolicitacoesPage() {
                   </div>
                   <p className="text-purple-200">{sol.emailAutor || "-"}</p>
                   <p className="text-zinc-200 text-sm">{formatDate(sol.data)}</p>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
+
         ) : (
           <p className="text-white">Nenhuma solicitação encontrada.</p>
         )}
@@ -289,6 +290,14 @@ export default function SolicitacoesPage() {
                   <p>
                     <strong>Rotas:</strong> {selectedSolicitacao.rotas || "-"}
                   </p>
+
+
+                  {selectedSolicitacao.motivoCancelamento && (
+                    <p>
+                      <strong>Motivo do cancelamento: </strong>
+                      {selectedSolicitacao.motivoCancelamento || "-"}
+                    </p>
+                  )}
 
                   <div className="flex flex-col gap-2 mt-4">
                     <div className="flex justify-end gap-2">

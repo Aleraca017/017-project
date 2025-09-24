@@ -79,6 +79,18 @@ html {
   display: none;
 }
 
+::-webkit-scrollbar {
+  background-color: oklch(27.4% 0.006 286.033);
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: oklch(37% 0.013 285.805);
+  border-radius: 10px;
+  width: 8px;
+}
+
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
