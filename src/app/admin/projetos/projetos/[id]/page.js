@@ -9,7 +9,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import {
   Select,
   SelectTrigger,
@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export default function ProjetoPage() {
   const { id } = useParams();
@@ -32,7 +33,7 @@ export default function ProjetoPage() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   const languages = ["JavaScript", "Python", "PHP", "Java", "C#", "Ruby"];
-  const projectTypes = ["Fixo", "Recorrente"]; // <- tipos dinâmicos controlados aqui
+  const projectTypes = ["Fixo", "Recorrente"];
 
   const frameworksMap = {
     JavaScript: ["React", "Angular", "Vue", "Vanilla JS"],
@@ -52,7 +53,7 @@ export default function ProjetoPage() {
   };
 
   const statusColors = {
-    andamento: "bg-yellow-400 text-black",
+    "em andamento": "bg-yellow-400 text-black",
     concluido: "bg-green-500 text-white",
     cancelado: "bg-red-500 text-white",
     tratativa: "bg-gray-400 text-white",
@@ -112,6 +113,41 @@ export default function ProjetoPage() {
   const [availableFrameworks, setAvailableFrameworks] = useState([]);
   const [availableTechnologies, setAvailableTechnologies] = useState([]);
 
+  // helpers para data
+  const parseToDate = (v) => {
+    if (!v && v !== 0) return null;
+    // Firestore Timestamp like { seconds, nanoseconds }
+    if (typeof v === "object" && v !== null) {
+      if (typeof v.seconds === "number") return new Date(v.seconds * 1000);
+      if (typeof v.toDate === "function") {
+        try {
+          const d = v.toDate();
+          if (d instanceof Date && !isNaN(d)) return d;
+        } catch (e) { }
+      }
+    }
+    if (typeof v === "number") {
+      // could be ms or seconds — assumimos ms (Firestore seconds handled acima)
+      return new Date(v);
+    }
+    if (typeof v === "string") {
+      // "2025-09-29" or ISO string
+      const d = new Date(v);
+      if (!isNaN(d)) return d;
+      return null;
+    }
+    if (v instanceof Date) {
+      return isNaN(v) ? null : v;
+    }
+    return null;
+  };
+
+  const safeFormat = (value, fmt = "dd/MM/yyyy") => {
+    const d = value instanceof Date ? value : parseToDate(value);
+    if (!d) return "—";
+    return isValid(d) ? format(d, fmt) : "—";
+  };
+
   // Verifica admin
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -137,6 +173,8 @@ export default function ProjetoPage() {
           linguagem: data.linguagem || "",
           framework: data.framework || "",
           tecnologia: data.tecnologia || "",
+          // padroniza como Date | null
+          dataEntrega: parseToDate(data.dataEntrega),
         });
 
         setAvailableFrameworks(frameworksMap[data.linguagem] || []);
@@ -146,12 +184,12 @@ export default function ProjetoPage() {
 
     const fetchUsers = async () => {
       const querySnapshot = await getDocs(collection(db, "usuarios"));
-      setUsers(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      setUsers(querySnapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
     };
 
     const fetchClients = async () => {
       const querySnapshot = await getDocs(collection(db, "clientes"));
-      setClients(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      setClients(querySnapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
     };
 
     if (id) {
@@ -173,21 +211,27 @@ export default function ProjetoPage() {
 
   const handleSave = async () => {
     try {
-      const bodyToSend = {
+      // Antes de enviar, converte dataEntrega (Date) para ISO (ou null)
+      const payload = {
         ...editingProject,
         docId: editingProject.id,
         tipo: editingProject.tipo || "",
         linguagem: editingProject.linguagem || "",
         framework: editingProject.framework || "",
         tecnologia: editingProject.tecnologia || "",
+        dataEntrega: editingProject.dataEntrega
+          ? editingProject.dataEntrega.toISOString()
+          : null,
       };
+
       const res = await fetch("/api/projetos/update-projeto", {
         method: "POST",
-        body: JSON.stringify(bodyToSend),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setProjeto(bodyToSend);
+      if (!res.ok) throw new Error(data.error || "Erro no servidor");
+      // Atualiza localmente (mantemos editingProject como Date)
+      setProjeto((prev) => ({ ...prev, ...payload }));
       setIsEditing(false);
       alert("Projeto atualizado com sucesso!");
     } catch (err) {
@@ -199,7 +243,10 @@ export default function ProjetoPage() {
     return (
       <div className="flex">
         <Sidebar />
-        <div className="ml-64 p-6">Carregando...</div>
+        <div className="flex flex-col justify-center items-center bg-black text-white w-full h-screen">
+          <Loader2 className="animate-spin w-8 h-8 mb-4 text-purple-600" />
+          Carregando...
+        </div>
       </div>
     );
   }
@@ -213,30 +260,29 @@ export default function ProjetoPage() {
           {isAdmin && (
             <div className="flex gap-2">
               <Button
+                className={"bg-gray-900 hover:bg-gray-800 hover:cursor-pointer"}
                 onClick={() => {
-                  if (isEditing) {
-                    // cancelar → volta para dados originais
-                    setEditingProject({
-                      ...projeto,
-                      linguagem: projeto.linguagem || "",
-                      framework: projeto.framework || "",
-                      tecnologia: projeto.tecnologia || "",
-                    });
-                  } else {
-                    // editar → prepara para edição
-                    setEditingProject({
-                      ...projeto,
-                      linguagem: projeto.linguagem || "",
-                      framework: projeto.framework || "",
-                      tecnologia: projeto.tecnologia || "",
-                    });
-                  }
-                  setIsEditing(!isEditing);
+                  // sempre (re)inicializa editingProject com data como Date
+                  setEditingProject({
+                    ...projeto,
+                    linguagem: projeto.linguagem || "",
+                    framework: projeto.framework || "",
+                    tecnologia: projeto.tecnologia || "",
+                    dataEntrega: parseToDate(projeto.dataEntrega),
+                  });
+                  setIsEditing((v) => !v);
                 }}
               >
                 {isEditing ? "Cancelar" : "Editar"}
               </Button>
-              {isEditing && <Button onClick={handleSave}>Salvar</Button>}
+              {isEditing && (
+                <Button
+                  className={"bg-green-600 hover:bg-green-800 hover:cursor-pointer"}
+                  onClick={handleSave}
+                >
+                  Salvar
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -322,8 +368,6 @@ export default function ProjetoPage() {
             </div>
           </div>
 
-
-
           {/* Contrato */}
           <div className="bg-zinc-950 text-white p-4 rounded-md shadow-md space-y-4">
             <CardTitle className=" text-lg font-semibold">Contrato</CardTitle>
@@ -359,9 +403,7 @@ export default function ProjetoPage() {
               <div>
                 <Label className="mb-2">Data de Criação</Label>
                 <div className="p-2 bg-zinc-900 rounded-md shadow-sm">
-                  {projeto.criadoEm?.seconds
-                    ? format(new Date(projeto.criadoEm.seconds * 1000), "dd/MM/yyyy")
-                    : "—"}
+                  {safeFormat(projeto.criadoEm, "dd/MM/yyyy")}
                 </div>
               </div>
 
@@ -372,8 +414,8 @@ export default function ProjetoPage() {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className="w-full justify-start text-left text-black">
-                        {editingProject.dataEntrega
-                          ? format(new Date(editingProject.dataEntrega), "dd/MM/yyyy")
+                        {editingProject?.dataEntrega
+                          ? format(editingProject.dataEntrega, "dd/MM/yyyy")
                           : "Selecione a data"}
                         <CalendarIcon className="ml-auto h-4 w-4" />
                       </Button>
@@ -381,15 +423,11 @@ export default function ProjetoPage() {
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={
-                          editingProject.dataEntrega
-                            ? new Date(editingProject.dataEntrega)
-                            : undefined
-                        }
+                        selected={editingProject?.dataEntrega ?? undefined}
                         onSelect={(date) =>
                           setEditingProject((prev) => ({
                             ...prev,
-                            dataEntrega: date ? date.toISOString().split("T")[0] : "",
+                            dataEntrega: date ?? null, // sempre Date | null
                           }))
                         }
                       />
@@ -397,11 +435,7 @@ export default function ProjetoPage() {
                   </Popover>
                 ) : (
                   <div className="p-2 bg-zinc-900 rounded-md shadow-sm">
-                    {projeto.dataEntrega
-                      ? projeto.dataEntrega.seconds
-                        ? format(new Date(projeto.dataEntrega.seconds * 1000), "dd/MM/yyyy")
-                        : format(new Date(projeto.dataEntrega), "dd/MM/yyyy")
-                      : "Sem data prevista"}
+                    {projeto.dataEntrega ? safeFormat(projeto.dataEntrega, "dd/MM/yyyy") : "Sem data prevista"}
                   </div>
                 )}
               </div>
@@ -423,12 +457,8 @@ export default function ProjetoPage() {
                       setEditingProject((prev) => ({
                         ...prev,
                         linguagem: val,
-                        framework: frameworksMap[val]?.includes(prev.framework)
-                          ? prev.framework
-                          : "",
-                        tecnologia: technologiesMap[val]?.includes(prev.tecnologia)
-                          ? prev.tecnologia
-                          : "",
+                        framework: frameworksMap[val]?.includes(prev.framework) ? prev.framework : "",
+                        tecnologia: technologiesMap[val]?.includes(prev.tecnologia) ? prev.tecnologia : "",
                       }));
                       setAvailableFrameworks(frameworksMap[val] || []);
                       setAvailableTechnologies(technologiesMap[val] || []);
@@ -457,14 +487,8 @@ export default function ProjetoPage() {
                 <Label className="mb-2">Framework</Label>
                 {isEditing ? (
                   <Select
-                    value={
-                      availableFrameworks.includes(editingProject.framework)
-                        ? editingProject.framework
-                        : ""
-                    }
-                    onValueChange={(val) =>
-                      setEditingProject((prev) => ({ ...prev, framework: val }))
-                    }
+                    value={availableFrameworks.includes(editingProject.framework) ? editingProject.framework : ""}
+                    onValueChange={(val) => setEditingProject((prev) => ({ ...prev, framework: val }))}
                   >
                     <SelectTrigger className="text-black bg-gray-50 w-full">
                       <SelectValue placeholder="Selecione um framework" />
@@ -489,14 +513,8 @@ export default function ProjetoPage() {
                 <Label className="mb-2">Tecnologia</Label>
                 {isEditing ? (
                   <Select
-                    value={
-                      availableTechnologies.includes(editingProject.tecnologia)
-                        ? editingProject.tecnologia
-                        : ""
-                    }
-                    onValueChange={(val) =>
-                      setEditingProject((prev) => ({ ...prev, tecnologia: val }))
-                    }
+                    value={availableTechnologies.includes(editingProject.tecnologia) ? editingProject.tecnologia : ""}
+                    onValueChange={(val) => setEditingProject((prev) => ({ ...prev, tecnologia: val }))}
                   >
                     <SelectTrigger className="text-black bg-gray-50 w-full">
                       <SelectValue placeholder="Selecione uma tecnologia" />
@@ -549,8 +567,6 @@ export default function ProjetoPage() {
             </Badge>
           </div>
         </Card>
-
-
       </main>
     </div>
   );

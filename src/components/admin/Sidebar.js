@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut, onAuthStateChanged, getIdTokenResult } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
@@ -18,14 +18,18 @@ import {
   FaChevronDown,
   FaChevronUp,
 } from "react-icons/fa";
+import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 
 export default function Sidebar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userName, setUserName] = useState("Carregando...");
   const [userFullName, setUserFullName] = useState("Carregando...");
-  const [userImg, setUserImg] = useState(null); // imagem do Firestore
+  const [userImg, setUserImg] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [openSection, setOpenSection] = useState("");
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
   const router = useRouter();
   const pathname = usePathname();
 
@@ -35,18 +39,25 @@ export default function Sidebar() {
     router.push("/login");
   };
 
-  // Pegar usuário logado, claims e dados do Firestore
+  // Fecha dropdown ao clicar fora
   useEffect(() => {
-    console.log("Sidebar conectada no Firestore Project:", db._databaseId?.projectId);
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpenDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
+  // Pegar usuário logado
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          // claims
           const tokenResult = await getIdTokenResult(user, true);
           setIsAdmin(!!tokenResult.claims.admin);
 
-          // dados do Firestore
           const userRef = doc(db, "usuarios", user.uid);
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
@@ -99,9 +110,7 @@ export default function Sidebar() {
     {
       label: "Suporte",
       icon: <FaTasks />,
-      subLinks: [
-        { label: "Solicitações", href: "/admin/suporte/solicitacoes", icon: <FaTasks /> },
-      ],
+      subLinks: [{ label: "Solicitações", href: "/admin/suporte/solicitacoes", icon: <FaTasks /> }],
     },
   ];
 
@@ -118,9 +127,7 @@ export default function Sidebar() {
 
   const renderLinks = () => {
     return links.map((section, idx) => {
-      const isActiveSection = section.subLinks.some((link) =>
-        pathname.startsWith(link.href)
-      );
+      const isActiveSection = section.subLinks.some((link) => pathname.startsWith(link.href));
       const isOpen = openSection === section.label || isActiveSection;
 
       return (
@@ -153,7 +160,7 @@ export default function Sidebar() {
     });
   };
 
-  // Avatar com fallback para iniciais
+  // Avatar com fallback
   const renderAvatar = () => {
     if (userImg) {
       return (
@@ -162,7 +169,7 @@ export default function Sidebar() {
           className="w-16 h-16 rounded-full object-cover ring-3 ring-purple-700 shadow-lg shadow-purple-500"
           alt="Avatar do usuário"
           onError={(e) => {
-            e.currentTarget.onerror = null; // evita loop infinito
+            e.currentTarget.onerror = null;
             setUserImg(null);
           }}
         />
@@ -192,20 +199,52 @@ export default function Sidebar() {
           {renderLinks()}
         </div>
 
-        <div className="flex flex-col h-50 items-center justify-between bg-stone-700 w-full p-4 pb-8 ">
-          <div className="flex flex-row items-center gap-4 justify-center w-full pt-4 ">
+        {/* Avatar + Dropdown */}
+        <div ref={dropdownRef} className="relative flex flex-col items-center w-full p-4 pb-8 bg-stone-700">
+          <div
+            onClick={() => setOpenDropdown(!openDropdown)}
+            className="flex flex-row items-center gap-4 justify-center w-full pt-4 hover:cursor-pointer group"
+          >
             {renderAvatar()}
             <div>
               {periodo}, <span className="font-semibold">{userName}</span>
             </div>
+            <MdOutlineKeyboardArrowRight
+              className="invisible group-hover:visible transition-transform duration-200"
+              style={{ transform: openDropdown ? "rotate(90deg)" : "rotate(0deg)" }}
+            />
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="mt-5 flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded w-full justify-center hover:cursor-pointer"
-          >
-            <FaSignOutAlt /> Sair
-          </button>
+          {openDropdown && (
+            <div className="absolute bottom-10 w-44 left-60 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg z-50">
+              <ul className="flex flex-col text-sm text-zinc-200">
+                <li
+                  className="px-4 py-2 hover:bg-zinc-800 cursor-pointer rounded-lg"
+                  onClick={() => {
+                    setOpenDropdown(false);
+                    router.push("/versao");
+                  }}
+                >
+                  Versão
+                </li>
+                <li
+                  className="px-4 py-2 hover:bg-zinc-800 cursor-pointer rounded-lg"
+                  onClick={() => {
+                    setOpenDropdown(false);
+                    router.push("/admin/account");
+                  }}
+                >
+                  Minha Conta
+                </li>
+                <li
+                  onClick={handleLogout}
+                  className="px-4 py-2 hover:bg-zinc-800 cursor-pointer text-red-400 flex items-center gap-2 rounded-lg"
+                >
+                  <FaSignOutAlt /> Sair
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </aside>
 

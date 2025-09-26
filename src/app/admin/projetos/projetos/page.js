@@ -286,7 +286,7 @@ export default function ProjetosPage() {
                       return "bg-red-500 text-white";
                     case "concluido":
                       return "bg-green-500 text-white";
-                    case "andamento":
+                    case "em andamento":
                       return "bg-yellow-400 text-black";
                     default:
                       return "bg-gray-300 text-black";
@@ -298,7 +298,7 @@ export default function ProjetosPage() {
                     key={p.id}
                     className={`${index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"
                       } hover:bg-zinc-600 transition cursor-pointer`}
-                    onDoubleClick={() => router.push(`/admin/projetos/${p.id}`)}
+                    onDoubleClick={() => router.push(`/admin/projetos/projetos/${p.id}`)}
                   >
                     <td className="p-3 text-zinc-50">{p.titulo || "-"}</td>
                     <td className="p-3">
