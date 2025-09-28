@@ -19,6 +19,8 @@ import {
   FaChevronUp,
 } from "react-icons/fa";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
+import { MdForum } from "react-icons/md";
+import { BiSupport } from "react-icons/bi";
 
 export default function Sidebar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -109,8 +111,11 @@ export default function Sidebar() {
     },
     {
       label: "Suporte",
-      icon: <FaTasks />,
-      subLinks: [{ label: "Solicitações", href: "/admin/suporte/solicitacoes", icon: <FaTasks /> }],
+      icon: <BiSupport />,
+      subLinks: [
+        { label: "Solicitações", href: "/admin/suporte/solicitacoes", icon: <FaTasks /> },
+        { label: "Forum de tratativas", href: "/admin/suporte/forum", icon: <MdForum /> },
+      ],
     },
   ];
 

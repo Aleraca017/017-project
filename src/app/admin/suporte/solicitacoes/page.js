@@ -41,8 +41,16 @@ export default function SolicitacoesPage() {
       try {
         const querySnapshot = await getDocs(collection(dbSolicitacoes, "chamados"));
         const dados = querySnapshot.docs
-          .map((doc) => ({ id: doc.id, ...doc.data() }))
-          .sort((a, b) => new Date(b.data) - new Date(a.data));
+          .map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              criadoEm: data.criadoEm?.toDate ? data.criadoEm.toDate() : null,
+            };
+          })
+          .sort((a, b) => b.criadoEm - a.criadoEm);
+
         setSolicitacoes(dados);
         setFilteredSolicitacoes(dados);
       } catch (err) {
@@ -69,9 +77,12 @@ export default function SolicitacoesPage() {
             (s.emailAutor && s.emailAutor.toLowerCase().includes(lower))
         );
       }
-      if (startDate) data = data.filter((s) => new Date(s.data) >= new Date(startDate));
+      if (startDate)
+        data = data.filter((s) => s.criadoEm && s.criadoEm >= new Date(startDate));
       if (endDate)
-        data = data.filter((s) => new Date(s.data) <= new Date(endDate + "T23:59:59"));
+        data = data.filter(
+          (s) => s.criadoEm && s.criadoEm <= new Date(endDate + "T23:59:59")
+        );
       if (statusFilter) data = data.filter((s) => s.status === statusFilter);
     }
 
@@ -93,9 +104,9 @@ export default function SolicitacoesPage() {
     cancelado: "bg-red-500",
   };
 
-  const formatDate = (str) => {
-    if (!str) return "-";
-    const d = new Date(str);
+  const formatDate = (date) => {
+    if (!date) return "-";
+    const d = new Date(date);
     return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(
       2,
       "0"
@@ -238,18 +249,20 @@ export default function SolicitacoesPage() {
                     </span>
                   </div>
                   <p className="text-purple-200">{sol.emailAutor || "-"}</p>
-                  <p className="text-zinc-200 text-sm">{formatDate(sol.data)}</p>
+                  <p className="text-zinc-200 text-sm">{formatDate(sol.criadoEm)}</p>
                 </div>
               ))}
             </div>
           </div>
-
         ) : (
           <p className="text-white">Nenhuma solicitação encontrada.</p>
         )}
 
         {/* Modal */}
-        <Dialog open={!!selectedSolicitacao} onOpenChange={() => setSelectedSolicitacao(null)}>
+        <Dialog
+          open={!!selectedSolicitacao}
+          onOpenChange={() => setSelectedSolicitacao(null)}
+        >
           <DialogContent className="max-w-lg">
             {selectedSolicitacao && (
               <>
@@ -263,10 +276,12 @@ export default function SolicitacoesPage() {
                       {selectedSolicitacao.status}
                     </span>
                     <span>
-                      {selectedSolicitacao.emailAutor} - {formatDate(selectedSolicitacao.data)}
+                      {selectedSolicitacao.emailAutor} -{" "}
+                      {formatDate(selectedSolicitacao.criadoEm)}
                     </span>
                   </DialogDescription>
                 </DialogHeader>
+
 
                 <div className="mt-2 space-y-2 text-black">
                   <p>
@@ -399,7 +414,9 @@ export default function SolicitacoesPage() {
 
         {notification.message && (
           <div
-            className={`fixed top-5 right-5 rounded-2xl py-2 px-4 z-50 transition-transform duration-500 ${notification.type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+            className={`fixed top-5 right-5 rounded-2xl py-2 px-4 z-50 transition-transform duration-500 ${notification.type === "success"
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
               }`}
           >
             {notification.message}

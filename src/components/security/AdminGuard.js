@@ -5,6 +5,8 @@ import { onAuthStateChanged, signOut, getIdTokenResult } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { auth } from "@/lib/firebase";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function AdminGuard({ children }) {
     const [status, setStatus] = useState("checking");
@@ -26,10 +28,6 @@ export default function AdminGuard({ children }) {
                 } else {
                     setStatus("unauthorized");
                     // redireciona só depois de renderizar a mensagem
-                    setTimeout(async () => {
-                        await signOut(auth);
-                        router.replace("/login");
-                    }, 2000);
                 }
             } catch (err) {
                 console.error("Erro ao verificar claims:", err);
@@ -52,11 +50,15 @@ export default function AdminGuard({ children }) {
 
     if (status === "unauthorized") {
         return (
-            <div className="flex flex-col items-center justify-center h-screen w-screen bg-zinc-950 text-white text-center">
-                <Loader2 className="animate-spin w-8 h-8 mb-4 text-red-500" />
-                Você não possui permissões suficientes.
-                <br />
-                Redirecionando para login...
+            <div className="flex flex-col items-center justify-center h-screen w-screen bg-zinc-950 text-red-500 text-center">
+                <Header />
+                <div className="flex flex-col h-screen w-full items-center justify-center bg-[url(/images/erros/401.jpg)] bg-cover bg-position-[center_left_30rem] flex-1 p-6 bold text-4xl">
+                    Erro 401
+                    <br />
+                    <br />
+                    Você não possui permissões suficientes.
+                </div>
+                <Footer />
             </div>
         );
     }

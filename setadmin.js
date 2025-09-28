@@ -12,7 +12,7 @@ const uid = "m9m4EhhloVUcywwbkAY5QvKC0QB2";
 
 async function setAdminClaim() {
   try {
-    await admin.auth().setCustomUserClaims(uid, { admin: true });
+    await admin.auth().setCustomUserClaims(uid, { admin: false });
     console.log(`Usuário ${uid} agora é ADMIN`);
     process.exit(0);
   } catch (error) {
