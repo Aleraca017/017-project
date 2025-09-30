@@ -21,6 +21,9 @@ import {
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdForum } from "react-icons/md";
 import { BiSupport } from "react-icons/bi";
+import { BiTransferAlt } from "react-icons/bi";
+import { MdAttachMoney } from "react-icons/md";
+import { FaMoneyBill } from "react-icons/fa";
 
 export default function Sidebar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -97,10 +100,18 @@ export default function Sidebar() {
             { label: "Reuniões", href: "/admin/gerencia/reunioes", icon: <FaCalendarAlt /> },
             { label: "Prazos", href: "/admin/gerencia/prazos", icon: <FaTasks /> },
             { label: "Clientes", href: "/admin/gerencia/clientes", icon: <FaUserAlt /> },
+            { label: "Transferir Solicitações", href: "/admin/gerencia/t-solicitacoes", icon: <BiTransferAlt /> },
           ],
         },
       ]
       : []),
+    {
+      label: "Financeiro",
+      icon: <MdAttachMoney />,
+      subLinks: [
+        { label: "Pagamentos", href: "/admin/financeiro/pagamentos", icon: <FaMoneyBill /> },
+      ],
+    },
     {
       label: "Projetos",
       icon: <FaProjectDiagram />,

@@ -6,7 +6,7 @@ import nodemailer from "nodemailer";
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log("Body recebido:", body);
+    console.log("📩 Body recebido:", body);
 
     const { id, novoStatus, status, emailAutor, cancelReason } = body;
     const finalStatus = novoStatus || status;
@@ -28,8 +28,12 @@ export async function POST(req) {
 
     // Envia e-mail
     if (emailAutor) {
+      console.log("📧 Preparando envio de email para:", emailAutor);
+
       const transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true, // conexão SSL/TLS
         auth: {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
@@ -45,31 +49,34 @@ export async function POST(req) {
         assunto = "Sua solicitação foi concluída";
       } else if (finalStatus === "cancelado") {
         assunto = "Sua solicitação foi cancelada";
-        mensagem += `\n\nMotivo do cancelamento: ${cancelReason && cancelReason.trim() !== ""
-            ? cancelReason
-            : "Não informado"
+        mensagem += `\n\nMotivo do cancelamento: ${cancelReason && cancelReason.trim() !== "" ? cancelReason : "Não informado"
           }`;
       }
 
       mensagem += `\n\nAtenciosamente,\nEquipe de Suporte 017Tag.`;
 
-      console.log("Assunto:", assunto);
-      console.log("Mensagem final:", mensagem);
-
       if (assunto) {
-        await transporter.sendMail({
-          from: `"Suporte" <${process.env.SMTP_USER}>`,
-          to: emailAutor,
-          subject: assunto,
-          text: mensagem,
-          html: `<p>${mensagem.replace(/\n/g, "<br>")}</p>`,
-        });
+        try {
+          await transporter.sendMail({
+            from: `"Suporte 017Tag" <${process.env.SMTP_USER}>`,
+            to: emailAutor,
+            subject: assunto,
+            text: mensagem,
+            html: `<p>${mensagem.replace(/\n/g, "<br>")}</p>`,
+          });
+
+          console.log("✅ Email enviado com sucesso para:", emailAutor);
+        } catch (mailErr) {
+          console.error("❌ Erro ao enviar email:", mailErr);
+        }
+      } else {
+        console.log("⚠️ Nenhum assunto definido, email não enviado.");
       }
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Erro ao atualizar status:", error);
+    console.error("❌ Erro ao atualizar status:", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

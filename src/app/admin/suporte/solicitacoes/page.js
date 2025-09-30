@@ -16,7 +16,12 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, getIdTokenResult } from "firebase/auth";
+
 export default function SolicitacoesPage() {
+  const [user, setUser] = useState(null);
+
   const [solicitacoes, setSolicitacoes] = useState([]);
   const [filteredSolicitacoes, setFilteredSolicitacoes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,19 +29,35 @@ export default function SolicitacoesPage() {
   const [notification, setNotification] = useState({ message: "", type: "" });
   const [showCancelInput, setShowCancelInput] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
-
   const [search, setSearch] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [idSearch, setIdSearch] = useState("");
-
-  // Novo estado para loader de alteração de status
   const [statusLoading, setStatusLoading] = useState(false);
 
-  // Buscar solicitações
+  // 🔹 Autenticação
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const tokenResult = await getIdTokenResult(firebaseUser);
+        setUser({
+          email: firebaseUser.email,
+          claims: tokenResult.claims,
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 🔹 Buscar solicitações
+  useEffect(() => {
+    if (!user) return;
+
     const fetchSolicitacoes = async () => {
       try {
         const querySnapshot = await getDocs(collection(dbSolicitacoes, "chamados"));
@@ -52,7 +73,6 @@ export default function SolicitacoesPage() {
           .sort((a, b) => b.criadoEm - a.criadoEm);
 
         setSolicitacoes(dados);
-        setFilteredSolicitacoes(dados);
       } catch (err) {
         console.error("Erro ao buscar solicitações:", err);
       } finally {
@@ -60,11 +80,17 @@ export default function SolicitacoesPage() {
       }
     };
     fetchSolicitacoes();
-  }, []);
+  }, [user]);
 
-  // Aplicar filtros
+  // 🔹 Filtrar por autor ou admin
   useEffect(() => {
-    let data = [...solicitacoes];
+    if (!user) return;
+
+    let data = solicitacoes.filter((s) => {
+      if (user.claims?.admin) return true;
+      if (!s.atendidoPor) return true;
+      return s.atendidoPor === user.email;
+    });
 
     if (idSearch) {
       data = data.filter((s) => s.id === idSearch.trim());
@@ -87,9 +113,9 @@ export default function SolicitacoesPage() {
     }
 
     setFilteredSolicitacoes(data);
-  }, [search, startDate, endDate, statusFilter, idSearch, solicitacoes]);
+  }, [solicitacoes, search, startDate, endDate, statusFilter, idSearch, user]);
 
-  // Notificação animada
+  // 🔹 Notificação automática
   useEffect(() => {
     if (notification.message) {
       const timer = setTimeout(() => setNotification({ message: "", type: "" }), 4000);
@@ -115,38 +141,63 @@ export default function SolicitacoesPage() {
     ).padStart(2, "0")}`;
   };
 
+  // 🔹 Atualizar status via API (com envio de e-mail)
   const atualizarStatus = async (id, novoStatus, emailAutor, cancelReason = "") => {
     try {
-      setStatusLoading(true); // ativa loader
+      setStatusLoading(true);
 
-      const res = await fetch("/api/solicitacoes/set-tratativa", {
+      const response = await fetch("/api/solicitacoes/set-tratativa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, novoStatus, emailAutor, cancelReason }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao atualizar status");
+      const data = await response.json();
+      if (!data.success) throw new Error(data.error || "Erro ao atualizar status");
 
       setNotification({
-        message: data.message || "Status atualizado com sucesso!",
+        message: "Status atualizado e e-mail enviado!",
         type: "success",
       });
 
       setSolicitacoes((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, status: novoStatus } : s))
+        prev.map((s) =>
+          s.id === id
+            ? {
+              ...s,
+              status: novoStatus,
+              atendidoPor: novoStatus === "em tratativa" ? user.email : s.atendidoPor,
+            }
+            : s
+        )
       );
+
       setSelectedSolicitacao((prev) =>
-        prev && prev.id === id ? { ...prev, status: novoStatus } : prev
+        prev && prev.id === id
+          ? {
+            ...prev,
+            status: novoStatus,
+            atendidoPor: novoStatus === "em tratativa" ? user.email : prev.atendidoPor,
+          }
+          : prev
       );
+
       setShowCancelInput(false);
       setCancelReason("");
     } catch (err) {
       setNotification({ message: err.message, type: "error" });
     } finally {
-      setStatusLoading(false); // desativa loader
+      setStatusLoading(false);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="flex min-h-screen bg-black text-white items-center justify-center">
+        <p>Carregando usuário...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-black">
@@ -282,7 +333,6 @@ export default function SolicitacoesPage() {
                   </DialogDescription>
                 </DialogHeader>
 
-
                 <div className="mt-2 space-y-2 text-black">
                   <p>
                     <strong>Assunto:</strong> {selectedSolicitacao.assunto || "-"}
@@ -293,24 +343,10 @@ export default function SolicitacoesPage() {
                   <p>
                     <strong>Mensagem:</strong> {selectedSolicitacao.mensagem || "-"}
                   </p>
-                  <p>
-                    <strong>Linguagem:</strong> {selectedSolicitacao.linguagem || "-"}
-                  </p>
-                  <p>
-                    <strong>Framework:</strong> {selectedSolicitacao.framework || "-"}
-                  </p>
-                  <p>
-                    <strong>Tecnologia:</strong> {selectedSolicitacao.tecnologia || "-"}
-                  </p>
-                  <p>
-                    <strong>Rotas:</strong> {selectedSolicitacao.rotas || "-"}
-                  </p>
 
-
-                  {selectedSolicitacao.motivoCancelamento && (
+                  {selectedSolicitacao.atendidoPor && (
                     <p>
-                      <strong>Motivo do cancelamento: </strong>
-                      {selectedSolicitacao.motivoCancelamento || "-"}
+                      <strong>Atendido por:</strong> {selectedSolicitacao.atendidoPor}
                     </p>
                   )}
 
@@ -318,7 +354,6 @@ export default function SolicitacoesPage() {
                     <div className="flex justify-end gap-2">
                       {selectedSolicitacao.status === "pendente" && (
                         <Button
-                          className="bg-yellow-500 text-white hover:bg-yellow-600 flex items-center gap-2"
                           onClick={() =>
                             atualizarStatus(
                               selectedSolicitacao.id,
@@ -328,11 +363,7 @@ export default function SolicitacoesPage() {
                           }
                           disabled={statusLoading}
                         >
-                          {statusLoading ? (
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          ) : (
-                            "Colocar em tratativa"
-                          )}
+                          {statusLoading ? "Carregando..." : "Colocar em tratativa"}
                         </Button>
                       )}
 
@@ -415,8 +446,8 @@ export default function SolicitacoesPage() {
         {notification.message && (
           <div
             className={`fixed top-5 right-5 rounded-2xl py-2 px-4 z-50 transition-transform duration-500 ${notification.type === "success"
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
               }`}
           >
             {notification.message}

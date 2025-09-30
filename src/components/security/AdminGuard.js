@@ -50,13 +50,22 @@ export default function AdminGuard({ children }) {
 
     if (status === "unauthorized") {
         return (
-            <div className="flex flex-col items-center justify-center h-screen w-screen bg-zinc-950 text-red-500 text-center">
+            <div className="flex flex-col items-center justify-center h-screen w-screen bg-zinc-950  text-center">
                 <Header />
-                <div className="flex flex-col h-screen w-full items-center justify-center bg-[url(/images/erros/401.jpg)] bg-cover bg-position-[center_left_30rem] flex-1 p-6 bold text-4xl">
-                    Erro 401
-                    <br />
-                    <br />
-                    Você não possui permissões suficientes.
+                <div className="flex flex-col h-screen w-full items-center justify-center bg-[url(/images/erros/401.jpg)] bg-cover bg-center flex-1 bold">
+                    <div className="backdrop-blur-sm w-full h-full flex flex-col items-center justify-around mt-20 text-red-500 text-shadow-lg text-shadow-red-900 text-7xl">
+                        Erro 401
+                        <br />
+                        <br />
+                        Você não possui permissões suficientes.
+                        <br />
+
+
+                        <a onClick={history.back} className="text-xl text-white hover:cursor-pointer hover:underline">Retornar para a pagina anterior</a>
+
+                    </div>
+
+
                 </div>
                 <Footer />
             </div>
