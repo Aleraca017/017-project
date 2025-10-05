@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { dbSolicitacoes } from "@/lib/firebase-solicitacoes";
 import Sidebar from "@/components/admin/Sidebar";
 import {
@@ -42,9 +43,40 @@ export default function SolicitacoesPage() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const tokenResult = await getIdTokenResult(firebaseUser);
+
+        let nome = "";
+
+        try {
+          // Busca nome no Firestore
+          const userRef = doc(db, "usuarios", firebaseUser.uid);
+          const userSnap = await getDoc(userRef);
+
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            nome =
+              userData.nome ||
+              userData.displayName ||
+              userData.fullName ||
+              ""; // tenta achar o nome em variações
+          } else {
+            console.warn("Documento do usuário não encontrado:", firebaseUser.uid);
+          }
+        } catch (error) {
+          console.error("Erro ao buscar nome do usuário:", error);
+        }
+
+        // Atualiza o estado global com nome, email, uid e claims
         setUser({
+          uid: firebaseUser.uid,
           email: firebaseUser.email,
+          nome,
           claims: tokenResult.claims,
+        });
+
+        console.log("Usuário autenticado:", {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          nome,
         });
       } else {
         setUser(null);
@@ -53,6 +85,8 @@ export default function SolicitacoesPage() {
 
     return () => unsubscribe();
   }, []);
+
+
 
   // 🔹 Buscar solicitações
   useEffect(() => {
@@ -146,13 +180,48 @@ export default function SolicitacoesPage() {
     try {
       setStatusLoading(true);
 
+      let atendidoPorUid = "";
+      let atendidoPorEmail = "";
+      let atendidoPorNome = "";
+
+      if (user) {
+        atendidoPorUid = user.uid;
+        atendidoPorEmail = user.email;
+
+        // 🔹 Busca nome no Firestore caso ainda não esteja no estado user.nome
+        if (!user.nome) {
+          try {
+            const userRef = doc(db, "usuarios", user.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              atendidoPorNome = userSnap.data().nome || "";
+            }
+          } catch (err) {
+            console.error("Erro ao buscar nome do usuário:", err);
+          }
+        } else {
+          atendidoPorNome = user.nome;
+        }
+      }
+
+      const payload = {
+        id,
+        novoStatus,
+        emailAutor,
+        cancelReason: cancelReason || "",
+        atendidoPorUid,
+        atendidoPorEmail,
+        atendidoPorNome,
+      };
+
       const response = await fetch("/api/solicitacoes/set-tratativa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, novoStatus, emailAutor, cancelReason }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
+
       if (!data.success) throw new Error(data.error || "Erro ao atualizar status");
 
       setNotification({
@@ -160,25 +229,18 @@ export default function SolicitacoesPage() {
         type: "success",
       });
 
+      // Atualiza localmente a solicitação
       setSolicitacoes((prev) =>
         prev.map((s) =>
           s.id === id
-            ? {
-              ...s,
-              status: novoStatus,
-              atendidoPor: novoStatus === "em tratativa" ? user.email : s.atendidoPor,
-            }
+            ? { ...s, status: novoStatus, atendidoPor: atendidoPorEmail || s.atendidoPor }
             : s
         )
       );
 
       setSelectedSolicitacao((prev) =>
         prev && prev.id === id
-          ? {
-            ...prev,
-            status: novoStatus,
-            atendidoPor: novoStatus === "em tratativa" ? user.email : prev.atendidoPor,
-          }
+          ? { ...prev, status: novoStatus, atendidoPor: atendidoPorEmail || prev.atendidoPor }
           : prev
       );
 
@@ -190,6 +252,8 @@ export default function SolicitacoesPage() {
       setStatusLoading(false);
     }
   };
+
+
 
   if (!user) {
     return (
