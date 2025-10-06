@@ -116,16 +116,27 @@ export default function SolicitacoesPage() {
     fetchSolicitacoes();
   }, [user]);
 
-  // 🔹 Filtrar por autor ou admin
+  // 🔹 Filtrar conforme status e permissões
   useEffect(() => {
     if (!user) return;
 
     let data = solicitacoes.filter((s) => {
-      if (user.claims?.admin) return true;
-      if (!s.atendidoPor) return true;
-      return s.atendidoPor === user.email;
+      const status = s.status?.toLowerCase();
+
+      // 🔸 Caso seja pendente → visível a todos
+      if (status === "pendente") return true;
+
+      // 🔸 Caso esteja em tratativa, cancelado ou concluído → visível apenas ao atendente ou admin
+      if (["em tratativa", "cancelado", "concluido"].includes(status)) {
+        if (user.claims?.admin) return true;
+        if (s.atendidoPorUid === user.uid) return true;
+        return false;
+      }
+
+      return false;
     });
 
+    // 🔎 Filtros adicionais
     if (idSearch) {
       data = data.filter((s) => s.id === idSearch.trim());
     } else {
@@ -137,17 +148,25 @@ export default function SolicitacoesPage() {
             (s.emailAutor && s.emailAutor.toLowerCase().includes(lower))
         );
       }
+
       if (startDate)
         data = data.filter((s) => s.criadoEm && s.criadoEm >= new Date(startDate));
+
       if (endDate)
         data = data.filter(
           (s) => s.criadoEm && s.criadoEm <= new Date(endDate + "T23:59:59")
         );
-      if (statusFilter) data = data.filter((s) => s.status === statusFilter);
+
+      if (statusFilter)
+        data = data.filter(
+          (s) => s.status?.toLowerCase() === statusFilter.toLowerCase()
+        );
     }
 
     setFilteredSolicitacoes(data);
   }, [solicitacoes, search, startDate, endDate, statusFilter, idSearch, user]);
+
+
 
   // 🔹 Notificação automática
   useEffect(() => {
@@ -214,6 +233,7 @@ export default function SolicitacoesPage() {
         atendidoPorNome,
       };
 
+      // 🔹 Sempre chama a rota padrão de tratativa (envia e-mail ao cliente)
       const response = await fetch("/api/solicitacoes/set-tratativa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -221,8 +241,28 @@ export default function SolicitacoesPage() {
       });
 
       const data = await response.json();
-
       if (!data.success) throw new Error(data.error || "Erro ao atualizar status");
+
+
+      // 🔹 Se for conclusão, também aciona a rota de financeiro + e-mail ao atendente
+
+      console.log("📦 Enviando dados para /concluir:", { id, atendidoPorEmail, atendidoPorNome });
+
+      if (novoStatus === "concluido") {
+        try {
+          await fetch("/api/solicitacoes/concluir", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id,
+              atendidoPorEmail,
+              atendidoPorNome,
+            }),
+          });
+        } catch (error) {
+          console.error("Erro ao chamar rota de conclusão:", error);
+        }
+      }
 
       setNotification({
         message: "Status atualizado e e-mail enviado!",
@@ -408,9 +448,9 @@ export default function SolicitacoesPage() {
                     <strong>Mensagem:</strong> {selectedSolicitacao.mensagem || "-"}
                   </p>
 
-                  {selectedSolicitacao.atendidoPor && (
+                  {selectedSolicitacao.atendidoPorUid && (
                     <p>
-                      <strong>Atendido por:</strong> {selectedSolicitacao.atendidoPor}
+                      <strong>Atendido por:</strong> {selectedSolicitacao.atendidoPorNome} - <a className="hover:underline text-blue-900" href={`mailto:${selectedSolicitacao.atendidoPorEmail}`}> {selectedSolicitacao.atendidoPorEmail} </a>
                     </p>
                   )}
 

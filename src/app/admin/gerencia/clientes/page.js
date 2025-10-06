@@ -110,73 +110,75 @@ export default function ClientesPage() {
 
   return (
     <AdminGuard>
-      <div className="flex">
-        <Sidebar />
-        <div className="flex-1 p-6 bg-black text-gray-50">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Clientes</h1>
-            <Button onClick={handleOpenModal} className="bg-blue-600 hover:bg-blue-700">
-              Novo Cliente
-            </Button>
+      <div className="bg-[url(/images/restrict/bg-cyberpunk.jpg)] bg-cover">
+        <div className="flex">
+          <Sidebar />
+          <div className="flex-1 p-6 bg-black/40 backdrop-blur-sm text-gray-50">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold">Clientes</h1>
+              <Button onClick={handleOpenModal} className="bg-blue-600 hover:bg-blue-700">
+                Novo Cliente
+              </Button>
+            </div>
+
+            {loading ? (
+              <p>Carregando clientes...</p>
+            ) : (
+              <table className="w-full rounded-lg overflow-hidden shadow-sm">
+                <thead className="bg-zinc-700 border-b-2 border-zinc-500">
+                  <tr>
+                    <th className="p-3 text-left text-gray-50 font-medium">Nome/Nome da Empresa</th>
+                    <th className="p-3 text-left text-gray-50 font-medium">Email</th>
+                    <th className="p-3 text-left text-gray-50 font-medium">Telefone</th>
+                    <th className="p-3 text-left text-gray-50 font-medium">Tipo Contrato</th>
+                    <th className="p-3 text-left text-gray-50 font-medium">Status</th>
+                    <th className="p-3 text-left text-gray-50 font-medium">CPF/CNPJ</th>
+                    <th className="p-3 text-left text-gray-50 font-medium">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clientes.map((c, i) => {
+                    const status = c.dataVencimento && new Date(c.dataVencimento) < new Date()
+                      ? { text: "Vencido", classes: "bg-red-100 text-red-700" }
+                      : c.statusContrato === "ativo"
+                        ? { text: "Ativo", classes: "bg-green-100 text-green-700" }
+                        : c.statusContrato === "cancelado"
+                          ? { text: "Cancelado", classes: "bg-red-100 text-red-700" }
+                          : c.statusContrato === "em_negociacao"
+                            ? { text: "Em Negociação", classes: "bg-yellow-100 text-yellow-700" }
+                            : { text: c.statusContrato, classes: "bg-gray-100 text-gray-700" };
+
+                    return (
+                      <tr
+                        key={c.id}
+                        onDoubleClick={() => buscarProjetos(c)}
+                        className={`${i % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"} hover:bg-zinc-700 transition-colors cursor-pointer`}
+                      >
+                        <td className="p-3 text-gray-50">{c.nome}</td>
+                        <td className="p-3 text-gray-50">{c.email}</td>
+                        <td className="p-3 text-gray-50">{c.telefone}</td>
+                        <td className="p-3 text-gray-50 capitalize">{c.tipoContrato}</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${status.classes}`}>
+                            {status.text}
+                          </span>
+                        </td>
+                        <td className="p-3 text-gray-50">{c.cpfCnpj}</td>
+                        <td className="p-3 flex gap-2">
+                          <Button onClick={() => handleEdit(c)} className="bg-yellow-500 hover:bg-yellow-600">
+                            Visualizar/Editar
+                          </Button>
+                          <Button onClick={() => handleDelete(c)} className="bg-red-500 hover:bg-red-600">
+                            Excluir
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
           </div>
-
-          {loading ? (
-            <p>Carregando clientes...</p>
-          ) : (
-            <table className="w-full rounded-lg overflow-hidden shadow-sm">
-              <thead className="bg-zinc-700 border-b-2 border-zinc-500">
-                <tr>
-                  <th className="p-3 text-left text-gray-50 font-medium">Nome/Nome da Empresa</th>
-                  <th className="p-3 text-left text-gray-50 font-medium">Email</th>
-                  <th className="p-3 text-left text-gray-50 font-medium">Telefone</th>
-                  <th className="p-3 text-left text-gray-50 font-medium">Tipo Contrato</th>
-                  <th className="p-3 text-left text-gray-50 font-medium">Status</th>
-                  <th className="p-3 text-left text-gray-50 font-medium">CPF/CNPJ</th>
-                  <th className="p-3 text-left text-gray-50 font-medium">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clientes.map((c, i) => {
-                  const status = c.dataVencimento && new Date(c.dataVencimento) < new Date()
-                    ? { text: "Vencido", classes: "bg-red-100 text-red-700" }
-                    : c.statusContrato === "ativo"
-                      ? { text: "Ativo", classes: "bg-green-100 text-green-700" }
-                      : c.statusContrato === "cancelado"
-                        ? { text: "Cancelado", classes: "bg-red-100 text-red-700" }
-                        : c.statusContrato === "em_negociacao"
-                          ? { text: "Em Negociação", classes: "bg-yellow-100 text-yellow-700" }
-                          : { text: c.statusContrato, classes: "bg-gray-100 text-gray-700" };
-
-                  return (
-                    <tr
-                      key={c.id}
-                      onDoubleClick={() => buscarProjetos(c)}
-                      className={`${i % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"} hover:bg-zinc-700 transition-colors cursor-pointer`}
-                    >
-                      <td className="p-3 text-gray-50">{c.nome}</td>
-                      <td className="p-3 text-gray-50">{c.email}</td>
-                      <td className="p-3 text-gray-50">{c.telefone}</td>
-                      <td className="p-3 text-gray-50 capitalize">{c.tipoContrato}</td>
-                      <td className="p-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${status.classes}`}>
-                          {status.text}
-                        </span>
-                      </td>
-                      <td className="p-3 text-gray-50">{c.cpfCnpj}</td>
-                      <td className="p-3 flex gap-2">
-                        <Button onClick={() => handleEdit(c)} className="bg-yellow-500 hover:bg-yellow-600">
-                          Visualizar/Editar
-                        </Button>
-                        <Button onClick={() => handleDelete(c)} className="bg-red-500 hover:bg-red-600">
-                          Excluir
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
         </div>
 
         {/* Modal de criação/edição cliente */}

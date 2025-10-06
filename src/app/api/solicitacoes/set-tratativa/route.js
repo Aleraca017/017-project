@@ -65,7 +65,7 @@ export async function POST(req) {
       }
 
       // Finaliza a mensagem com assinatura
-      mensagem += `\n\nAtenciosamente,\n${atendidoPorNome || "Equipe 017Tag"} | 017Tag.`;
+      mensagem += `\n\nAtenciosamente,\n${atendidoPorNome || "Equipe de Suporte"} | 017Tag.`;
 
 
       await transporter.sendMail({

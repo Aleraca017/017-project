@@ -13,7 +13,7 @@ if (!admin.apps.length) {
 export async function POST(req) {
   try {
     const { uid } = await req.json();
-    const defaultPassword = "017tag.2025@";
+    const defaultPassword = "017Tag.2025@";
 
     await admin.auth().updateUser(uid, {
       password: defaultPassword,

@@ -140,7 +140,7 @@ export default function AdminDashboard() {
           const data = doc.data();
           const status = data.status;
 
-          if (status === "em andamento") sAndamento++;
+          if (status === "em tratativa") sAndamento++;
           else if (status === "concluido") sConcluido++;
           else if (status === "cancelado") sCancelado++;
           else if (status === "pendente") sNovas++;
