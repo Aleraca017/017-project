@@ -24,6 +24,7 @@ import { BiSupport } from "react-icons/bi";
 import { BiTransferAlt } from "react-icons/bi";
 import { MdAttachMoney } from "react-icons/md";
 import { FaMoneyBill } from "react-icons/fa";
+import { MdOutlineLabelImportant } from "react-icons/md";
 
 export default function Sidebar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -125,7 +126,7 @@ export default function Sidebar() {
       icon: <BiSupport />,
       subLinks: [
         { label: "Solicitações", href: "/admin/suporte/solicitacoes", icon: <FaTasks /> },
-        { label: "Forum de tratativas", href: "/admin/suporte/forum", icon: <MdForum /> },
+        { label: "Registrar tratativas", href: "/admin/suporte/registro", icon: <MdOutlineLabelImportant /> },
       ],
     },
   ];
