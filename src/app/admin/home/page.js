@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/admin/Sidebar";
+import AuthGuard from "@/components/security/AuthGuard";
 import { db } from "@/lib/firebase";
 import { dbSolicitacoes } from "@/lib/firebase-solicitacoes";
 import { collection, getDocs } from "firebase/firestore";
@@ -228,152 +229,155 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
-      <Sidebar links={links} />
+    <AuthGuard>
+      <div className="min-h-screen flex bg-gray-100">
+        <Sidebar links={links} />
 
-      <main className="flex-1 p-8 w-full overflow-y-auto h-screen">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
+        <main className="flex-1 p-8 w-full overflow-y-auto h-screen">
+          <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* -------- Projetos -------- */}
-          <section className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-700">
-              Projetos
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-              <Card icon={<FaClock />} label="Média até entrega (dias)" value={projetos.tempoEntrega} time />
-              <Card icon={<FaClock />} label="Média até conclusão (dias)" value={projetos.tempoConclusao} time />
-              <Card icon={<FaClipboardList />} label="Em andamento" value={projetos.andamento} />
-              <Card icon={<FaCheckCircle />} label="Concluídos" value={projetos.concluido} />
-              <Card icon={<FaTimesCircle />} label="Cancelados" value={projetos.cancelado} />
-              <Card icon={<FaProjectDiagram />} label="Totais" value={projetos.total} totais />
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* -------- Projetos -------- */}
+            <section className="bg-white p-6 rounded-xl shadow-md">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-700">
+                Projetos
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+                <Card icon={<FaClock />} label="Média até entrega (dias)" value={projetos.tempoEntrega} time />
+                <Card icon={<FaClock />} label="Média até conclusão (dias)" value={projetos.tempoConclusao} time />
+                <Card icon={<FaClipboardList />} label="Em andamento" value={projetos.andamento} />
+                <Card icon={<FaCheckCircle />} label="Concluídos" value={projetos.concluido} />
+                <Card icon={<FaTimesCircle />} label="Cancelados" value={projetos.cancelado} />
+                <Card icon={<FaProjectDiagram />} label="Totais" value={projetos.total} totais />
+              </div>
 
-            {/* Carousel de Gráficos */}
-            <div className="bg-gray-50 p-6 rounded-xl shadow-md mt-12 relative">
-              <h3 className="text-lg font-semibold mb-4 text-center">
-                {graficos[graficoIndex].titulo}
-              </h3>
-              {graficos[graficoIndex].content}
+              {/* Carousel de Gráficos */}
+              <div className="bg-gray-50 p-6 rounded-xl shadow-md mt-12 relative">
+                <h3 className="text-lg font-semibold mb-4 text-center">
+                  {graficos[graficoIndex].titulo}
+                </h3>
+                {graficos[graficoIndex].content}
 
-              {/* Botões de navegação */}
-              <button
-                onClick={() =>
-                  setGraficoIndex((prev) =>
-                    prev === 0 ? graficos.length - 1 : prev - 1
-                  )
-                }
-                className="absolute -left-5 top-1/2 -translate-y-1/2 bg-purple-600 text-white px-3 py-1 rounded-full shadow hover:scale-110 hover:-left-7 hover:cursor-pointer transition-all"
-              >
-                <IoMdArrowDropleft size={20} />
-              </button>
-              <button
-                onClick={() =>
-                  setGraficoIndex((prev) =>
-                    prev === graficos.length - 1 ? 0 : prev + 1
-                  )
-                }
-                className="absolute -right-5 top-1/2 -translate-y-1/2 bg-purple-600 text-white px-3 py-1 rounded-full shadow hover:scale-110 hover:-right-7 hover:cursor-pointer transition-all"
-              >
-                <IoMdArrowDropright size={20} />
-              </button>
-            </div>
-          </section>
+                {/* Botões de navegação */}
+                <button
+                  onClick={() =>
+                    setGraficoIndex((prev) =>
+                      prev === 0 ? graficos.length - 1 : prev - 1
+                    )
+                  }
+                  className="absolute -left-5 top-1/2 -translate-y-1/2 bg-purple-600 text-white px-3 py-1 rounded-full shadow hover:scale-110 hover:-left-7 hover:cursor-pointer transition-all"
+                >
+                  <IoMdArrowDropleft size={20} />
+                </button>
+                <button
+                  onClick={() =>
+                    setGraficoIndex((prev) =>
+                      prev === graficos.length - 1 ? 0 : prev + 1
+                    )
+                  }
+                  className="absolute -right-5 top-1/2 -translate-y-1/2 bg-purple-600 text-white px-3 py-1 rounded-full shadow hover:scale-110 hover:-right-7 hover:cursor-pointer transition-all"
+                >
+                  <IoMdArrowDropright size={20} />
+                </button>
+              </div>
+            </section>
 
-          {/* -------- Solicitações -------- */}
-          <section className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-700">
-              Solicitações
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-              <Card
-                icon={<FaEnvelopeOpenText />}
-                label="Novas Solicitações"
-                value={solicitacoes.novas}
-                highlight
-              />
-              <Card icon={<FaClipboardList />} label="Em andamento" value={solicitacoes.andamento} />
-              <Card icon={<FaCheckCircle />} label="Concluídas" value={solicitacoes.concluido} />
-              <Card icon={<FaTimesCircle />} label="Canceladas" value={solicitacoes.cancelado} />
-              <Card icon={<FaProjectDiagram />} label="Totais" value={solicitacoes.total} totais />
-            </div>
+            {/* -------- Solicitações -------- */}
+            <section className="bg-white p-6 rounded-xl shadow-md">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-700">
+                Solicitações
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+                <Card
+                  icon={<FaEnvelopeOpenText />}
+                  label="Novas Solicitações"
+                  value={solicitacoes.novas}
+                  highlight
+                />
+                <Card icon={<FaClipboardList />} label="Em andamento" value={solicitacoes.andamento} />
+                <Card icon={<FaCheckCircle />} label="Concluídas" value={solicitacoes.concluido} />
+                <Card icon={<FaTimesCircle />} label="Canceladas" value={solicitacoes.cancelado} />
+                <Card icon={<FaProjectDiagram />} label="Totais" value={solicitacoes.total} totais />
+              </div>
 
-            {/* Carousel de Gráficos */}
-            <div className="bg-gray-50 p-6 rounded-xl shadow-md mt-12 relative">
-              <h3 className="text-lg font-semibold mb-4 text-center">
-                {solicitacoesGrafico === 0
-                  ? "Solicitações criadas por mês"
-                  : "Distribuição por Status"}
-              </h3>
+              {/* Carousel de Gráficos */}
+              <div className="bg-gray-50 p-6 rounded-xl shadow-md mt-12 relative">
+                <h3 className="text-lg font-semibold mb-4 text-center">
+                  {solicitacoesGrafico === 0
+                    ? "Solicitações criadas por mês"
+                    : "Distribuição por Status"}
+                </h3>
 
-              {/* Gráfico ativo */}
-              {solicitacoesGrafico === 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={solicitacoes.historicoMensal}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="qtd" fill="#6366F1" />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={[
-                        { name: "Novas", value: solicitacoes.novas },
-                        { name: "Em andamento", value: solicitacoes.andamento },
-                        { name: "Concluídas", value: solicitacoes.concluido },
-                        { name: "Canceladas", value: solicitacoes.cancelado },
-                      ]}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      label
-                    >
-                      <Cell fill="#6366F1" /> {/* Novas */}
-                      <Cell fill="#F59E0B" /> {/* Em andamento */}
-                      <Cell fill="#10B981" /> {/* Concluídas */}
-                      <Cell fill="#EF4444" /> {/* Canceladas */}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
+                {/* Gráfico ativo */}
+                {solicitacoesGrafico === 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={solicitacoes.historicoMensal}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="mes" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="qtd" fill="#6366F1" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: "Novas", value: solicitacoes.novas },
+                          { name: "Em andamento", value: solicitacoes.andamento },
+                          { name: "Concluídas", value: solicitacoes.concluido },
+                          { name: "Canceladas", value: solicitacoes.cancelado },
+                        ]}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        label
+                      >
+                        <Cell fill="#6366F1" /> {/* Novas */}
+                        <Cell fill="#F59E0B" /> {/* Em andamento */}
+                        <Cell fill="#10B981" /> {/* Concluídas */}
+                        <Cell fill="#EF4444" /> {/* Canceladas */}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
 
-              {/* Botões de navegação */}
-              <button
-                onClick={() =>
-                  setSolicitacoesGrafico((prev) =>
-                    prev === 0 ? 1 : 0
-                  )
-                }
-                className="absolute -left-5 top-1/2 -translate-y-1/2 bg-purple-600 text-white px-3 py-1 rounded-full shadow hover:scale-110 hover:-left-7 hover:cursor-pointer transition-all"
-              >
-                <IoMdArrowDropleft size={20} />
-              </button>
-              <button
-                onClick={() =>
-                  setSolicitacoesGrafico((prev) =>
-                    prev === 1 ? 0 : 1
-                  )
-                }
-                className="absolute -right-5 top-1/2 -translate-y-1/2 bg-purple-600 text-white px-3 py-1 rounded-full shadow hover:scale-110 hover:-right-7 hover:cursor-pointer transition-all"
-              >
-                <IoMdArrowDropright size={20} />
-              </button>
-            </div>
-          </section>
+                {/* Botões de navegação */}
+                <button
+                  onClick={() =>
+                    setSolicitacoesGrafico((prev) =>
+                      prev === 0 ? 1 : 0
+                    )
+                  }
+                  className="absolute -left-5 top-1/2 -translate-y-1/2 bg-purple-600 text-white px-3 py-1 rounded-full shadow hover:scale-110 hover:-left-7 hover:cursor-pointer transition-all"
+                >
+                  <IoMdArrowDropleft size={20} />
+                </button>
+                <button
+                  onClick={() =>
+                    setSolicitacoesGrafico((prev) =>
+                      prev === 1 ? 0 : 1
+                    )
+                  }
+                  className="absolute -right-5 top-1/2 -translate-y-1/2 bg-purple-600 text-white px-3 py-1 rounded-full shadow hover:scale-110 hover:-right-7 hover:cursor-pointer transition-all"
+                >
+                  <IoMdArrowDropright size={20} />
+                </button>
+              </div>
+            </section>
 
 
 
-        </div>
-      </main>
-    </div>
+          </div>
+        </main>
+      </div>
+    </AuthGuard>
   );
+
 }
 
 function Card({ icon, label, value, highlight, totais, time }) {

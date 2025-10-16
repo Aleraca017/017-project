@@ -53,10 +53,10 @@ export async function POST(req) {
         const mailOptions = {
             from: `"Suporte 017Tag" <${process.env.SMTP_USER}>`,
             to: destinatario,
-            subject: "Registro de atendimento concluído",
+            subject: "Registre o atendimento concluído",
             html: `
         <p>Olá ${atendidoPorNome || ""},</p>
-        <p>Registre seu atendimento pelo forum (Suporte > Forum de tratativas) para ser efetuado o pagamento.</p>
+        <p>Registre seu atendimento pela aba de registro de tratativa (Suporte > Registrar tratativas) para ser efetuado o pagamento.</p>
         <p><strong>ID da solicitação:</strong> ${id}</p>
         <hr />
         <p style="font-size:12px;color:#777;">Mensagem automática - não responda este e-mail.</p>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/admin/Sidebar";
+import AuthGuard from "@/components/security/AuthGuard";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged, updateEmail } from "firebase/auth";
@@ -94,73 +95,76 @@ export default function AccountPage() {
     }
 
     return (
-        <div className="flex min-h-screen bg-black text-white">
-            <Sidebar />
-            <main className="flex-1 flex items-center justify-center p-6">
-                <div className="w-full max-w-md bg-zinc-900 p-8 rounded-2xl shadow-lg border border-zinc-700">
-                    <h1 className="text-2xl font-bold mb-6 text-center">Minha Conta</h1>
+        <AuthGuard>
+            <div className="flex min-h-screen bg-black text-white">
+                <Sidebar />
+                <main className="flex-1 flex items-center justify-center p-6">
+                    <div className="w-full max-w-md bg-zinc-900 p-8 rounded-2xl shadow-lg border border-zinc-700">
+                        <h1 className="text-2xl font-bold mb-6 text-center">Minha Conta</h1>
 
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm mb-1">Nome</label>
-                            <Input
-                                type="text"
-                                value={nome}
-                                onChange={(e) => setNome(e.target.value)}
-                                className="bg-zinc-800 text-white border-zinc-700"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm mb-1">Email</label>
-                            <Input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="bg-zinc-800 text-white border-zinc-700"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm mb-1">Foto (URL)</label>
-                            <Textarea
-                                value={img}
-                                onChange={(e) => setImg(e.target.value)}
-                                className="bg-zinc-800 text-white border-zinc-700"
-                                placeholder="Cole aqui o link da sua imagem"
-                                rows={3}
-                            />
-                        </div>
-
-                        {img && (
-                            <div className="mt-4 flex justify-center">
-                                <img
-                                    src={img}
-                                    alt="Foto do usuário"
-                                    className="w-24 h-24 rounded-full object-cover border-2 border-zinc-700"
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm mb-1">Nome</label>
+                                <Input
+                                    type="text"
+                                    value={nome}
+                                    onChange={(e) => setNome(e.target.value)}
+                                    className="bg-zinc-800 text-white border-zinc-700"
                                 />
                             </div>
-                        )}
 
-                        <div className="flex space-x-4 mt-6">
-                            <Button
-                                onClick={handleSave}
-                                disabled={saving}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-xl"
-                            >
-                                {saving ? "Salvando..." : "Salvar Alterações"}
-                            </Button>
-                            <Button
-                                onClick={handleCancel}
-                                disabled={saving}
-                                className="flex-1 bg-zinc-700 hover:bg-zinc-600 rounded-xl"
-                            >
-                                Cancelar
-                            </Button>
+                            <div>
+                                <label className="block text-sm mb-1">Email</label>
+                                <Input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="bg-zinc-800 text-white border-zinc-700"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm mb-1">Foto (URL)</label>
+                                <Textarea
+                                    value={img}
+                                    onChange={(e) => setImg(e.target.value)}
+                                    className="bg-zinc-800 text-white border-zinc-700"
+                                    placeholder="Cole aqui o link da sua imagem"
+                                    rows={3}
+                                />
+                            </div>
+
+                            {img && (
+                                <div className="mt-4 flex justify-center">
+                                    <img
+                                        src={img}
+                                        alt="Foto do usuário"
+                                        className="w-24 h-24 rounded-full object-cover border-2 border-zinc-700"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="flex space-x-4 mt-6">
+                                <Button
+                                    onClick={handleSave}
+                                    disabled={saving}
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 rounded-xl"
+                                >
+                                    {saving ? "Salvando..." : "Salvar Alterações"}
+                                </Button>
+                                <Button
+                                    onClick={handleCancel}
+                                    disabled={saving}
+                                    className="flex-1 bg-zinc-700 hover:bg-zinc-600 rounded-xl"
+                                >
+                                    Cancelar
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </main>
-        </div>
+                </main>
+            </div>
+        </AuthGuard>
     );
+
 }

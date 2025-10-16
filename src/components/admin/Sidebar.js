@@ -106,13 +106,7 @@ export default function Sidebar() {
         },
       ]
       : []),
-    {
-      label: "Financeiro",
-      icon: <MdAttachMoney />,
-      subLinks: [
-        { label: "Pagamentos", href: "/admin/financeiro/pagamentos", icon: <FaMoneyBill /> },
-      ],
-    },
+    //{     label: "Financeiro", icon: <MdAttachMoney />, subLinks: [  { label: "Pagamentos", href: "/admin/financeiro/pagamentos", icon: <FaMoneyBill /> },],},
     {
       label: "Projetos",
       icon: <FaProjectDiagram />,
@@ -127,6 +121,7 @@ export default function Sidebar() {
       subLinks: [
         { label: "Solicitações", href: "/admin/suporte/solicitacoes", icon: <FaTasks /> },
         { label: "Registrar tratativas", href: "/admin/suporte/registro", icon: <MdOutlineLabelImportant /> },
+        { label: "Fórum de tratativas", href: "/admin/suporte/forum", icon: <MdForum /> },
       ],
     },
   ];
@@ -151,7 +146,7 @@ export default function Sidebar() {
         <div key={idx} className="mb-4">
           <button
             onClick={() => toggleSection(section.label)}
-            className={`flex items-center justify-between w-full p-2 font-semibold hover:bg-zinc-600 rounded ${isActiveSection ? "bg-zinc-600" : ""
+            className={`flex items-center justify-between w-full p-2 font-semibold hover:cursor-pointer hover:bg-zinc-600 rounded ${isActiveSection ? "bg-zinc-600" : ""
               }`}
           >
             <div className="flex items-center gap-2">

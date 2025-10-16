@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/admin/Sidebar";
+import AuthGuard from "@/components/security/AuthGuard";
 import { collection, getDocs } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Auth } from "googleapis";
 
 export default function ProjetosPage() {
   const router = useRouter();
@@ -212,421 +214,423 @@ export default function ProjetosPage() {
   });
 
   return (
-    <div className="flex min-h-screen bg-black">
-      <Sidebar />
-      <main className="flex-1 p-6">
-        {/* Notificação */}
-        <AnimatePresence>
-          {notification.message && (
-            <motion.div
-              key="notification"
-              initial={{ x: 400, opacity: 0 }}
-              animate={{ x: -40, opacity: 1 }}
-              exit={{ x: 400, opacity: 0 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              className={`fixed top-20 rounded-2xl -right-15 w-80 text-left py-2 px-4 z-50 shadow-lg ${notification.type === "success"
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
-                }`}
-            >
-              {notification.message}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Cabeçalho */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-50">
-            Gerenciamento de Projetos
-          </h1>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Pesquisar projetos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="shadow-lg shadow-purple-950 focus:shadow-purple-700 rounded px-3 py-2 ring-2 ring-purple-600 outline-none placeholder-purple-400 text-gray-50"
-            />
-            <button
-              onClick={handleCreateClick}
-              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer "
-            >
-              + Criar Projeto
-            </button>
-          </div>
-        </div>
-
-        {/* Lista */}
-        <div className="shadow rounded-lg overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-zinc-700 border-b-2 border-zinc-500">
-              <tr>
-                <th className="p-3 text-gray-50">Título</th>
-                <th className="p-3 text-gray-50">Cliente</th>
-                <th className="p-3 text-gray-50">Descrição</th>
-                <th className="p-3 text-gray-50">Status</th>
-                <th className="p-3 text-gray-50">Responsável</th>
-                {isAdmin && <th className="p-3 text-gray-50">Ações</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProjects.map((p, index) => {
-                // Busca o cliente pelo id salvo no projeto
-                const client = clients.find((c) => c.id === p.cliente);
-                const clientName = client?.nome || client?.empresa || "-";
-
-                // Busca o responsável pelo id
-                const responsavel = users.find((u) => u.id === p.responsavel);
-                const responsavelNome = responsavel?.nome || "-";
-
-                // Função para cor do status
-                const getStatusClass = (status) => {
-                  switch (status) {
-                    case "cancelado":
-                      return "bg-red-500 text-white";
-                    case "concluido":
-                      return "bg-green-500 text-white";
-                    case "em andamento":
-                      return "bg-yellow-400 text-black";
-                    default:
-                      return "bg-gray-300 text-black";
-                  }
-                };
-
-                return (
-                  <tr
-                    key={p.id}
-                    className={`${index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"
-                      } hover:bg-zinc-600 transition cursor-pointer`}
-                    onDoubleClick={() => router.push(`/admin/projetos/projetos/${p.id}`)}
-                  >
-                    <td className="p-3 text-zinc-50">{p.titulo || "-"}</td>
-                    <td className="p-3">
-                      <span className="px-2 py-1 rounded-full bg-green-200 text-green-800 text-sm">
-                        {clientName}
-                      </span>
-                    </td>
-                    <td className="p-3 text-zinc-50">{p.descricao || "-"}</td>
-                    <td className="p-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusClass(
-                          p.status
-                        )}`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-
-                    <td className="p-3">
-                      <span className="px-2 py-1 rounded-full bg-purple-200 text-purple-800 text-sm">
-                        {responsavelNome}
-                      </span>
-                    </td>
-                    {isAdmin && (
-                      <td className="p-3 flex gap-2">
-                        <button
-                          onClick={() => handleDelete(p.id)}
-                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
-                        >
-                          Excluir
-                        </button>
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Modal de criação */}
-        <Dialog open={showModal} onOpenChange={setShowModal}>
-          <DialogContent className="max-w-lg h-200 overflow-y-auto no-scrollbar">
-            <DialogHeader>
-              <DialogTitle>Criar Projeto</DialogTitle>
-              <DialogDescription>
-                Preencha os dados do projeto e salve.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 py-2">
-              {/* Responsável */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Responsável</label>
-                <Select
-                  value={editingProject?.responsavel || ""}
-                  onValueChange={(val) =>
-                    setEditingProject((prev) => ({
-                      ...prev,
-                      responsavel: val,
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um responsável" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>
-                        {u.nome} ({u.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Cliente */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Cliente</label>
-                <Select
-                  value={editingProject?.cliente || ""}
-                  onValueChange={(val) =>
-                    setEditingProject((prev) => ({ ...prev, cliente: val }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.nome || c.empresa}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Título */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Título</label>
-                <Input
-                  value={editingProject?.titulo || ""}
-                  onChange={(e) =>
-                    setEditingProject((prev) => ({
-                      ...prev,
-                      titulo: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              {/* Descrição */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Descrição</label>
-                <Textarea
-                  value={editingProject?.descricao || ""}
-                  onChange={(e) =>
-                    setEditingProject((prev) => ({
-                      ...prev,
-                      descricao: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              {/* Status */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
-                <Select
-                  value={editingProject?.status || "andamento"}
-                  onValueChange={(val) =>
-                    setEditingProject((prev) => ({ ...prev, status: val }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="concluido">Concluído</SelectItem>
-                    <SelectItem value="cancelado">Cancelado</SelectItem>
-                    <SelectItem value="tratativa">Em tratativa</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Linguagem */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Linguagem</label>
-                <Select
-                  value={editingProject?.linguagem || ""}
-                  onValueChange={(val) =>
-                    setEditingProject((prev) => ({
-                      ...prev,
-                      linguagem: val,
-                      framework: "",   // reseta quando mudar linguagem
-                      tecnologia: "",  // reseta quando mudar linguagem
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a linguagem" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {linguagens.map((lang) => (
-                      <SelectItem key={lang} value={lang}>
-                        {lang}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Framework */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Framework</label>
-                <Select
-                  value={editingProject?.framework || ""}
-                  onValueChange={(val) =>
-                    setEditingProject((prev) => ({
-                      ...prev,
-                      framework: val,
-                    }))
-                  }
-                  disabled={!editingProject?.linguagem} // só habilita se linguagem escolhida
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um framework" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(frameworks[editingProject?.linguagem] || []).map((fw) => (
-                      <SelectItem key={fw} value={fw}>
-                        {fw}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Tecnologia */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tecnologia</label>
-                <Select
-                  value={editingProject?.tecnologia || ""}
-                  onValueChange={(val) =>
-                    setEditingProject((prev) => ({
-                      ...prev,
-                      tecnologia: val,
-                    }))
-                  }
-                  disabled={!editingProject?.linguagem} // só habilita se linguagem escolhida
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma tecnologia" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(tecnologias[editingProject?.linguagem] || []).map((tech) => (
-                      <SelectItem key={tech} value={tech}>
-                        {tech}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-
-              {/* Tipo */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tipo de Projeto</label>
-                <Select
-                  value={editingProject?.tipo || ""}
-                  onValueChange={(val) =>
-                    setEditingProject((prev) => ({ ...prev, tipo: val }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo de projeto" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="fixo">Fixo</SelectItem>
-                    <SelectItem value="recorrente">Recorrente</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Data de entrega */}
-              <div className="space-y-2">
-                <Label>Data de Entrega</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left"
-                    >
-                      {editingProject?.dataEntrega
-                        ? format(
-                          new Date(editingProject.dataEntrega),
-                          "dd/MM/yyyy"
-                        )
-                        : "Selecione a data"}
-                      <CalendarIcon className="ml-auto h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={
-                        editingProject?.dataEntrega
-                          ? new Date(editingProject.dataEntrega)
-                          : undefined
-                      }
-                      onSelect={(date) =>
-                        setEditingProject((prev) => ({
-                          ...prev,
-                          dataEntrega: date
-                            ? date.toISOString().split("T")[0]
-                            : "",
-                        }))
-                      }
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Autor */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Autor</label>
-                <Input
-                  value={editingProject?.autor || ""}
-                  onChange={(e) =>
-                    setEditingProject((prev) => ({
-                      ...prev,
-                      autor: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-
-              {/* GitHub */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  URL da Documentação (GitHub)
-                </label>
-                <Input
-                  value={editingProject?.githubUrl || ""}
-                  onChange={(e) =>
-                    setEditingProject((prev) => ({
-                      ...prev,
-                      githubUrl: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button
-                variant="destructive"
-                onClick={() => setShowModal(false)}
+    <AuthGuard>
+      <div className="flex min-h-screen bg-black">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          {/* Notificação */}
+          <AnimatePresence>
+            {notification.message && (
+              <motion.div
+                key="notification"
+                initial={{ x: 400, opacity: 0 }}
+                animate={{ x: -40, opacity: 1 }}
+                exit={{ x: 400, opacity: 0 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className={`fixed top-20 rounded-2xl -right-15 w-80 text-left py-2 px-4 z-50 shadow-lg ${notification.type === "success"
+                  ? "bg-green-500 text-white"
+                  : "bg-red-500 text-white"
+                  }`}
               >
-                Cancelar
-              </Button>
-              <Button onClick={handleSave}>Criar</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </main>
-    </div>
+                {notification.message}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Cabeçalho */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <h1 className="text-2xl font-bold text-gray-50">
+              Gerenciamento de Projetos
+            </h1>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Pesquisar projetos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="shadow-lg shadow-purple-950 focus:shadow-purple-700 rounded px-3 py-2 ring-2 ring-purple-600 outline-none placeholder-purple-400 text-gray-50"
+              />
+              <button
+                onClick={handleCreateClick}
+                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer "
+              >
+                + Criar Projeto
+              </button>
+            </div>
+          </div>
+
+          {/* Lista */}
+          <div className="shadow rounded-lg overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-zinc-700 border-b-2 border-zinc-500">
+                <tr>
+                  <th className="p-3 text-gray-50">Título</th>
+                  <th className="p-3 text-gray-50">Cliente</th>
+                  <th className="p-3 text-gray-50">Descrição</th>
+                  <th className="p-3 text-gray-50">Status</th>
+                  <th className="p-3 text-gray-50">Responsável</th>
+                  {isAdmin && <th className="p-3 text-gray-50">Ações</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProjects.map((p, index) => {
+                  // Busca o cliente pelo id salvo no projeto
+                  const client = clients.find((c) => c.id === p.cliente);
+                  const clientName = client?.nome || client?.empresa || "-";
+
+                  // Busca o responsável pelo id
+                  const responsavel = users.find((u) => u.id === p.responsavel);
+                  const responsavelNome = responsavel?.nome || "-";
+
+                  // Função para cor do status
+                  const getStatusClass = (status) => {
+                    switch (status) {
+                      case "cancelado":
+                        return "bg-red-500 text-white";
+                      case "concluido":
+                        return "bg-green-500 text-white";
+                      case "em andamento":
+                        return "bg-yellow-400 text-black";
+                      default:
+                        return "bg-gray-300 text-black";
+                    }
+                  };
+
+                  return (
+                    <tr
+                      key={p.id}
+                      className={`${index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"
+                        } hover:bg-zinc-600 transition cursor-pointer`}
+                      onDoubleClick={() => router.push(`/admin/projetos/projetos/${p.id}`)}
+                    >
+                      <td className="p-3 text-zinc-50">{p.titulo || "-"}</td>
+                      <td className="p-3">
+                        <span className="px-2 py-1 rounded-full bg-green-200 text-green-800 text-sm">
+                          {clientName}
+                        </span>
+                      </td>
+                      <td className="p-3 text-zinc-50">{p.descricao || "-"}</td>
+                      <td className="p-3">
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusClass(
+                            p.status
+                          )}`}
+                        >
+                          {p.status}
+                        </span>
+                      </td>
+
+                      <td className="p-3">
+                        <span className="px-2 py-1 rounded-full bg-purple-200 text-purple-800 text-sm">
+                          {responsavelNome}
+                        </span>
+                      </td>
+                      {isAdmin && (
+                        <td className="p-3 flex gap-2">
+                          <button
+                            onClick={() => handleDelete(p.id)}
+                            className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition cursor-pointer"
+                          >
+                            Excluir
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Modal de criação */}
+          <Dialog open={showModal} onOpenChange={setShowModal}>
+            <DialogContent className="max-w-lg h-200 overflow-y-auto no-scrollbar">
+              <DialogHeader>
+                <DialogTitle>Criar Projeto</DialogTitle>
+                <DialogDescription>
+                  Preencha os dados do projeto e salve.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-2">
+                {/* Responsável */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Responsável</label>
+                  <Select
+                    value={editingProject?.responsavel || ""}
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({
+                        ...prev,
+                        responsavel: val,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um responsável" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.nome} ({u.email})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Cliente */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Cliente</label>
+                  <Select
+                    value={editingProject?.cliente || ""}
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({ ...prev, cliente: val }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um cliente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clients.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.nome || c.empresa}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Título */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Título</label>
+                  <Input
+                    value={editingProject?.titulo || ""}
+                    onChange={(e) =>
+                      setEditingProject((prev) => ({
+                        ...prev,
+                        titulo: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                {/* Descrição */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Descrição</label>
+                  <Textarea
+                    value={editingProject?.descricao || ""}
+                    onChange={(e) =>
+                      setEditingProject((prev) => ({
+                        ...prev,
+                        descricao: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                {/* Status */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Status</label>
+                  <Select
+                    value={editingProject?.status || "andamento"}
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({ ...prev, status: val }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="concluido">Concluído</SelectItem>
+                      <SelectItem value="cancelado">Cancelado</SelectItem>
+                      <SelectItem value="tratativa">Em tratativa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Linguagem */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Linguagem</label>
+                  <Select
+                    value={editingProject?.linguagem || ""}
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({
+                        ...prev,
+                        linguagem: val,
+                        framework: "",   // reseta quando mudar linguagem
+                        tecnologia: "",  // reseta quando mudar linguagem
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a linguagem" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {linguagens.map((lang) => (
+                        <SelectItem key={lang} value={lang}>
+                          {lang}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Framework */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Framework</label>
+                  <Select
+                    value={editingProject?.framework || ""}
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({
+                        ...prev,
+                        framework: val,
+                      }))
+                    }
+                    disabled={!editingProject?.linguagem} // só habilita se linguagem escolhida
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um framework" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(frameworks[editingProject?.linguagem] || []).map((fw) => (
+                        <SelectItem key={fw} value={fw}>
+                          {fw}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Tecnologia */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Tecnologia</label>
+                  <Select
+                    value={editingProject?.tecnologia || ""}
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({
+                        ...prev,
+                        tecnologia: val,
+                      }))
+                    }
+                    disabled={!editingProject?.linguagem} // só habilita se linguagem escolhida
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma tecnologia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(tecnologias[editingProject?.linguagem] || []).map((tech) => (
+                        <SelectItem key={tech} value={tech}>
+                          {tech}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+
+                {/* Tipo */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Tipo de Projeto</label>
+                  <Select
+                    value={editingProject?.tipo || ""}
+                    onValueChange={(val) =>
+                      setEditingProject((prev) => ({ ...prev, tipo: val }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo de projeto" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fixo">Fixo</SelectItem>
+                      <SelectItem value="recorrente">Recorrente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Data de entrega */}
+                <div className="space-y-2">
+                  <Label>Data de Entrega</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left"
+                      >
+                        {editingProject?.dataEntrega
+                          ? format(
+                            new Date(editingProject.dataEntrega),
+                            "dd/MM/yyyy"
+                          )
+                          : "Selecione a data"}
+                        <CalendarIcon className="ml-auto h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          editingProject?.dataEntrega
+                            ? new Date(editingProject.dataEntrega)
+                            : undefined
+                        }
+                        onSelect={(date) =>
+                          setEditingProject((prev) => ({
+                            ...prev,
+                            dataEntrega: date
+                              ? date.toISOString().split("T")[0]
+                              : "",
+                          }))
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Autor */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Autor</label>
+                  <Input
+                    value={editingProject?.autor || ""}
+                    onChange={(e) =>
+                      setEditingProject((prev) => ({
+                        ...prev,
+                        autor: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                {/* GitHub */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    URL da Documentação (GitHub)
+                  </label>
+                  <Input
+                    value={editingProject?.githubUrl || ""}
+                    onChange={(e) =>
+                      setEditingProject((prev) => ({
+                        ...prev,
+                        githubUrl: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button onClick={handleSave}>Criar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </main>
+      </div>
+    </AuthGuard>
   );
 }
