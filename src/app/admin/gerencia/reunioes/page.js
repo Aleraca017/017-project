@@ -260,10 +260,10 @@ export default function ReunioesPage() {
   };
 
   return (
-    <AdminGuard>
-      <div className="flex h-screen bg-black  ">
-        <Sidebar />
-        <main className="flex-1 p-6 overflow-y-auto">
+    <div className="flex h-screen bg-[url(/images/restrict/bg-cyberpunk.jpg)] ">
+      <Sidebar />
+      <AdminGuard>
+        <main className="flex-1 p-6 overflow-y-auto backdrop-blur-sm">
           <h1 className="text-2xl font-bold mb-4 text-gray-50">Reuniões</h1>
 
           {message && (
@@ -473,7 +473,7 @@ export default function ReunioesPage() {
             </DialogContent>
           </Dialog>
         </main>
-      </div>
-    </AdminGuard>
+      </AdminGuard>
+    </div>
   );
 }

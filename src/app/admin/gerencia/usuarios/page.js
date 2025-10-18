@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import Sidebar from "@/components/admin/Sidebar";
 import { getDocs, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-
 import {
   Dialog,
   DialogContent,
@@ -13,9 +12,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react"; // ícone de loading
+import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function UserManagementPage() {
@@ -25,13 +23,11 @@ export default function UserManagementPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState(null);
-
   const [search, setSearch] = useState("");
   const [filterPermissao, setFilterPermissao] = useState("all");
 
   const defaultPassword = "017tag.2025@";
 
-  // 🔹 Buscar usuários do Firestore
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -49,7 +45,6 @@ export default function UserManagementPage() {
     fetchUsers();
   }, []);
 
-  // 🔹 Mensagem temporária (5 segundos)
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => setMessage(null), 5000);
@@ -64,7 +59,13 @@ export default function UserManagementPage() {
   };
 
   const handleCreateClick = () => {
-    setEditingUser({ nome: "", email: "", funcao: "", permissao: "leitor" });
+    setEditingUser({
+      nome: "",
+      email: "",
+      funcao: "",
+      permissao: "leitor",
+      img: "",
+    });
     setIsCreating(true);
     setShowModal(true);
   };
@@ -75,6 +76,7 @@ export default function UserManagementPage() {
       email: editingUser.email?.trim(),
       funcao: editingUser.funcao?.trim(),
       permissao: editingUser.permissao?.trim().toLowerCase(),
+      img: editingUser.img?.trim() || "",
     };
 
     setIsSaving(true);
@@ -110,7 +112,9 @@ export default function UserManagementPage() {
 
         setUsers((prev) =>
           prev.map((u) =>
-            u.id === editingUser.id ? { ...u, ...userData, uid: editingUser.uid } : u
+            u.id === editingUser.id
+              ? { ...u, ...userData, uid: editingUser.uid }
+              : u
           )
         );
         setMessage({ type: "success", text: "Usuário atualizado com sucesso!" });
@@ -118,7 +122,10 @@ export default function UserManagementPage() {
 
       setShowModal(false);
     } catch (err) {
-      setMessage({ type: "error", text: "Erro ao salvar usuário: " + err.message });
+      setMessage({
+        type: "error",
+        text: "Erro ao salvar usuário: " + err.message,
+      });
       console.error(err);
     } finally {
       setIsSaving(false);
@@ -140,7 +147,10 @@ export default function UserManagementPage() {
       setUsers((prev) => prev.filter((u) => u.uid !== uid));
       setMessage({ type: "success", text: "Usuário excluído com sucesso!" });
     } catch (err) {
-      setMessage({ type: "error", text: "Erro ao excluir usuário: " + err.message });
+      setMessage({
+        type: "error",
+        text: "Erro ao excluir usuário: " + err.message,
+      });
       console.error(err);
     }
   };
@@ -162,10 +172,16 @@ export default function UserManagementPage() {
           text: `Senha de ${email} resetada para: ${data.password}`,
         });
       } else {
-        setMessage({ type: "error", text: "Erro ao resetar senha: " + data.error });
+        setMessage({
+          type: "error",
+          text: "Erro ao resetar senha: " + data.error,
+        });
       }
     } catch (err) {
-      setMessage({ type: "error", text: "Erro ao resetar senha: " + err.message });
+      setMessage({
+        type: "error",
+        text: "Erro ao resetar senha: " + err.message,
+      });
       console.error(err);
     }
   };
@@ -175,7 +191,6 @@ export default function UserManagementPage() {
     setEditingUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🔹 Filtro e pesquisa
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
       u.nome?.toLowerCase().includes(search.toLowerCase()) ||
@@ -188,29 +203,36 @@ export default function UserManagementPage() {
   return (
     <div className="bg-[url(/images/restrict/bg-cyberpunk.jpg)] bg-cover">
       <div className="flex min-h-screen bg-black/40 backdrop-blur-sm">
+        <Sidebar />
         <AdminGuard>
-          <Sidebar />
           <main className="flex-1 p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-gray-50">Gerenciamento de Usuários</h1>
-              <Button onClick={handleCreateClick} className="bg-purple-600 hover:bg-purple-700 hover:cursor-pointer">
+              <h1 className="text-2xl font-bold text-gray-50">
+                Gerenciamento de Usuários
+              </h1>
+              <Button
+                onClick={handleCreateClick}
+                className="bg-purple-600 hover:bg-purple-700 hover:cursor-pointer"
+              >
                 + Criar Usuário
               </Button>
             </div>
 
-            {/* 🔹 Barra de mensagem (fixa no topo direito e temporária) */}
             {message && (
               <div className="fixed top-4 right-4 z-50 w-80 animate-in fade-in slide-in-from-top-2">
                 <Alert
-                  className={`shadow-lg ${message.type === "error" ? "border-red-700 bg-red-500 text-white" : "border-green-700 bg-green-500 text-white"
+                  className={`shadow-lg ${message.type === "error"
+                    ? "border-red-700 bg-red-500 text-white"
+                    : "border-green-700 bg-green-500 text-white"
                     }`}
                 >
-                  <AlertDescription className={"text-white"}>{message.text}</AlertDescription>
+                  <AlertDescription className="text-white">
+                    {message.text}
+                  </AlertDescription>
                 </Alert>
               </div>
             )}
 
-            {/* 🔹 Pesquisa e Filtro */}
             <div className="flex gap-4">
               <input
                 type="text"
@@ -231,11 +253,11 @@ export default function UserManagementPage() {
               </select>
             </div>
 
-            {/* tabela */}
             <div className="shadow rounded-lg overflow-hidden">
               <table className="w-full text-left border-collapse">
                 <thead className="bg-zinc-700 border-b-2 border-zinc-500">
                   <tr>
+                    <th className="p-3 text-gray-50">Foto</th>
                     <th className="p-3 text-gray-50">Nome</th>
                     <th className="p-3 text-gray-50">Email</th>
                     <th className="p-3 text-gray-50">Função</th>
@@ -247,21 +269,39 @@ export default function UserManagementPage() {
                   {filteredUsers.map((u, index) => (
                     <tr
                       key={u.id}
-                      className={`${index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"} hover:bg-zinc-700`}
+                      className={`${index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"
+                        } hover:bg-zinc-700`}
                     >
+                      <td className="p-3">
+                        <img
+                          src={u.img || "/images/default-avatar.png"}
+                          alt={u.nome}
+                          className="w-10 h-10 rounded-full object-cover border border-zinc-700"
+                        />
+                      </td>
                       <td className="p-3 text-gray-50">{u.nome || "-"}</td>
                       <td className="p-3 text-gray-50">{u.email || "-"}</td>
                       <td className="p-3 text-gray-50">{u.funcao || "-"}</td>
-                      <td className="p-3 text-gray-50 capitalize">{u.permissao || "-"}</td>
+                      <td className="p-3 text-gray-50 capitalize">
+                        {u.permissao || "-"}
+                      </td>
                       <td className="p-3 flex gap-2">
-                        <Button onClick={() => handleEditClick(u)} className="bg-blue-600 hover:bg-blue-700">
+                        <Button
+                          onClick={() => handleEditClick(u)}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
                           Editar
                         </Button>
-                        <Button onClick={() => handleDelete(u.uid)} className="bg-red-600 hover:bg-red-700">
+                        <Button
+                          onClick={() => handleDelete(u.uid)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
                           Excluir
                         </Button>
                         <Button
-                          onClick={() => handleResetPassword(u.uid, u.email)}
+                          onClick={() =>
+                            handleResetPassword(u.uid, u.email)
+                          }
                           className="bg-yellow-500 hover:bg-yellow-600"
                         >
                           Resetar Senha
@@ -273,11 +313,12 @@ export default function UserManagementPage() {
               </table>
             </div>
 
-            {/* Modal ShadCN */}
             <Dialog open={showModal} onOpenChange={setShowModal}>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>{isCreating ? "Criar Usuário" : "Editar Usuário"}</DialogTitle>
+                  <DialogTitle>
+                    {isCreating ? "Criar Usuário" : "Editar Usuário"}
+                  </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4 mt-2">
@@ -291,6 +332,26 @@ export default function UserManagementPage() {
                       className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
                     />
                   </label>
+
+                  <label className="block">
+                    Foto (URL)
+                    <input
+                      type="text"
+                      name="img"
+                      value={editingUser?.img || ""}
+                      onChange={handleChange}
+                      placeholder="https://..."
+                      className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
+                    />
+                    {editingUser?.img && (
+                      <img
+                        src={editingUser.img}
+                        alt="Preview"
+                        className="mt-2 w-20 h-20 object-cover rounded-full border"
+                      />
+                    )}
+                  </label>
+
                   <label className="block">
                     Email
                     <input
@@ -301,6 +362,7 @@ export default function UserManagementPage() {
                       className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
                     />
                   </label>
+
                   <label className="block">
                     Função
                     <input
@@ -311,6 +373,7 @@ export default function UserManagementPage() {
                       className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
                     />
                   </label>
+
                   <label className="block">
                     Permissão
                     <select
@@ -319,7 +382,7 @@ export default function UserManagementPage() {
                       onChange={handleChange}
                       className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
                     >
-                      <option value="adm">Administrador</option>
+                      <option value="administrador">Administrador</option>
                       <option value="dev">Dev</option>
                       <option value="leitor">Leitor</option>
                     </select>
