@@ -36,7 +36,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Auth } from "googleapis";
 
 export default function ProjetosPage() {
   const router = useRouter();
