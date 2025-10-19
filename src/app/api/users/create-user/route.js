@@ -12,8 +12,8 @@ if (!admin.apps.length) {
 
 export async function POST(req) {
   try {
-    const { email, nome, funcao, permissao } = await req.json();
-    const defaultPassword = "017tag.2025@";
+    const { email, nome, funcao, permissao, img } = await req.json();
+    const defaultPassword = "017Tag.2025@";
 
     // Cria o usuário no Auth
     const userRecord = await admin.auth().createUser({
@@ -26,6 +26,7 @@ export async function POST(req) {
     const db = admin.firestore();
     await db.collection("usuarios").doc(userRecord.uid).set({
       nome,
+      img,
       email,
       funcao,
       permissao,

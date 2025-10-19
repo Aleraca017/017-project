@@ -19,7 +19,7 @@ const auth = admin.auth();
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { uid, docId, nome, email, funcao, permissao, foto } = body;
+    const { uid, docId, nome, email, funcao, permissao, img } = body;
 
     if (!uid || typeof uid !== "string" || uid.length > 128) {
       return NextResponse.json({ error: "UID inválido." }, { status: 400 });
@@ -38,7 +38,7 @@ export async function POST(req) {
     const userRef = db.collection("usuarios").doc(docId);
     await userRef.update({
       nome: nome || "",
-      img: foto || "",
+      img: img || "",
       email: email || "",
       funcao: funcao || "",
       permissao: permissao || "leitor",
