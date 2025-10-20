@@ -5,6 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase"; // seu arquivo de configuração do Firebase
 
+
 export default function AuthGuard({ children }) {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);

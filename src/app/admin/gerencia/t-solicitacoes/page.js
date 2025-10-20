@@ -1,11 +1,20 @@
+//frontend definer
 "use client";
 
+//react imports
 import { useEffect, useState } from "react";
+
+//firebase imports
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { dbSolicitacoes } from "@/lib/firebase-solicitacoes";
-import Sidebar from "@/components/admin/Sidebar";
+
+//security components
 import AdminGuard from "@/components/security/AdminGuard";
+import CheckUserPermission from "@/components/security/CheckUserPermission";
+
+//visual components
+import Sidebar from "@/components/admin/Sidebar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -114,120 +123,122 @@ export default function TransferirSolicitacoesPage() {
 
     return (
         <AdminGuard>
-            <div className="flex min-h-screen bg-black text-white">
-                <Sidebar />
+            <CheckUserPermission>
+                <div className="flex min-h-screen bg-black text-white">
+                    <Sidebar />
 
-                <main className="flex-1 p-6">
-                    <h1 className="text-2xl font-bold mb-6 text-gray-50">
-                        Transferência de Solicitações
-                    </h1>
+                    <main className="flex-1 p-6">
+                        <h1 className="text-2xl font-bold mb-6 text-gray-50">
+                            Transferência de Solicitações
+                        </h1>
 
-                    <div className="mb-4">
-                        <Label className="text-white">
-                            Buscar por ID, aplicação ou atendente:
-                        </Label>
-                        <Input
-                            type="text"
-                            placeholder="Digite para filtrar"
-                            value={busca}
-                            onChange={(e) => setBusca(e.target.value)}
-                            className="bg-zinc-800 text-zinc-300 border-zinc-700 border-2 mt-1"
-                        />
-                    </div>
-
-                    {loading ? (
-                        <p>Carregando solicitações...</p>
-                    ) : solicitacoesFiltradas.length === 0 ? (
-                        <p>Nenhuma solicitação em tratativa encontrada.</p>
-                    ) : (
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                            {solicitacoesFiltradas.map((s) => (
-                                <div
-                                    key={s.id}
-                                    onDoubleClick={() => setSelectedSolicitacao(s)}
-                                    className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 shadow hover:shadow-lg cursor-pointer transition"
-                                >
-                                    <h2 className="text-lg font-semibold text-gray-100 mb-2">
-                                        {s.aplicação || "Solicitação sem nome"}
-                                    </h2>
-                                    <p className="text-sm text-gray-400">
-                                        <span className="font-medium">Atendido por:</span>{" "}
-                                        {s.atendidoPorNome || "—"}
-                                    </p>
-                                    <p className="text-sm text-gray-400">
-                                        <span className="font-medium">Email:</span>{" "}
-                                        {s.atendidoPorEmail || "—"}
-                                    </p>
-                                    <p className="text-xs text-gray-500 mt-2 italic">
-                                        (Clique duas vezes para transferir)
-                                    </p>
-                                </div>
-                            ))}
+                        <div className="mb-4">
+                            <Label className="text-white">
+                                Buscar por ID, aplicação ou atendente:
+                            </Label>
+                            <Input
+                                type="text"
+                                placeholder="Digite para filtrar"
+                                value={busca}
+                                onChange={(e) => setBusca(e.target.value)}
+                                className="bg-zinc-800 text-zinc-300 border-zinc-700 border-2 mt-1"
+                            />
                         </div>
-                    )}
 
-                    {/* Modal usando shadcn */}
-                    <Dialog open={!!selectedSolicitacao} onOpenChange={setSelectedSolicitacao}>
-                        <DialogContent className="bg-zinc-900 border border-zinc-700 text-white max-w-200">
-                            <DialogHeader>
-                                <DialogTitle>Transferir Solicitação</DialogTitle>
-                            </DialogHeader>
-
-                            {selectedSolicitacao && (
-                                <>
-                                    <p className="text-gray-300 mb-2">
-                                        <span className="font-medium text-gray-100">Aplicação:</span>{" "}
-                                        {selectedSolicitacao.aplicação || "—"}
-                                    </p>
-                                    <p className="text-gray-300 mb-4">
-                                        <span className="font-medium text-gray-100">
-                                            Atualmente tratado por:
-                                        </span>{" "}
-                                        {selectedSolicitacao.atendidoPorNome || "—"} (
-                                        {selectedSolicitacao.atendidoPorEmail || "—"})
-                                    </p>
-
-                                    <Label className="block text-sm font-medium text-gray-200 mb-1">
-                                        Novo Responsável
-                                    </Label>
-                                    <Select
-                                        value={novoResponsavel}
-                                        onValueChange={(v) => setNovoResponsavel(v)}
+                        {loading ? (
+                            <p>Carregando solicitações...</p>
+                        ) : solicitacoesFiltradas.length === 0 ? (
+                            <p>Nenhuma solicitação em tratativa encontrada.</p>
+                        ) : (
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                {solicitacoesFiltradas.map((s) => (
+                                    <div
+                                        key={s.id}
+                                        onDoubleClick={() => setSelectedSolicitacao(s)}
+                                        className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 shadow hover:shadow-lg cursor-pointer transition"
                                     >
-                                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-300">
-                                            <SelectValue placeholder="Selecione um usuário" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-zinc-900 text-zinc-200">
-                                            {usuarios.map((u) => (
-                                                <SelectItem key={u.uid} value={u.uid}>
-                                                    {u.nome} ({u.email})
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        <h2 className="text-lg font-semibold text-gray-100 mb-2">
+                                            {s.aplicação || "Solicitação sem nome"}
+                                        </h2>
+                                        <p className="text-sm text-gray-400">
+                                            <span className="font-medium">Atendido por:</span>{" "}
+                                            {s.atendidoPorNome || "—"}
+                                        </p>
+                                        <p className="text-sm text-gray-400">
+                                            <span className="font-medium">Email:</span>{" "}
+                                            {s.atendidoPorEmail || "—"}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-2 italic">
+                                            (Clique duas vezes para transferir)
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
-                                    <DialogFooter className="mt-6">
-                                        <Button
-                                            variant="outline"
-                                            onClick={() => setSelectedSolicitacao(null)}
-                                            className="bg-zinc-800 border-zinc-700 text-gray-200 hover:bg-zinc-700"
+                        {/* Modal usando shadcn */}
+                        <Dialog open={!!selectedSolicitacao} onOpenChange={setSelectedSolicitacao}>
+                            <DialogContent className="bg-zinc-900 border border-zinc-700 text-white max-w-200">
+                                <DialogHeader>
+                                    <DialogTitle>Transferir Solicitação</DialogTitle>
+                                </DialogHeader>
+
+                                {selectedSolicitacao && (
+                                    <>
+                                        <p className="text-gray-300 mb-2">
+                                            <span className="font-medium text-gray-100">Aplicação:</span>{" "}
+                                            {selectedSolicitacao.aplicação || "—"}
+                                        </p>
+                                        <p className="text-gray-300 mb-4">
+                                            <span className="font-medium text-gray-100">
+                                                Atualmente tratado por:
+                                            </span>{" "}
+                                            {selectedSolicitacao.atendidoPorNome || "—"} (
+                                            {selectedSolicitacao.atendidoPorEmail || "—"})
+                                        </p>
+
+                                        <Label className="block text-sm font-medium text-gray-200 mb-1">
+                                            Novo Responsável
+                                        </Label>
+                                        <Select
+                                            value={novoResponsavel}
+                                            onValueChange={(v) => setNovoResponsavel(v)}
                                         >
-                                            Cancelar
-                                        </Button>
-                                        <Button
-                                            onClick={handleTransferir}
-                                            disabled={transferindo}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                                        >
-                                            {transferindo ? "Transferindo..." : "Transferir"}
-                                        </Button>
-                                    </DialogFooter>
-                                </>
-                            )}
-                        </DialogContent>
-                    </Dialog>
-                </main>
-            </div>
+                                            <SelectTrigger className="bg-zinc-800 border-zinc-700 text-zinc-300">
+                                                <SelectValue placeholder="Selecione um usuário" />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-zinc-900 text-zinc-200">
+                                                {usuarios.map((u) => (
+                                                    <SelectItem key={u.uid} value={u.uid}>
+                                                        {u.nome} ({u.email})
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+
+                                        <DialogFooter className="mt-6">
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => setSelectedSolicitacao(null)}
+                                                className="bg-zinc-800 border-zinc-700 text-gray-200 hover:bg-zinc-700"
+                                            >
+                                                Cancelar
+                                            </Button>
+                                            <Button
+                                                onClick={handleTransferir}
+                                                disabled={transferindo}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                                            >
+                                                {transferindo ? "Transferindo..." : "Transferir"}
+                                            </Button>
+                                        </DialogFooter>
+                                    </>
+                                )}
+                            </DialogContent>
+                        </Dialog>
+                    </main>
+                </div>
+            </CheckUserPermission>
         </AdminGuard>
     );
 }

@@ -19,27 +19,30 @@ const auth = admin.auth();
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { uid, docId, nome, email, funcao, permissao, img } = body;
+    const { uid, nome, email, funcao, permissao, img, pix } = body;
 
     if (!uid || typeof uid !== "string" || uid.length > 128) {
       return NextResponse.json({ error: "UID inválido." }, { status: 400 });
     }
 
-    if (!docId || typeof docId !== "string") {
-      return NextResponse.json({ error: "docId inválido." }, { status: 400 });
-    }
-
-    // 🔹 Atualiza email no Firebase Auth
+    // 🔹 Atualiza email no Firebase Auth, se fornecido
     if (email) {
       await auth.updateUser(uid, { email });
     }
 
     // 🔹 Atualiza dados no Firestore
-    const userRef = db.collection("usuarios").doc(docId);
+    const userRef = db.collection("usuarios").doc(uid);
+    const userSnap = await userRef.get();
+
+    if (!userSnap.exists) {
+      return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
+    }
+
     await userRef.update({
       nome: nome || "",
       img: img || "",
       email: email || "",
+      pix: pix || "",
       funcao: funcao || "",
       permissao: permissao || "leitor",
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -48,6 +51,9 @@ export async function POST(req) {
     return NextResponse.json({ message: "Usuário atualizado com sucesso." });
   } catch (err) {
     console.error("Erro ao atualizar usuário:", err);
-    return NextResponse.json({ error: err.message || "Erro desconhecido." }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Erro desconhecido." },
+      { status: 500 }
+    );
   }
 }

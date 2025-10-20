@@ -1,7 +1,14 @@
+//front end definer
 "use client";
 
-import AdminGuard from "@/components/security/AdminGuard";
+// react imports
 import { useState, useEffect, useMemo } from "react";
+
+// security components
+import AdminGuard from "@/components/security/AdminGuard";
+import CheckUserPermission from "@/components/security/CheckUserPermission";
+
+// visual components
 import Sidebar from "@/components/admin/Sidebar";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -260,164 +267,116 @@ export default function ReunioesPage() {
   };
 
   return (
-    <div className="flex h-screen bg-[url(/images/restrict/bg-cyberpunk.jpg)] ">
-      <Sidebar />
-      <AdminGuard>
-        <main className="flex-1 p-6 overflow-y-auto backdrop-blur-sm">
-          <h1 className="text-2xl font-bold mb-4 text-gray-50">Reuniões</h1>
+    <AdminGuard>
+      <CheckUserPermission>
+        <div className="flex h-screen bg-[url(/images/restrict/bg-cyberpunk.jpg)] ">
+          <Sidebar />
+          <main className="flex-1 p-6 overflow-y-auto backdrop-blur-sm">
+            <h1 className="text-2xl font-bold mb-4 text-gray-50">Reuniões</h1>
 
-          {message && (
-            <div
-              className={`p-3 mb-4 rounded ${message.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-            >
-              {message.text}
+            {message && (
+              <div
+                className={`p-3 mb-4 rounded ${message.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+              >
+                {message.text}
+              </div>
+            )}
+
+            {/* Busca e botão */}
+            <div className="flex items-center justify-between mb-6">
+              <Input placeholder="Buscar por cliente..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm bg-zinc-900 border-0 text-white" />
+              <button onClick={() => setShowNewModal(true)} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer">
+                + Nova Reunião
+              </button>
             </div>
-          )}
 
-          {/* Busca e botão */}
-          <div className="flex items-center justify-between mb-6">
-            <Input placeholder="Buscar por cliente..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm bg-zinc-900 border-0 text-white" />
-            <button onClick={() => setShowNewModal(true)} className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer">
-              + Nova Reunião
-            </button>
-          </div>
+            {/* Calendário */}
+            <div className="bg-zinc-950 rounded-lg shadow p-4 mb-6">
+              <Calendar onChange={setDate} value={date} onClickDay={handleDayClick} className="border rounded-lg shadow bg-white p-3" />
+            </div>
 
-          {/* Calendário */}
-          <div className="bg-zinc-950 rounded-lg shadow p-4 mb-6">
-            <Calendar onChange={setDate} value={date} onClickDay={handleDayClick} className="border rounded-lg shadow bg-white p-3" />
-          </div>
+            {/* Lista agrupada com dropdown */}
+            <div className="space-y-4">
+              {Object.entries(grouped).map(([year, months]) => (
+                <div key={year} className="rounded-lg border-0 shadow">
+                  <button
+                    onClick={() => toggleYear(year)}
+                    className="w-full text-left px-4 py-2 font-bold bg-zinc-800 hover:bg-zinc-900 border-0 flex justify-between items-center rounded-lg rounded-br-none text-white hover:cursor-pointer"
+                  >
+                    {year} {openYears[year] ? "▲" : "▼"}
+                  </button>
 
-          {/* Lista agrupada com dropdown */}
-          <div className="space-y-4">
-            {Object.entries(grouped).map(([year, months]) => (
-              <div key={year} className="rounded-lg border-0 shadow">
-                <button
-                  onClick={() => toggleYear(year)}
-                  className="w-full text-left px-4 py-2 font-bold bg-zinc-800 hover:bg-zinc-900 border-0 flex justify-between items-center rounded-lg rounded-br-none text-white hover:cursor-pointer"
-                >
-                  {year} {openYears[year] ? "▲" : "▼"}
-                </button>
+                  {openYears[year] &&
+                    Object.entries(months).map(([month, days]) => (
+                      <div key={month} className="ml-4">
+                        <button
+                          onClick={() => toggleMonth(year, month)}
+                          className="w-full text-left px-4 py-1 font-medium bg-zinc-700 hover:bg-zinc-900 flex justify-between items-center text-white hover:cursor-pointer rounded-bl-lg"
+                        >
+                          {new Date(year, month - 1).toLocaleString("pt-BR", { month: "long" })}{" "}
+                          {openMonths[`${year}-${month}`] ? "▲" : "▼"}
+                        </button>
 
-                {openYears[year] &&
-                  Object.entries(months).map(([month, days]) => (
-                    <div key={month} className="ml-4">
-                      <button
-                        onClick={() => toggleMonth(year, month)}
-                        className="w-full text-left px-4 py-1 font-medium bg-zinc-700 hover:bg-zinc-900 flex justify-between items-center text-white hover:cursor-pointer rounded-bl-lg"
-                      >
-                        {new Date(year, month - 1).toLocaleString("pt-BR", { month: "long" })}{" "}
-                        {openMonths[`${year}-${month}`] ? "▲" : "▼"}
-                      </button>
+                        {openMonths[`${year}-${month}`] &&
+                          Object.entries(days).map(([day, meetings]) => (
+                            <div key={day} className="ml-4 mb-2">
+                              <button
+                                onClick={() => toggleDay(year, month, day)}
+                                className="w-full text-left px-4 py-1 bg-zinc-800 hover:bg-zinc-900 flex justify-between items-center text-white hover:cursor-pointer rounded-bl-lg"
+                              >
+                                {day}/{month}/{year} {openDays[`${year}-${month}-${day}`] ? "▲" : "▼"}
+                              </button>
 
-                      {openMonths[`${year}-${month}`] &&
-                        Object.entries(days).map(([day, meetings]) => (
-                          <div key={day} className="ml-4 mb-2">
-                            <button
-                              onClick={() => toggleDay(year, month, day)}
-                              className="w-full text-left px-4 py-1 bg-zinc-800 hover:bg-zinc-900 flex justify-between items-center text-white hover:cursor-pointer rounded-bl-lg"
-                            >
-                              {day}/{month}/{year} {openDays[`${year}-${month}-${day}`] ? "▲" : "▼"}
-                            </button>
+                              {openDays[`${year}-${month}-${day}`] && (
+                                <ul className="ml-4 list-disc space-y-1">
+                                  {meetings.map((r) => (
+                                    <li key={r.id} className="flex justify-between items-center gap-2 px-5 py-5 bg-purple-700 text-white">
+                                      {r.hora} - {getClienteNome(r.cliente)}
+                                      <div className="flex gap-2">
+                                        <button onClick={() => handleEditMeeting(r)} className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 hover:cursor-pointer">
+                                          Editar
+                                        </button>
+                                        <button onClick={() => handleDeleteMeeting(r.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 hover:cursor-pointer">
+                                          Excluir
+                                        </button>
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                    ))}
+                </div>
+              ))}
+            </div>
 
-                            {openDays[`${year}-${month}-${day}`] && (
-                              <ul className="ml-4 list-disc space-y-1">
-                                {meetings.map((r) => (
-                                  <li key={r.id} className="flex justify-between items-center gap-2 px-5 py-5 bg-purple-700 text-white">
-                                    {r.hora} - {getClienteNome(r.cliente)}
-                                    <div className="flex gap-2">
-                                      <button onClick={() => handleEditMeeting(r)} className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 hover:cursor-pointer">
-                                        Editar
-                                      </button>
-                                      <button onClick={() => handleDeleteMeeting(r.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 hover:cursor-pointer">
-                                        Excluir
-                                      </button>
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-                        ))}
-                    </div>
-                  ))}
-              </div>
-            ))}
-          </div>
-
-          {/* Modal Nova Reunião */}
-          <Dialog open={showNewModal} onOpenChange={setShowNewModal} >
-            <DialogContent className="max-w-100">
-              <DialogHeader>
-                <DialogTitle>Nova Reunião</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3">
-                <Input
-                  type="date"
-                  value={newMeeting.data}
-                  onChange={(e) =>
-                    setNewMeeting((prev) => ({ ...prev, data: e.target.value }))
-                  }
-                />
-                <Input
-                  type="time"
-                  value={newMeeting.hora}
-                  onChange={(e) =>
-                    setNewMeeting((prev) => ({ ...prev, hora: e.target.value }))
-                  }
-                />
-                <select
-                  value={newMeeting.cliente}
-                  onChange={(e) =>
-                    setNewMeeting((prev) => ({ ...prev, cliente: e.target.value }))
-                  }
-                  className="w-full border p-2 rounded"
-                >
-                  <option value="">Selecione um cliente</option>
-                  {clientes.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nome}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={handleCreateMeeting}
-                  className="w-full py-2 bg-purple-600 text-white rounded hover:bg-purple-700 hover:cursor-pointer"
-                >
-                  Salvar
-                </button>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          {/* Modal Editar Reunião */}
-          <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-            <DialogContent className="max-w-100">
-              <DialogHeader>
-                <DialogTitle>Editar Reunião</DialogTitle>
-              </DialogHeader>
-              {editingMeeting && (
+            {/* Modal Nova Reunião */}
+            <Dialog open={showNewModal} onOpenChange={setShowNewModal} >
+              <DialogContent className="max-w-100">
+                <DialogHeader>
+                  <DialogTitle>Nova Reunião</DialogTitle>
+                </DialogHeader>
                 <div className="space-y-3">
                   <Input
                     type="date"
-                    value={editingMeeting.data}
+                    value={newMeeting.data}
                     onChange={(e) =>
-                      setEditingMeeting((prev) => ({ ...prev, data: e.target.value }))
+                      setNewMeeting((prev) => ({ ...prev, data: e.target.value }))
                     }
                   />
                   <Input
                     type="time"
-                    value={editingMeeting.hora}
+                    value={newMeeting.hora}
                     onChange={(e) =>
-                      setEditingMeeting((prev) => ({ ...prev, hora: e.target.value }))
+                      setNewMeeting((prev) => ({ ...prev, hora: e.target.value }))
                     }
                   />
                   <select
-                    value={editingMeeting.cliente}
+                    value={newMeeting.cliente}
                     onChange={(e) =>
-                      setEditingMeeting((prev) => ({
-                        ...prev,
-                        cliente: e.target.value,
-                      }))
+                      setNewMeeting((prev) => ({ ...prev, cliente: e.target.value }))
                     }
                     className="w-full border p-2 rounded"
                   >
@@ -429,51 +388,101 @@ export default function ReunioesPage() {
                     ))}
                   </select>
                   <button
-                    onClick={handleSaveEdit}
-                    className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 hover:cursor-pointer"
+                    onClick={handleCreateMeeting}
+                    className="w-full py-2 bg-purple-600 text-white rounded hover:bg-purple-700 hover:cursor-pointer"
                   >
-                    Salvar Alterações
+                    Salvar
                   </button>
                 </div>
-              )}
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
 
-          {/* Modal do Dia */}
-          <Dialog open={showDayModal} onOpenChange={setShowDayModal}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Reuniões do dia</DialogTitle>
-              </DialogHeader>
-              {selectedDayMeetings.length === 0 ? (
-                <p>Nenhuma reunião para este dia.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {selectedDayMeetings.map((r) => (
-                    <li key={r.id} className="flex justify-between items-center">
-                      {r.hora} - {getClienteNome(r.cliente)}
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEditMeeting(r)}
-                          className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleDeleteMeeting(r.id)}
-                          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                        >
-                          Excluir
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </DialogContent>
-          </Dialog>
-        </main>
-      </AdminGuard>
-    </div>
+            {/* Modal Editar Reunião */}
+            <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+              <DialogContent className="max-w-100">
+                <DialogHeader>
+                  <DialogTitle>Editar Reunião</DialogTitle>
+                </DialogHeader>
+                {editingMeeting && (
+                  <div className="space-y-3">
+                    <Input
+                      type="date"
+                      value={editingMeeting.data}
+                      onChange={(e) =>
+                        setEditingMeeting((prev) => ({ ...prev, data: e.target.value }))
+                      }
+                    />
+                    <Input
+                      type="time"
+                      value={editingMeeting.hora}
+                      onChange={(e) =>
+                        setEditingMeeting((prev) => ({ ...prev, hora: e.target.value }))
+                      }
+                    />
+                    <select
+                      value={editingMeeting.cliente}
+                      onChange={(e) =>
+                        setEditingMeeting((prev) => ({
+                          ...prev,
+                          cliente: e.target.value,
+                        }))
+                      }
+                      className="w-full border p-2 rounded"
+                    >
+                      <option value="">Selecione um cliente</option>
+                      {clientes.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.nome}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={handleSaveEdit}
+                      className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 hover:cursor-pointer"
+                    >
+                      Salvar Alterações
+                    </button>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+
+            {/* Modal do Dia */}
+            <Dialog open={showDayModal} onOpenChange={setShowDayModal}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Reuniões do dia</DialogTitle>
+                </DialogHeader>
+                {selectedDayMeetings.length === 0 ? (
+                  <p>Nenhuma reunião para este dia.</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {selectedDayMeetings.map((r) => (
+                      <li key={r.id} className="flex justify-between items-center">
+                        {r.hora} - {getClienteNome(r.cliente)}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEditMeeting(r)}
+                            className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleDeleteMeeting(r.id)}
+                            className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                          >
+                            Excluir
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </DialogContent>
+            </Dialog>
+          </main>
+        </div>
+      </CheckUserPermission>
+    </AdminGuard>
   );
 }

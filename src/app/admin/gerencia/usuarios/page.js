@@ -1,10 +1,19 @@
+// frontend definer
 "use client";
 
-import AdminGuard from "@/components/security/AdminGuard";
+// react imports
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/admin/Sidebar";
+
+//security components
+import AdminGuard from "@/components/security/AdminGuard";
+import CheckUserPermission from "@/components/security/CheckUserPermission";
+
+//firebase imports
 import { getDocs, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+
+// visual components
+import Sidebar from "@/components/admin/Sidebar";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +46,13 @@ export default function UserManagementPage() {
           uid: doc.id,
           ...doc.data(),
         }));
+        // 🔽 Ordena pelo campo "id" do Firestore (numérico ou alfanumérico)
+        userList.sort((a, b) => {
+          if (typeof a.id === "number" && typeof b.id === "number") {
+            return a.id - b.id; // numérico
+          }
+          return String(a.id).localeCompare(String(b.id)); // texto
+        });
         setUsers(userList);
       } catch (err) {
         console.error("Erro ao buscar usuários:", err);
@@ -65,6 +81,7 @@ export default function UserManagementPage() {
       funcao: "",
       permissao: "leitor",
       img: "",
+      pix: "",
     });
     setIsCreating(true);
     setShowModal(true);
@@ -77,6 +94,7 @@ export default function UserManagementPage() {
       funcao: editingUser.funcao?.trim(),
       permissao: editingUser.permissao?.trim().toLowerCase(),
       img: editingUser.img?.trim() || "",
+      pix: editingUser.pix?.trim() || "",
     };
 
     setIsSaving(true);
@@ -103,7 +121,6 @@ export default function UserManagementPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             uid: editingUser.uid,
-            docId: editingUser.id,
             ...userData,
           }),
         });
@@ -201,215 +218,234 @@ export default function UserManagementPage() {
   });
 
   return (
-    <div className="bg-[url(/images/restrict/bg-cyberpunk.jpg)] bg-cover">
-      <div className="flex min-h-screen bg-black/40 backdrop-blur-sm">
-        <Sidebar />
-        <AdminGuard>
-          <main className="flex-1 p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-gray-50">
-                Gerenciamento de Usuários
-              </h1>
-              <Button
-                onClick={handleCreateClick}
-                className="bg-purple-600 hover:bg-purple-700 hover:cursor-pointer"
-              >
-                + Criar Usuário
-              </Button>
-            </div>
-
-            {message && (
-              <div className="fixed top-4 right-4 z-50 w-80 animate-in fade-in slide-in-from-top-2">
-                <Alert
-                  className={`shadow-lg ${message.type === "error"
-                    ? "border-red-700 bg-red-500 text-white"
-                    : "border-green-700 bg-green-500 text-white"
-                    }`}
+    <AdminGuard>
+      <CheckUserPermission>
+        <div className="bg-[url(/images/restrict/bg-cyberpunk.jpg)] bg-cover">
+          <div className="flex min-h-screen bg-black/40 backdrop-blur-sm">
+            <Sidebar />
+            <main className="flex-1 p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-gray-50">
+                  Gerenciamento de Usuários
+                </h1>
+                <Button
+                  onClick={handleCreateClick}
+                  className="bg-purple-600 hover:bg-purple-700 hover:cursor-pointer"
                 >
-                  <AlertDescription className="text-white">
-                    {message.text}
-                  </AlertDescription>
-                </Alert>
+                  + Criar Usuário
+                </Button>
               </div>
-            )}
 
-            <div className="flex gap-4">
-              <input
-                type="text"
-                placeholder="Pesquisar por nome ou email..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full p-2 rounded focus:ring-2 focus:ring-purple-600 outline-none text-white bg-zinc-900"
-              />
-              <select
-                value={filterPermissao}
-                onChange={(e) => setFilterPermissao(e.target.value)}
-                className="p-2 rounded focus:ring-2 focus:ring-purple-600 outline-none text-white bg-zinc-900 hover:cursor-pointer"
-              >
-                <option value="all">Todas</option>
-                <option value="administrador">Administrador</option>
-                <option value="dev">Dev</option>
-                <option value="leitor">Leitor</option>
-              </select>
-            </div>
-
-            <div className="shadow rounded-lg overflow-hidden">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-zinc-700 border-b-2 border-zinc-500">
-                  <tr>
-                    <th className="p-3 text-gray-50">Foto</th>
-                    <th className="p-3 text-gray-50">Nome</th>
-                    <th className="p-3 text-gray-50">Email</th>
-                    <th className="p-3 text-gray-50">Função</th>
-                    <th className="p-3 text-gray-50">Permissão</th>
-                    <th className="p-3 text-gray-50">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((u, index) => (
-                    <tr
-                      key={u.id}
-                      className={`${index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"
-                        } hover:bg-zinc-700`}
-                    >
-                      <td className="p-3">
-                        <img
-                          src={u.img || "/images/default-avatar.png"}
-                          alt={u.nome}
-                          className="w-10 h-10 rounded-full object-cover border border-zinc-700"
-                        />
-                      </td>
-                      <td className="p-3 text-gray-50">{u.nome || "-"}</td>
-                      <td className="p-3 text-gray-50">{u.email || "-"}</td>
-                      <td className="p-3 text-gray-50">{u.funcao || "-"}</td>
-                      <td className="p-3 text-gray-50 capitalize">
-                        {u.permissao || "-"}
-                      </td>
-                      <td className="p-3 flex gap-2">
-                        <Button
-                          onClick={() => handleEditClick(u)}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          Editar
-                        </Button>
-                        <Button
-                          onClick={() => handleDelete(u.uid)}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
-                          Excluir
-                        </Button>
-                        <Button
-                          onClick={() =>
-                            handleResetPassword(u.uid, u.email)
-                          }
-                          className="bg-yellow-500 hover:bg-yellow-600"
-                        >
-                          Resetar Senha
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <Dialog open={showModal} onOpenChange={setShowModal}>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>
-                    {isCreating ? "Criar Usuário" : "Editar Usuário"}
-                  </DialogTitle>
-                </DialogHeader>
-
-                <div className="space-y-4 mt-2">
-                  <label className="block">
-                    Nome
-                    <input
-                      type="text"
-                      name="nome"
-                      value={editingUser?.nome || ""}
-                      onChange={handleChange}
-                      className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                    />
-                  </label>
-
-                  <label className="block">
-                    Foto (URL)
-                    <input
-                      type="text"
-                      name="img"
-                      value={editingUser?.img || ""}
-                      onChange={handleChange}
-                      placeholder="https://..."
-                      className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                    />
-                    {editingUser?.img && (
-                      <img
-                        src={editingUser.img}
-                        alt="Preview"
-                        className="mt-2 w-20 h-20 object-cover rounded-full border"
-                      />
-                    )}
-                  </label>
-
-                  <label className="block">
-                    Email
-                    <input
-                      type="email"
-                      name="email"
-                      value={editingUser?.email || ""}
-                      onChange={handleChange}
-                      className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                    />
-                  </label>
-
-                  <label className="block">
-                    Função
-                    <input
-                      type="text"
-                      name="funcao"
-                      value={editingUser?.funcao || ""}
-                      onChange={handleChange}
-                      className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                    />
-                  </label>
-
-                  <label className="block">
-                    Permissão
-                    <select
-                      name="permissao"
-                      value={editingUser?.permissao || "leitor"}
-                      onChange={handleChange}
-                      className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
-                    >
-                      <option value="administrador">Administrador</option>
-                      <option value="dev">Dev</option>
-                      <option value="leitor">Leitor</option>
-                    </select>
-                  </label>
+              {message && (
+                <div className="fixed top-4 right-4 z-50 w-80 animate-in fade-in slide-in-from-top-2">
+                  <Alert
+                    className={`shadow-lg ${message.type === "error"
+                      ? "border-red-700 bg-red-500 text-white"
+                      : "border-green-700 bg-green-500 text-white"
+                      }`}
+                  >
+                    <AlertDescription className="text-white">
+                      {message.text}
+                    </AlertDescription>
+                  </Alert>
                 </div>
+              )}
 
-                <DialogFooter className="mt-4 flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setShowModal(false)}>
-                    Cancelar
-                  </Button>
-                  <Button onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="animate-spin w-4 h-4 mr-2" /> Salvando...
-                      </>
-                    ) : isCreating ? (
-                      "Criar"
-                    ) : (
-                      "Salvar"
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </main>
-        </AdminGuard>
-      </div>
-    </div>
+              <div className="flex gap-4">
+                <input
+                  type="text"
+                  placeholder="Pesquisar por nome ou email..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full p-2 rounded focus:ring-2 focus:ring-purple-600 outline-none text-white bg-zinc-900"
+                />
+                <select
+                  value={filterPermissao}
+                  onChange={(e) => setFilterPermissao(e.target.value)}
+                  className="p-2 rounded focus:ring-2 focus:ring-purple-600 outline-none text-white bg-zinc-900 hover:cursor-pointer"
+                >
+                  <option value="all">Todas</option>
+                  <option value="administrador">Administrador</option>
+                  <option value="dev">Dev</option>
+                  <option value="leitor">Leitor</option>
+                  <option value="cliente">Cliente</option>
+                </select>
+              </div>
+
+              <div className="shadow rounded-lg overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                  <thead className="bg-zinc-700 border-b-2 border-zinc-500">
+                    <tr>
+                      <th className="p-3 text-gray-50">Foto</th>
+                      <th className="p-3 text-gray-50">Nome</th>
+                      <th className="p-3 text-gray-50">Função</th>
+                      <th className="p-3 text-gray-50">Permissão</th>
+                      <th className="p-3 text-gray-50">Email</th>
+                      <th className="p-3 text-gray-50">PIX</th>
+                      <th className="p-3 text-gray-50">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.map((u, index) => (
+                      <tr
+                        key={u.id}
+                        className={`${index % 2 === 0 ? "bg-zinc-800" : "bg-zinc-900"
+                          } hover:bg-zinc-700`}
+                      >
+                        <td className="p-3">
+                          <img
+                            src={u.img || "/images/default-avatar.png"}
+                            alt={u.nome}
+                            className="w-10 h-10 rounded-full object-cover border border-zinc-700"
+                          />
+                        </td>
+                        <td className="p-3 text-gray-50">{u.nome || "-"}</td>
+                        <td className="p-3 text-gray-50">{u.funcao || "-"}</td>
+                        <td className="p-3 text-gray-50 capitalize">
+                          {u.permissao || "-"}
+                        </td>
+                        <td className="p-3 text-gray-50">{u.email || "-"}</td>
+                        <td className="p-3 text-gray-50">{u.pix || "-"}</td>
+                        <td className="p-3 flex gap-2">
+                          <Button
+                            onClick={() => handleEditClick(u)}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            onClick={() => handleDelete(u.uid)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Excluir
+                          </Button>
+                          <Button
+                            onClick={() =>
+                              handleResetPassword(u.uid, u.email)
+                            }
+                            className="bg-yellow-500 hover:bg-yellow-600"
+                          >
+                            Resetar Senha
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <Dialog open={showModal} onOpenChange={setShowModal}>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {isCreating ? "Criar Usuário" : "Editar Usuário"}
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  <div className="space-y-4 mt-2">
+                    <label className="block">
+                      Nome
+                      <input
+                        type="text"
+                        name="nome"
+                        value={editingUser?.nome || ""}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
+                      />
+                    </label>
+
+                    <label className="block">
+                      Foto (URL)
+                      <input
+                        type="text"
+                        name="img"
+                        value={editingUser?.img || ""}
+                        onChange={handleChange}
+                        placeholder="https://..."
+                        className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
+                      />
+                      {editingUser?.img && (
+                        <img
+                          src={editingUser.img}
+                          alt="Preview"
+                          className="mt-2 w-20 h-20 object-cover rounded-full border"
+                        />
+                      )}
+                    </label>
+
+                    <label className="block">
+                      Email
+                      <input
+                        type="email"
+                        name="email"
+                        value={editingUser?.email || ""}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
+                      />
+                    </label>
+
+                    <label className="block">
+                      Chave PIX
+                      <input
+                        type="text"
+                        name="pix"
+                        value={editingUser?.pix || ""}
+                        onChange={handleChange}
+                        placeholder="Digite a chave PIX"
+                        className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
+                      />
+                    </label>
+
+
+                    <label className="block">
+                      Função
+                      <input
+                        type="text"
+                        name="funcao"
+                        value={editingUser?.funcao || ""}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
+                      />
+                    </label>
+
+                    <label className="block">
+                      Permissão
+                      <select
+                        name="permissao"
+                        value={editingUser?.permissao || "leitor"}
+                        onChange={handleChange}
+                        className="w-full border p-2 rounded mt-1 focus:ring-2 focus:ring-blue-600 outline-none"
+                      >
+                        <option value="administrador">Administrador</option>
+                        <option value="dev">Dev</option>
+                        <option value="leitor">Leitor</option>
+                        <option value="cliente">Cliente</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <DialogFooter className="mt-4 flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setShowModal(false)}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={handleSave} disabled={isSaving}>
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="animate-spin w-4 h-4 mr-2" /> Salvando...
+                        </>
+                      ) : isCreating ? (
+                        "Criar"
+                      ) : (
+                        "Salvar"
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </main>
+          </div>
+        </div>
+      </CheckUserPermission>
+    </AdminGuard>
   );
 }
