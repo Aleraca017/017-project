@@ -7,6 +7,8 @@ import { Loader2 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Lottie from "lottie-react"
+import error401Animation from "@/../public/lotties/restrict/Error401.json";
 
 export default function AdminGuard({ children }) {
     const [status, setStatus] = useState("checking");
@@ -52,16 +54,20 @@ export default function AdminGuard({ children }) {
         return (
             <div className="flex flex-col items-center justify-center h-screen w-screen bg-zinc-950  text-center">
                 <Header />
-                <div className="flex flex-col h-screen w-full items-center justify-center bg-[url(/images/erros/401.jpg)] bg-cover bg-center flex-1 bold">
-                    <div className="backdrop-blur-sm w-full h-full flex flex-col items-center justify-around mt-20 text-red-500 text-shadow-lg text-shadow-red-900 text-7xl">
-                        Erro 401
-                        <br />
-                        <br />
-                        Você não possui permissões suficientes.
-                        <br />
+                <div className="flex flex-col h-screen w-full items-center justify-center bg-zinc-950 bg-cover bg-center flex-1 bold">
+                    <div className="backdrop-blur-sm w-full h-150 flex flex-col items-center justify-around mt-20 text-purple-500 text-shadow-lg text-shadow-purple-900 text-7xl">
+
+                        <h1>Você não tem permissão para acessar essa pagina</h1>
+
+                        <Lottie
+                            className="h-200 "
+                            animationData={error401Animation}
+                            loop
+                            autoplay
+                        />
 
 
-                        <a onClick={history.back} className="text-xl text-white hover:cursor-pointer hover:underline">Retornar para a pagina anterior</a>
+                        <a onClick={router.push("/login")} className="text-xl text-white hover:cursor-pointer hover:underline">Retornar para a pagina anterior</a>
 
                     </div>
 

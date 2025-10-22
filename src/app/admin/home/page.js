@@ -239,9 +239,9 @@ export default function AdminDashboard() {
 
   return (
     <AuthGuard>
-      <Sidebar links={links} />
       <CheckUserPermission>
         <div className="min-h-screen flex bg-gray-100">
+          <Sidebar links={links} />
 
           <main className="flex-1 p-8 w-full overflow-y-auto h-screen">
             <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
